@@ -1,0 +1,63 @@
+{
+	"SW5E-QOL": {
+		"name": "SW5E Quality of Life",
+		"description": "Enhanced combat and action workflows for SW5E system",
+		
+		"dialogs": {
+			"attack": {
+				"title": "Attack Roll",
+				"roll": "Roll Attack",
+				"modifiers": "Modifiers",
+				"targets": "Targets",
+				"advantage": "Advantage",
+				"disadvantage": "Disadvantage"
+			},
+			"damage": {
+				"title": "Damage Roll",
+				"roll": "Roll Damage",
+				"damageTypes": "Damage Types",
+				"critical": "Critical Hit"
+			},
+			"save": {
+				"title": "Saving Throw",
+				"roll": "Roll Save",
+				"dc": "Difficulty Class",
+				"saveType": "Save Type"
+			}
+		},
+		
+		"cards": {
+			"attack": "Attack",
+			"damage": "Damage",
+			"save": "Save",
+			"hit": "Hit",
+			"miss": "Miss",
+			"critical": "Critical!",
+			"apply": "Apply",
+			"undo": "Undo"
+		},
+		
+		"workflow": {
+			"attack": "Attack Workflow",
+			"damage": "Damage Workflow",
+			"save": "Save Workflow",
+			"complete": "Workflow Complete",
+			"error": "Workflow Error"
+		},
+		
+		"resources": {
+			"forcePoints": "Force Points",
+			"techPoints": "Tech Points",
+			"ammo": "Ammunition",
+			"consumables": "Consumables"
+		},
+		
+		"settings": {
+			"title": "SW5E QoL Settings",
+			"autoIntercept": "Auto-Intercept Actions",
+			"quickExecute": "Quick Execute Mode",
+			"showTooltips": "Show Tooltips",
+			"enableUndo": "Enable Undo System"
+		}
+	}
+}

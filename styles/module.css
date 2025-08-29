@@ -1,0 +1,93 @@
+/* SW5E Quality of Life Module - Main Styles */
+
+/* Module-specific CSS variables */
+:root {
+	--sw5e-qol-primary: #2c3e50;
+	--sw5e-qol-secondary: #34495e;
+	--sw5e-qol-accent: #3498db;
+	--sw5e-qol-success: #27ae60;
+	--sw5e-qol-warning: #f39c12;
+	--sw5e-qol-danger: #e74c3c;
+	--sw5e-qol-light: #ecf0f1;
+	--sw5e-qol-dark: #2c3e50;
+}
+
+/* Module container */
+.sw5e-qol-module {
+	font-family: 'Roboto', sans-serif;
+	color: var(--sw5e-qol-dark);
+}
+
+/* Common button styles */
+.sw5e-qol-btn {
+	padding: 8px 16px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: 500;
+	transition: all 0.2s ease;
+}
+
+.sw5e-qol-btn-primary {
+	background-color: var(--sw5e-qol-accent);
+	color: white;
+}
+
+.sw5e-qol-btn-primary:hover {
+	background-color: #2980b9;
+}
+
+.sw5e-qol-btn-secondary {
+	background-color: var(--sw5e-qol-light);
+	color: var(--sw5e-qol-dark);
+	border: 1px solid var(--sw5e-qol-secondary);
+}
+
+.sw5e-qol-btn-secondary:hover {
+	background-color: #bdc3c7;
+}
+
+/* Module header */
+.sw5e-qol-header {
+	background: linear-gradient(135deg, var(--sw5e-qol-primary), var(--sw5e-qol-secondary));
+	color: white;
+	padding: 16px;
+	border-radius: 8px 8px 0 0;
+	margin-bottom: 16px;
+}
+
+.sw5e-qol-header h1 {
+	margin: 0;
+	font-size: 1.5em;
+	font-weight: 600;
+}
+
+.sw5e-qol-header p {
+	margin: 8px 0 0 0;
+	opacity: 0.9;
+}
+
+/* Utility classes */
+.sw5e-qol-hidden {
+	display: none !important;
+}
+
+.sw5e-qol-text-center {
+	text-align: center;
+}
+
+.sw5e-qol-text-right {
+	text-align: right;
+}
+
+.sw5e-qol-mt-1 { margin-top: 8px; }
+.sw5e-qol-mt-2 { margin-top: 16px; }
+.sw5e-qol-mt-3 { margin-top: 24px; }
+
+.sw5e-qol-mb-1 { margin-bottom: 8px; }
+.sw5e-qol-mb-2 { margin-bottom: 16px; }
+.sw5e-qol-mb-3 { margin-bottom: 24px; }
+
+.sw5e-qol-p-1 { padding: 8px; }
+.sw5e-qol-p-2 { padding: 16px; }
+.sw5e-qol-p-3 { padding: 24px; }

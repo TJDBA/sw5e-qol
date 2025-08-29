@@ -1,0 +1,85 @@
+graph TD
+    %% Entry Points
+    Start[Workflow Entry Point] --> selectDialogType
+    
+    %% Dialog System
+    selectDialogType --> buildDialogFromTemplate
+    buildDialogFromTemplate --> renderDialog
+    renderDialog --> captureDialogData
+    
+    %% Data Processing
+    captureDialogData --> verifyDialogData
+    verifyDialogData --> normalizeUserInput
+    normalizeUserInput --> detectDataConflicts
+    detectDataConflicts --> buildSeedObject
+    
+    %% Action Specific Engines
+    buildSeedObject --> ActionEngine{Route to Engine}
+    ActionEngine --> executeD20Roll
+    ActionEngine --> applyDamageTypes
+    
+    %% D20 Engine Functions
+    executeD20Roll --> calculateD20Results
+    calculateD20Results --> applyD20Modifiers
+    
+    %% Damage/Healing Engine Functions  
+    applyDamageTypes --> calculateHealingApplication
+    applyDamageTypes --> processDamageApplication
+    
+    %% Shared Functions - Dice Rolling
+    executeD20Roll --> parseRollFormula
+    applyDamageTypes --> parseRollFormula
+    parseRollFormula --> buildRollPool
+    buildRollPool --> executeRolls
+    executeRolls --> animateRolls
+    
+    %% Shared Functions - Resource Management
+    buildSeedObject --> validateResources
+    processDamageApplication --> changeResources
+    validateResources --> getCurrentResources
+    
+    %% Shared Functions - Target Management
+    detectDataConflicts --> validateTargets
+    processDamageApplication --> retrieveTargetData
+    
+    %% Card System
+    calculateD20Results --> buildCardFromTemplate
+    processDamageApplication --> buildCardFromTemplate
+    buildCardFromTemplate --> handleCardActions
+    handleCardActions --> chainToNextWorkflow
+    handleCardActions --> updateExistingCard
+    
+    %% Configuration Management
+    selectDialogType --> getDialogConfig
+    buildCardFromTemplate --> loadUserPreferences
+    executeRolls --> getFeatureFlags
+    
+    %% Error Handling
+    verifyDialogData --> handleValidationError
+    executeRolls --> executeErrorRecovery
+    handleValidationError --> rollbackWorkflow
+    executeErrorRecovery --> notifyUser
+    
+    %% Data Processing Validations
+    buildSeedObject --> sanitizeDiceFormula
+    buildSeedObject --> validateResourceRequirements
+    
+    %% Chain Back to Entry Points
+    chainToNextWorkflow --> Start
+    
+    %% Styling
+    classDef entryPoint fill:#e1f5fe
+    classDef dialogSystem fill:#fff3e0
+    classDef dataProcessing fill:#f3e5f5
+    classDef actionEngine fill:#e8f5e8
+    classDef sharedFunction fill:#fff8e1
+    classDef cardSystem fill:#fce4ec
+    classDef errorHandling fill:#ffebee
+    
+    class Start entryPoint
+    class selectDialogType,buildDialogFromTemplate,renderDialog,captureDialogData dialogSystem
+    class verifyDialogData,normalizeUserInput,detectDataConflicts,buildSeedObject,sanitizeDiceFormula,validateResourceRequirements dataProcessing
+    class executeD20Roll,calculateD20Results,applyD20Modifiers,applyDamageTypes,calculateHealingApplication,processDamageApplication actionEngine
+    class parseRollFormula,buildRollPool,executeRolls,animateRolls,validateResources,changeResources,getCurrentResources,validateTargets,retrieveTargetData sharedFunction
+    class buildCardFromTemplate,handleCardActions,chainToNextWorkflow,updateExistingCard cardSystem
+    class handleValidationError,executeErrorRecovery,rollbackWorkflow,notifyUser errorHandling

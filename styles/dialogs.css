@@ -1,0 +1,196 @@
+/* SW5E QoL - Dialog Styles */
+
+/* Dialog container */
+.sw5e-qol-dialog {
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+	border: 1px solid var(--sw5e-qol-light);
+}
+
+/* Dialog header */
+.sw5e-qol-dialog-header {
+	background: linear-gradient(135deg, var(--sw5e-qol-primary), var(--sw5e-qol-secondary));
+	color: white;
+	padding: 16px 20px;
+	border-radius: 8px 8px 0 0;
+	border-bottom: 2px solid var(--sw5e-qol-accent);
+}
+
+.sw5e-qol-dialog-header h2 {
+	margin: 0;
+	font-size: 1.3em;
+	font-weight: 600;
+}
+
+.sw5e-qol-dialog-header .subtitle {
+	margin: 4px 0 0 0;
+	opacity: 0.9;
+	font-size: 0.9em;
+}
+
+/* Dialog content */
+.sw5e-qol-dialog-content {
+	padding: 20px;
+}
+
+/* Dialog sections */
+.sw5e-qol-dialog-section {
+	margin-bottom: 20px;
+	border-bottom: 1px solid var(--sw5e-qol-light);
+	padding-bottom: 16px;
+}
+
+.sw5e-qol-dialog-section:last-child {
+	border-bottom: none;
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+
+.sw5e-qol-dialog-section h3 {
+	margin: 0 0 12px 0;
+	font-size: 1.1em;
+	font-weight: 600;
+	color: var(--sw5e-qol-primary);
+	border-bottom: 2px solid var(--sw5e-qol-accent);
+	padding-bottom: 4px;
+}
+
+/* Form rows */
+.sw5e-qol-form-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 12px;
+	gap: 12px;
+}
+
+.sw5e-qol-form-row:last-child {
+	margin-bottom: 0;
+}
+
+.sw5e-qol-form-label {
+	min-width: 120px;
+	font-weight: 500;
+	color: var(--sw5e-qol-dark);
+}
+
+.sw5e-qol-form-control {
+	flex: 1;
+}
+
+/* Input styles */
+.sw5e-qol-input {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid var(--sw5e-qol-light);
+	border-radius: 4px;
+	font-size: 14px;
+	transition: border-color 0.2s ease;
+}
+
+.sw5e-qol-input:focus {
+	outline: none;
+	border-color: var(--sw5e-qol-accent);
+	box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Select styles */
+.sw5e-qol-select {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid var(--sw5e-qol-light);
+	border-radius: 4px;
+	font-size: 14px;
+	background: white;
+	cursor: pointer;
+}
+
+/* Checkbox and radio styles */
+.sw5e-qol-checkbox,
+.sw5e-qol-radio {
+	margin-right: 8px;
+	cursor: pointer;
+}
+
+.sw5e-qol-checkbox-label,
+.sw5e-qol-radio-label {
+	cursor: pointer;
+	user-select: none;
+}
+
+/* Modifier row component */
+.sw5e-qol-modifier-row {
+	display: flex;
+	align-items: center;
+	padding: 8px 12px;
+	background: var(--sw5e-qol-light);
+	border-radius: 4px;
+	margin-bottom: 8px;
+	gap: 12px;
+}
+
+.sw5e-qol-modifier-type {
+	background: var(--sw5e-qol-accent);
+	color: white;
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-size: 0.8em;
+	font-weight: 500;
+	min-width: 60px;
+	text-align: center;
+}
+
+.sw5e-qol-modifier-value {
+	font-weight: 600;
+	color: var(--sw5e-qol-primary);
+	min-width: 40px;
+}
+
+.sw5e-qol-modifier-source {
+	flex: 1;
+	font-style: italic;
+	color: var(--sw5e-qol-secondary);
+}
+
+.sw5e-qol-modifier-controls {
+	display: flex;
+	gap: 4px;
+}
+
+/* Dialog footer */
+.sw5e-qol-dialog-footer {
+	background: var(--sw5e-qol-light);
+	padding: 16px 20px;
+	border-radius: 0 0 8px 8px;
+	border-top: 1px solid var(--sw5e-qol-light);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.sw5e-qol-dialog-actions {
+	display: flex;
+	gap: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+	.sw5e-qol-form-row {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+	}
+	
+	.sw5e-qol-form-label {
+		min-width: auto;
+	}
+	
+	.sw5e-qol-dialog-footer {
+		flex-direction: column;
+		gap: 12px;
+	}
+	
+	.sw5e-qol-dialog-actions {
+		justify-content: center;
+	}
+}

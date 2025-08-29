@@ -1,0 +1,153 @@
+graph TD
+    %% Entry Points
+    ItemHook[Item Activation Hook] --> ItemEntry[Item Usage Entry Point]
+    PowerHook[Force/Tech Power Hook] --> PowerEntry[Power Usage Entry Point]
+    AttackCall[Direct Attack Call] --> AttackEntry[Attack Action Entry Point]
+    SaveCall[Direct Save Call] --> SaveEntry[Saving Throw Entry Point]
+    DamageCall[Direct Damage Call] --> DamageEntry[Damage Application Entry Point]
+    LinkedSave[Linked Save Call] --> SaveEntry
+    LinkedDamage[Linked Damage Call] --> DamageEntry
+    
+    %% Entry Point Processing
+    ItemEntry --> ItemValidation[Item Validation & Data Extraction]
+    PowerEntry --> PowerValidation[Power Validation & Data Extraction]
+    AttackEntry --> AttackValidation[Attack Validation & Data Extraction]
+    SaveEntry --> SaveValidation[Save Parameter Setup]
+    DamageEntry --> DamageValidation[Damage Parameter Setup]
+    
+    %% Validation to Card Generation
+    ItemValidation --> CardGen[Generate/Update Chat Card]
+    PowerValidation --> CardGen
+    AttackValidation --> CardGen
+    SaveValidation --> CardGen
+    DamageValidation --> CardGen
+    
+    %% Phase 1: Setup & Validation
+    CardGen --> SetupDialog{Intervention Point 1:<br/>Setup Dialog}
+    SetupDialog -->|Quick Execute| QuickSetup[Use Seed/State Data or Defaults]
+    SetupDialog -->|Manual Setup| ManualSetup[User Input Dialog]
+    QuickSetup --> TargetValidation[Target Selection & Validation]
+    ManualSetup --> TargetValidation
+    
+    TargetValidation --> ResourceCheck[Resource Availability Check]
+    ResourceCheck -->|Insufficient| ResourceError[Resource Error Handler]
+    ResourceError --> SetupDialog
+    ResourceCheck -->|Available| Phase2Start[Phase 2: Resolution Processing]
+    
+    %% Phase 2: Resolution Processing
+    Phase2Start --> ActionType{Action Type Routing}
+    
+    %% Attack Resolution Branch
+    ActionType -->|Attack Action| AttackRoll[Execute Attack Roll]
+    ActionType -->|Power with Attack| AttackRoll
+    AttackRoll --> AttackResult[Calculate Hit/Miss/Crit]
+    AttackResult --> ResultEvaluation[Evaluate Success/Failure]
+    
+    %% Save Resolution Branch
+    ActionType -->|Save Required| SaveRoll[Execute Saving Throw]
+    ActionType -->|Direct Save| SaveRoll
+    ActionType -->|Direct Damage| Phase3Start[Phase 3: Effect Application]
+    SaveRoll --> SaveResult[Calculate Success/Failure]
+    SaveResult --> ResultEvaluation
+    
+    %% Direct Effect Branch
+    ActionType -->|Direct Effect| DirectEffect[Apply Direct Effect]
+    DirectEffect --> Phase3Start[Phase 3: Effect Application]
+    
+    %% Post-Roll Processing
+    PostRollDialog -->|Quick Continue| PostRollAuto[Use Calculated Results]
+    PostRollDialog -->|Manual Adjust| PostRollManual[Adjustment Dialog]
+    PostRollAuto --> ResultEvaluation[Evaluate Success/Failure]
+    PostRollManual --> ResultEvaluation
+    
+    ResultEvaluation -->|Success| Phase3Start
+    ResultEvaluation -->|Failure| FailureHandling[Handle Failure Results]
+    FailureHandling --> ResourceConsumption[Consume Resources<br/>*After Success Only*]
+    
+    %% Phase 3: Effect Application
+    Phase3Start --> CritMultiplier{Critical Hit?}
+    CritMultiplier -->|Yes| ApplyCritical[Apply Critical Multipliers<br/>to Damage Generation]
+    CritMultiplier -->|No| DamageCalc[Calculate Damage/Effects]
+    ApplyCritical --> DamageCalc
+    DamageCalc --> DamageTypes[Apply SW5E Damage Types<br/>Ion, Sonic, etc.]
+    DamageTypes --> PreAppDialog{Intervention Point 2:<br/>Pre-Application}
+    
+    PreAppDialog -->|Quick Apply| QuickApply[Use Calculated Values]
+    PreAppDialog -->|Manual Adjust| ManualAdjust[Damage Adjustment Dialog]
+    QuickApply --> ResistanceCalc[Calculate Resistance/<br/>Vulnerability/Immunity]
+    ManualAdjust --> ResistanceCalc
+    ResistanceCalc --> ApplyEffects[Apply Damage/Effects to Targets]
+    
+    ApplyEffects --> ResourceConsumption
+    ResourceConsumption --> UndoStateCapture[Capture Undo State]
+    
+    %% Phase 4: Finalization
+    UndoStateCapture --> UpdateCard[Update Chat Card with Results]
+    UpdateCard --> PostAppDialog{Intervention Point 3:<br/>Post-Application Review}
+    
+    PostAppDialog -->|Complete| WorkflowComplete[Workflow Complete]
+    PostAppDialog -->|Undo| UndoHandler[Execute Undo]
+    PostAppDialog -->|Chain to Item| ItemEntry
+    PostAppDialog -->|Chain to Power| PowerEntry
+    PostAppDialog -->|Chain to Attack| AttackEntry
+    PostAppDialog -->|Chain to Save| SaveEntry
+    PostAppDialog -->|Chain to Damage| DamageEntry
+    
+    UndoHandler --> AddBackResources[Add Back Resources/<br/>Restore Values]
+    AddBackResources --> UpdateCard
+    
+    %% Error Handling Nodes
+    TargetValidation -->|Invalid Targets| TargetError[Target Error Handler]
+    TargetError -->|Retry| TargetValidation
+    TargetError -->|Skip| Phase2Start
+    TargetError -->|Cancel| CancelWorkflow[Cancel Workflow]
+    
+    ApplyEffects -->|Target Invalid| TargetSkip[Skip Invalid Target]
+    TargetSkip --> ResourceConsumption
+    
+    %% System Error Handlers
+    AttackRoll -->|System Error| SystemError[System Error Handler]
+    SaveRoll -->|System Error| SystemError
+    DamageCalc -->|System Error| SystemError
+    SystemError -->|Retry| ActionType
+    SystemError -->|Manual Override| ManualOverride[Manual Resolution]
+    SystemError -->|Cancel| CancelWorkflow
+    
+    ManualOverride --> Phase3Start
+    CancelWorkflow --> RestoreInitialState[Restore Initial State]
+    RestoreInitialState --> WorkflowComplete
+    
+    %% Future Extension Points
+    PowerEntry -.->|Future| EffectsBranch[Effects System Branch]
+    EffectsBranch -.-> Phase3Start
+    
+    %% Configuration Inputs
+    ConfigSystem[Configuration System] --> SetupDialog
+    ConfigSystem --> PreAppDialog
+    ConfigSystem --> PostAppDialog
+    
+    %% External Integration Points
+    GMTools[GM Override Tools] --> PreAppDialog
+    OtherModules[Other Module Hooks] --> SaveEntry
+    OtherModules --> ItemEntry
+    OtherModules --> DamageEntry
+    
+    %% State Management
+    StateManager[State Management System] --> UndoStateCapture
+    StateManager --> AddBackResources
+    StateManager --> RestoreInitialState
+    
+    %% Styling for clarity
+    classDef entryPoint fill:#e1f5fe
+    classDef intervention fill:#fff3e0
+    classDef processing fill:#f3e5f5
+    classDef error fill:#ffebee
+    classDef completion fill:#e8f5e8
+    classDef future fill:#f0f0f0,stroke-dasharray: 5 5
+    
+    class ItemEntry,PowerEntry,AttackEntry,SaveEntry,DamageEntry entryPoint
+    class SetupDialog,PreAppDialog,PostAppDialog intervention
+    class AttackRoll,SaveRoll,DamageCalc,ApplyEffects processing
+    class ResourceError,TargetError,SystemError,CancelWorkflow error
+    class WorkflowComplete,RestoreInitialState completion
+    class EffectsBranch future
