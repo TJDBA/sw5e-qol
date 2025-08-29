@@ -11,47 +11,52 @@ import { SW5EQoLModule } from './config.js';
 // Module instance
 let moduleInstance = null;
 
-// Module initialization
-Hooks.once('init', async function() {
-	console.log('SW5E QoL | Initializing module...');
-	
-	// Initialize module configuration
-	moduleInstance = new SW5EQoLModule();
-	
-	// Register module settings
-	moduleInstance.registerSettings();
-	
-	// Load language files
-	await moduleInstance.loadLanguages();
-	
-	console.log('SW5E QoL | Module initialized successfully');
+// Module initialization hook
+Hooks.once('init', async () => {
+  try {
+    console.log('SW5E QoL | Module initialization starting...');
+    
+    // Create module instance
+    moduleInstance = new SW5EQoLModule();
+    
+    // Initialize the module
+    await moduleInstance.initialize();
+    
+    console.log('SW5E QoL | Module initialization completed');
+    
+  } catch (error) {
+    console.error('SW5E QoL | Module initialization failed:', error);
+    moduleInstance = null;
+  }
 });
 
-// Module ready
-Hooks.once('ready', async function() {
-	console.log('SW5E QoL | Module ready, setting up workflows...');
-	
-	if (moduleInstance) {
-		// Initialize workflows
-		await moduleInstance.initializeWorkflows();
-		
-		// Register hooks
-		moduleInstance.registerHooks();
-		
-		// Load templates
-		await moduleInstance.loadTemplates();
-		
-		console.log('SW5E QoL | Workflows and hooks registered');
-	}
+// Module ready hook
+Hooks.once('ready', () => {
+  if (moduleInstance && moduleInstance.initialized) {
+    console.log('SW5E QoL | Module ready and operational');
+    
+    // Expose module API globally for debugging
+    if (game.modules.get('sw5e-qol')) {
+      game.modules.get('sw5e-qol').api = {
+        module: moduleInstance,
+        stateManager: moduleInstance.stateManager,
+        workflowOrchestrator: moduleInstance.workflowOrchestrator
+      };
+    }
+    
+  } else {
+    console.warn('SW5E QoL | Module not properly initialized');
+  }
 });
 
-// Module cleanup
-Hooks.once('closeApplication', function() {
-	if (moduleInstance) {
-		moduleInstance.cleanup();
-		console.log('SW5E QoL | Module cleaned up');
-	}
+// Module cleanup hook
+Hooks.once('closeApplication', () => {
+  if (moduleInstance) {
+    moduleInstance.cleanup();
+    moduleInstance = null;
+    console.log('SW5E QoL | Module cleaned up');
+  }
 });
 
-// Export for other modules
-export { moduleInstance as SW5EQoL };
+// Export module instance for external access
+export { moduleInstance as SW5EQoLModule };

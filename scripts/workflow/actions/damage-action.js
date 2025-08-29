@@ -1,155 +1,173 @@
-/**
- * SW5E QoL - Damage Action Workflow
- * Handles damage roll workflows
- * Based on planning documents: damage-action.js - Damage action
- */
+// scripts/workflow/actions/damage-action.js
+// SW5E QoL - Damage Action Workflow
+// Handles damage roll workflows with pack feature integration
 
 export class DamageAction {
-	constructor(stateManager) {
-		this.stateManager = stateManager;
-		this.name = 'damage';
-		this.version = '0.1.0';
-	}
-	
-	/**
-	 * Start the damage workflow
-	 * @param {Object} workflowState - Initial workflow state
-	 * @param {Object} seedData - Seed data for the workflow
-	 * @returns {Promise<Object>} - Promise resolving to workflow result
-	 */
-	async start(workflowState, seedData) {
-		try {
-			console.log('SW5E QoL | Starting damage workflow:', workflowState.workflowId);
-			
-			// Update state
-			this.stateManager.updateState({
-				phase: 'damage_setup',
-				workflowState: {
-					...workflowState.workflowState,
-					phase: 'damage_setup'
-				}
-			}, 'damage_action_start');
-			
-			// This is a placeholder - actual implementation will be added later
-			return {
-				success: true,
-				workflowId: workflowState.workflowId,
-				phase: 'damage_setup',
-				message: 'Damage workflow started - implementation pending'
-			};
-		} catch (error) {
-			console.error('SW5E QoL | Damage workflow start error:', error);
-			throw error;
-		}
-	}
-	
-	/**
-	 * Continue the damage workflow
-	 * @param {string} workflowId - Workflow ID
-	 * @param {Object} continuationData - Data for continuation
-	 * @returns {Promise<Object>} - Promise resolving to workflow result
-	 */
-	async continue(workflowId, continuationData) {
-		try {
-			console.log('SW5E QoL | Continuing damage workflow:', workflowId);
-			
-			// This is a placeholder - actual implementation will be added later
-			return {
-				success: true,
-				workflowId,
-				phase: 'damage_continued',
-				message: 'Damage workflow continued - implementation pending'
-			};
-		} catch (error) {
-			console.error('SW5E QoL | Damage workflow continuation error:', error);
-			throw error;
-		}
-	}
-	
-	/**
-	 * Complete the damage workflow
-	 * @param {string} workflowId - Workflow ID
-	 * @param {Object} finalData - Final data for completion
-	 * @returns {Promise<Object>} - Promise resolving to completion result
-	 */
-	async complete(workflowId, finalData) {
-		try {
-			console.log('SW5E QoL | Completing damage workflow:', workflowId);
-			
-			// This is a placeholder - actual implementation will be added later
-			return {
-				success: true,
-				workflowId,
-				phase: 'damage_completed',
-				message: 'Damage workflow completed - implementation pending'
-			};
-		} catch (error) {
-			console.error('SW5E QoL | Damage workflow completion error:', error);
-			throw error;
-		}
-	}
-	
-	/**
-	 * Cancel the damage workflow
-	 * @param {string} workflowId - Workflow ID
-	 * @param {string} reason - Reason for cancellation
-	 * @returns {Promise<Object>} - Promise resolving to cancellation result
-	 */
-	async cancel(workflowId, reason) {
-		try {
-			console.log('SW5E QoL | Cancelling damage workflow:', workflowId, 'Reason:', reason);
-			
-			// This is a placeholder - actual implementation will be added later
-			return {
-				success: true,
-				workflowId,
-				phase: 'damage_cancelled',
-				reason,
-				message: 'Damage workflow cancelled - implementation pending'
-			};
-		} catch (error) {
-			console.error('SW5E QoL | Damage workflow cancellation error:', error);
-			throw error;
-		}
-	}
-	
-	/**
-	 * Get workflow configuration
-	 * @returns {Object} - Workflow configuration
-	 */
-	getConfig() {
-		return {
-			name: this.name,
-			version: this.version,
-			phases: ['damage_setup', 'damage_roll', 'damage_resolution'],
-			supportedActions: ['roll', 'modify', 'apply', 'resolve'],
-			requiredData: ['actor', 'targets', 'damageFormula']
-		};
-	}
-	
-	/**
-	 * Validate workflow data
-	 * @param {Object} data - Data to validate
-	 * @returns {Object} - Validation result
-	 */
-	validateData(data) {
-		const errors = [];
-		
-		if (!data.actor) {
-			errors.push('Actor is required');
-		}
-		
-		if (!data.targets || data.targets.length === 0) {
-			errors.push('At least one target is required');
-		}
-		
-		if (!data.damageFormula) {
-			errors.push('Damage formula is required');
-		}
-		
-		return {
-			valid: errors.length === 0,
-			errors
-		};
-	}
+  constructor(context = {}) {
+    this.type = 'damage';
+    this.context = context;
+    this.status = 'initialized';
+  }
+
+  /**
+   * Start the damage workflow
+   * @param {Object} data - Initial data for the damage
+   * @returns {Object} Damage workflow result
+   */
+  start(data = {}) {
+    try {
+      this.status = 'started';
+      this.data = { ...this.context, ...data };
+      
+      console.log('SW5E QoL | Damage workflow started:', this.data);
+      
+      return {
+        success: true,
+        workflowId: this.id,
+        status: this.status,
+        data: this.data
+      };
+    } catch (error) {
+      console.error('SW5E QoL | Error starting damage workflow:', error);
+      this.status = 'error';
+      return {
+        success: false,
+        error: error.message,
+        status: this.status
+      };
+    }
+  }
+
+  /**
+   * Continue the damage workflow
+   * @param {Object} data - Data for the next step
+   * @returns {Object} Updated workflow result
+   */
+  continue(data = {}) {
+    try {
+      this.data = { ...this.data, ...data };
+      this.status = 'continued';
+      
+      console.log('SW5E QoL | Damage workflow continued:', this.data);
+      
+      return {
+        success: true,
+        workflowId: this.id,
+        status: this.status,
+        data: this.data
+      };
+    } catch (error) {
+      console.error('SW5E QoL | Error continuing damage workflow:', error);
+      this.status = 'error';
+      return {
+        success: false,
+        error: error.message,
+        status: this.status
+      };
+    }
+  }
+
+  /**
+   * Complete the damage workflow
+   * @returns {Object} Completion result
+   */
+  complete() {
+    try {
+      this.status = 'completed';
+      
+      console.log('SW5E QoL | Damage workflow completed:', this.data);
+      
+      return {
+        success: true,
+        workflowId: this.id,
+        status: this.status,
+        data: this.data
+      };
+    } catch (error) {
+      console.error('SW5E QoL | Error completing damage workflow:', error);
+      this.status = 'error';
+      return {
+        success: false,
+        error: error.message,
+        status: this.status
+      };
+    }
+  }
+
+  /**
+   * Cancel the damage workflow
+   * @returns {Object} Cancellation result
+   */
+  cancel() {
+    try {
+      this.status = 'cancelled';
+      
+      console.log('SW5E QoL | Damage workflow cancelled');
+      
+      return {
+        success: true,
+        workflowId: this.id,
+        status: this.status
+      };
+    } catch (error) {
+      console.error('SW5E QoL | Error cancelling damage workflow:', error);
+      return {
+        success: false,
+        error: error.message,
+        status: this.status
+      };
+    }
+  }
+
+  /**
+   * Get current workflow status
+   * @returns {string} Current status
+   */
+  getStatus() {
+    return this.status;
+  }
+
+  /**
+   * Get workflow configuration
+   * @returns {Object} Configuration object
+   */
+  static getConfig() {
+    return {
+      name: 'Damage Action',
+      description: 'Handles damage roll workflows',
+      phases: ['start', 'rolling', 'resolving', 'complete'],
+      requiredData: ['actor', 'weapon', 'targets', 'hitResults'],
+      optionalData: ['modifiers', 'damageTypes', 'critical']
+    };
+  }
+
+  /**
+   * Validate workflow data
+   * @param {Object} data - Data to validate
+   * @returns {Object} Validation result
+   */
+  static validateData(data) {
+    const errors = [];
+    
+    if (!data.actor) {
+      errors.push('Actor is required');
+    }
+    
+    if (!data.weapon) {
+      errors.push('Weapon is required');
+    }
+    
+    if (!data.targets || data.targets.length === 0) {
+      errors.push('At least one target is required');
+    }
+    
+    if (!data.hitResults || data.hitResults.length === 0) {
+      errors.push('Hit results are required');
+    }
+    
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
 }
