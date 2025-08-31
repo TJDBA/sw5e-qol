@@ -1,0 +1,249 @@
+/* styles/themes/light.css - Light Side (Jedi) Theme */
+
+/* Light Side Theme Variables */
+:root {
+    --light-bg-primary: #f8f9fb;
+    --light-bg-secondary: #e8eef8;
+    --light-bg-tertiary: #d8e4f3;
+    --light-border-dark: #3388cc;
+    --light-border-light: #66aadd;
+    --light-text-header: #1a4480;
+    --light-text-primary: #2c3e50;
+    --light-text-light: #546e7a;
+    --light-accent: #4da6ff;
+    --light-warning: #ffa726;
+    --light-success: #66bb6a;
+    --light-info: #2196f3;
+}
+
+/* Body theming */
+body.theme-light {
+    background: linear-gradient(135deg, #0a0f1a 0%, #1a2030 100%);
+    transition: all 0.5s ease;
+}
+
+body.theme-light::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(77, 166, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(102, 187, 106, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Light Side Card Styling */
+.sw5e-helper-card[data-theme="light"] {
+    border: 2px solid var(--light-border-dark);
+    background: linear-gradient(135deg, var(--light-bg-primary) 0%, var(--light-bg-secondary) 100%);
+    box-shadow: 
+        0 8px 32px rgba(77, 166, 255, 0.3), 
+        0 0 20px rgba(255, 255, 255, 0.1);
+    color: var(--light-text-primary);
+}
+
+.sw5e-helper-card[data-theme="light"] .card-header {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-bottom: 2px solid var(--light-border-light);
+    color: var(--light-text-header);
+}
+
+.sw5e-helper-card[data-theme="light"] .weapon-title .name {
+    color: var(--light-text-header);
+    text-shadow: 0 0 10px rgba(77, 166, 255, 0.8);
+}
+
+.sw5e-helper-card[data-theme="light"] .weapon-icon {
+    background: linear-gradient(135deg, #fff 0%, #f0f8ff 100%);
+    border: 2px solid var(--light-border-light);
+    box-shadow: 0 0 15px rgba(77, 166, 255, 0.6);
+    animation: light-pulse 3s infinite ease-in-out;
+}
+
+@keyframes light-pulse {
+    0%, 100% { 
+        box-shadow: 0 0 15px rgba(77, 166, 255, 0.4); 
+    }
+    50% { 
+        box-shadow: 0 0 25px rgba(77, 166, 255, 0.8), 0 0 35px rgba(255, 255, 255, 0.3); 
+    }
+}
+
+.sw5e-helper-card[data-theme="light"] .card-controls {
+    background: var(--light-bg-secondary);
+    border-bottom: 1px solid var(--light-border-light);
+}
+
+.sw5e-helper-card[data-theme="light"] .quick-btn {
+    background: linear-gradient(135deg, #4da6ff 0%, #2196f3 100%);
+    border: 1px solid #4da6ff;
+    color: white;
+    box-shadow: 0 4px 12px rgba(77, 166, 255, 0.4);
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.sw5e-helper-card[data-theme="light"] .quick-btn:hover {
+    background: linear-gradient(135deg, #66b3ff 0%, #42a5f5 100%);
+    box-shadow: 0 6px 16px rgba(77, 166, 255, 0.6);
+    transform: translateY(-1px);
+}
+
+.sw5e-helper-card[data-theme="light"] .gm-btn {
+    background: var(--light-bg-primary);
+    border: 1px solid var(--light-border-light);
+    color: var(--light-text-primary);
+    box-shadow: 0 2px 8px rgba(77, 166, 255, 0.2);
+}
+
+.sw5e-helper-card[data-theme="light"] .gm-btn:hover {
+    background: var(--light-bg-secondary);
+    box-shadow: 0 4px 12px rgba(77, 166, 255, 0.3);
+}
+
+.sw5e-helper-card[data-theme="light"] .target-row {
+    background: #fafbfc;
+    border-bottom: 1px solid var(--light-border-light);
+    color: var(--light-text-primary);
+}
+
+.sw5e-helper-card[data-theme="light"] .target-row:nth-child(even) {
+    background: #f5f7fa;
+}
+
+.sw5e-helper-card[data-theme="light"] .target-name {
+    color: var(--light-text-header);
+    text-shadow: 0 0 8px rgba(77, 166, 255, 0.6);
+}
+
+.sw5e-helper-card[data-theme="light"] .target-name:hover {
+    text-shadow: 0 0 12px rgba(77, 166, 255, 1);
+    color: #0d47a1;
+}
+
+.sw5e-helper-card[data-theme="light"] .action-btn {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border: 1px solid var(--light-border-light);
+    color: var(--light-text-primary);
+    box-shadow: 0 2px 8px rgba(77, 166, 255, 0.2);
+}
+
+.sw5e-helper-card[data-theme="light"] .action-btn:hover {
+    background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+    box-shadow: 0 4px 12px rgba(77, 166, 255, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Light Side Status Indicators */
+.sw5e-helper-card[data-theme="light"] .status-hit .status-indicator { 
+    color: #66bb6a; 
+    text-shadow: 0 0 8px currentColor;
+}
+
+.sw5e-helper-card[data-theme="light"] .status-miss .status-indicator { 
+    color: #90a4ae; 
+    opacity: 0.8;
+}
+
+.sw5e-helper-card[data-theme="light"] .status-crit .status-indicator { 
+    color: #ffa726; 
+    text-shadow: 0 0 12px currentColor;
+}
+
+.sw5e-helper-card[data-theme="light"] .status-pending .status-indicator { 
+    color: #90a4ae; 
+}
+
+/* Light Side Damage Styling */
+.sw5e-helper-card[data-theme="light"] .damage-roll {
+    color: var(--light-warning);
+    text-shadow: 0 0 10px rgba(255, 167, 38, 0.6);
+}
+
+.sw5e-helper-card[data-theme="light"] .damage-roll.pending {
+    color: #90a4ae;
+    text-shadow: none;
+}
+
+/* Light Side Dialog Styling */
+.sw5e-helper-attack[data-theme="light"],
+.sw5e-helper-damage[data-theme="light"] {
+    background: var(--light-bg-primary);
+    border: 1px solid var(--light-border-dark);
+    color: var(--light-text-primary);
+}
+
+.sw5e-helper-attack[data-theme="light"] .window-header,
+.sw5e-helper-damage[data-theme="light"] .window-header {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    color: var(--light-text-header);
+}
+
+.sw5e-helper-attack[data-theme="light"] .window-content,
+.sw5e-helper-damage[data-theme="light"] .window-content {
+    background: var(--light-bg-primary);
+    color: var(--light-text-primary);
+}
+
+.sw5e-helper-attack[data-theme="light"] .form-row select,
+.sw5e-helper-attack[data-theme="light"] .form-row input,
+.sw5e-helper-damage[data-theme="light"] .form-row select,
+.sw5e-helper-damage[data-theme="light"] .form-row input {
+    background: #fff;
+    border: 1px solid var(--light-border-light);
+    color: var(--light-text-primary);
+}
+
+.sw5e-helper-attack[data-theme="light"] .dialog-button.primary,
+.sw5e-helper-damage[data-theme="light"] .dialog-button.primary {
+    background: linear-gradient(135deg, #4da6ff 0%, #2196f3 100%);
+    border-color: var(--light-border-dark);
+    color: white;
+    box-shadow: 0 4px 12px rgba(77, 166, 255, 0.3);
+}
+
+.sw5e-helper-attack[data-theme="light"] .compact-section,
+.sw5e-helper-damage[data-theme="light"] .compact-section {
+    background: var(--light-bg-secondary);
+    border: 1px solid var(--light-border-light);
+}
+
+.sw5e-helper-attack[data-theme="light"] .section-header,
+.sw5e-helper-damage[data-theme="light"] .section-header {
+    color: var(--light-accent);
+}
+
+/* Light Side Button Text Content (using CSS) */
+.sw5e-helper-card[data-theme="light"] .quick-btn[data-action="card-quick-damage"]::after {
+    content: " Focus";
+}
+
+.sw5e-helper-card[data-theme="light"] .quick-btn[data-action="card-mod-damage"]::after {
+    content: " Meditate";
+}
+
+.sw5e-helper-card[data-theme="light"] .gm-btn[data-action="gm-apply-all-full"]::after {
+    content: "Harmonize All";
+}
+
+/* Override default text content for light theme */
+.sw5e-helper-card[data-theme="light"] .quick-btn,
+.sw5e-helper-card[data-theme="light"] .gm-btn[data-action="gm-apply-all-full"] {
+    font-size: 0; /* Hide default text */
+}
+
+.sw5e-helper-card[data-theme="light"] .quick-btn[data-action="card-quick-damage"]::before {
+    content: "✨";
+    font-size: 11px;
+    margin-right: 4px;
+}
+
+.sw5e-helper-card[data-theme="light"] .quick-btn[data-action="card-mod-damage"]::before {
+    content: "🌟";
+    font-size: 11px;
+    margin-right: 4px;
+}

@@ -3,6 +3,10 @@
 		"name": "SW5E Quality of Life",
 		"description": "Enhanced combat and action workflows for SW5E system",
 		
+		"warn": {
+			"selectAToken": "Please select a token"
+		},
+		
 		"dialogs": {
 			"attack": {
 				"title": "Attack Roll",

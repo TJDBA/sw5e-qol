@@ -1,221 +1,141 @@
-/**
- * SW5E QoL - Public API
- * Provides public interface for other modules to interact with SW5E QoL
- */
-
-// API instance (will be set when module initializes)
-let apiInstance = null;
+// sw5e-helper-starter/scripts/api.js
+import { MODULE_ID, getSetting, isDebugEnabled } from '../presets/setting.js';
 
 /**
- * Set the API instance (called by module initialization)
- * @param {Object} instance - Module instance
+ * SW5E QoL API - Main interface for module functionality
  */
-export function setAPIInstance(instance) {
-	apiInstance = instance;
-}
+export const API = {
+    /**
+     * Simple ping function for testing
+     * @returns {string} "ok" if module is working
+     */
+    ping() { 
+        return "ok"; 
+    },
 
-/**
- * Get the API instance
- * @returns {Object|null} - API instance or null if not initialized
- */
-export function getAPIInstance() {
-	return apiInstance;
-}
+    /**
+     * Get localized string with module prefix
+     * @param {string} key - Localization key
+     * @param {Object} [data] - Data for string interpolation
+     * @returns {string} Localized string
+     */
+    localize(key, data = {}) {
+        const fullKey = `${MODULE_ID}.${key}`;
+        return game.i18n.localize(fullKey, data);
+    },
 
-/**
- * Public API object
- */
-export const SW5EQoL = {
-	/**
-	 * Check if the module is ready
-	 * @returns {boolean} - True if module is ready
-	 */
-	isReady() {
-		return apiInstance !== null && apiInstance.initialized;
-	},
-	
-	/**
-	 * Start a workflow
-	 * @param {string} workflowType - Type of workflow to start
-	 * @param {Object} seedData - Initial data for the workflow
-	 * @returns {Promise<Object>} - Promise resolving to workflow result
-	 */
-	async startWorkflow(workflowType, seedData) {
-		if (!this.isReady()) {
-			throw new Error('SW5E QoL module is not ready');
-		}
-		
-		return await apiInstance.workflowOrchestrator.startWorkflow(workflowType, seedData);
-	},
-	
-	/**
-	 * Continue a workflow
-	 * @param {string} workflowId - ID of workflow to continue
-	 * @param {Object} continuationData - Data for workflow continuation
-	 * @returns {Promise<Object>} - Promise resolving to workflow result
-	 */
-	async continueWorkflow(workflowId, continuationData) {
-		if (!this.isReady()) {
-			throw new Error('SW5E QoL module is not ready');
-		}
-		
-		return await apiInstance.workflowOrchestrator.continueWorkflow(workflowId, continuationData);
-	},
-	
-	/**
-	 * Chain to next workflow
-	 * @param {string} currentWorkflowId - Current workflow ID
-	 * @param {string} nextWorkflowType - Type of next workflow
-	 * @param {Object} chainData - Data to pass to next workflow
-	 * @returns {Promise<Object>} - Promise resolving to new workflow result
-	 */
-	async chainToNextWorkflow(currentWorkflowId, nextWorkflowType, chainData) {
-		if (!this.isReady()) {
-			throw new Error('SW5E QoL module is not ready');
-		}
-		
-		return await apiInstance.workflowOrchestrator.chainToNextWorkflow(currentWorkflowId, nextWorkflowType, chainData);
-	},
-	
-	/**
-	 * Get workflow status
-	 * @param {string} workflowId - Workflow ID
-	 * @returns {Object|null} - Workflow status or null if not found
-	 */
-	getWorkflowStatus(workflowId) {
-		if (!this.isReady()) {
-			return null;
-		}
-		
-		return apiInstance.workflowOrchestrator.getWorkflowStatus(workflowId);
-	},
-	
-	/**
-	 * Get all active workflows
-	 * @returns {Array} - Array of active workflow statuses
-	 */
-	getActiveWorkflows() {
-		if (!this.isReady()) {
-			return [];
-		}
-		
-		return apiInstance.workflowOrchestrator.getActiveWorkflows();
-	},
-	
-	/**
-	 * Get available workflow types
-	 * @returns {Array} - Array of available workflow type names
-	 */
-	getAvailableWorkflowTypes() {
-		if (!this.isReady()) {
-			return [];
-		}
-		
-		return apiInstance.workflowOrchestrator.getAvailableWorkflowTypes();
-	},
-	
-	/**
-	 * Get module setting
-	 * @param {string} key - Setting key
-	 * @returns {any} - Setting value
-	 */
-	getSetting(key) {
-		if (!this.isReady()) {
-			return null;
-		}
-		
-		return apiInstance.getSetting(key);
-	},
-	
-	/**
-	 * Check if a feature is enabled
-	 * @param {string} feature - Feature name
-	 * @returns {boolean} - True if feature is enabled
-	 */
-	isFeatureEnabled(feature) {
-		if (!this.isReady()) {
-			return false;
-		}
-		
-		return apiInstance.isFeatureEnabled(feature);
-	},
-	
-	/**
-	 * Get current state
-	 * @returns {Object|null} - Current state object or null if not ready
-	 */
-	getCurrentState() {
-		if (!this.isReady()) {
-			return null;
-		}
-		
-		return apiInstance.stateManager.getCurrentState();
-	},
-	
-	/**
-	 * Get state by workflow ID
-	 * @param {string} workflowId - Workflow ID
-	 * @returns {Object|null} - State object or null if not found
-	 */
-	getStateByWorkflowId(workflowId) {
-		if (!this.isReady()) {
-			return null;
-		}
-		
-		return apiInstance.stateManager.getStateByWorkflowId(workflowId);
-	},
-	
-	/**
-	 * Execute a dice roll
-	 * @param {string} formula - Dice formula
-	 * @param {Object} options - Roll options
-	 * @returns {Promise<Object>} - Promise resolving to roll result
-	 */
-	async executeRoll(formula, options = {}) {
-		if (!this.isReady()) {
-			throw new Error('SW5E QoL module is not ready');
-		}
-		
-		// This will be implemented when we create the dice engine instance
-		throw new Error('Dice rolling not yet implemented');
-	},
-	
-	/**
-	 * Execute a d20 roll
-	 * @param {string} formula - Dice formula
-	 * @param {Object} options - Roll options
-	 * @returns {Promise<Object>} - Promise resolving to roll result
-	 */
-	async executeD20Roll(formula, options = {}) {
-		if (!this.isReady()) {
-			throw new Error('SW5E QoL module is not ready');
-		}
-		
-		// This will be implemented when we create the d20 engine instance
-		throw new Error('D20 rolling not yet implemented');
-	},
-	
-	/**
-	 * Get module version
-	 * @returns {string} - Module version
-	 */
-	getVersion() {
-		return '0.1.0';
-	},
-	
-	/**
-	 * Get module information
-	 * @returns {Object} - Module information object
-	 */
-	getModuleInfo() {
-		return {
-			name: 'SW5E Quality of Life',
-			version: this.getVersion(),
-			ready: this.isReady(),
-			features: this.getAvailableWorkflowTypes()
-		};
-	}
+    /**
+     * Format localized string with data interpolation
+     * @param {string} key - Localization key
+     * @param {Object} data - Data for string interpolation
+     * @returns {string} Formatted localized string
+     */
+    format(key, data = {}) {
+        const fullKey = `${MODULE_ID}.${key}`;
+        return game.i18n.format(fullKey, data);
+    },
+
+    /**
+     * Check if a localization key exists
+     * @param {string} key - Localization key
+     * @returns {boolean} Whether the key exists
+     */
+    hasLocalization(key) {
+        const fullKey = `${MODULE_ID}.${key}`;
+        return game.i18n.has(fullKey);
+    },
+
+    /**
+     * Get module setting value
+     * @param {string} key - Setting key
+     * @param {*} fallback - Fallback value
+     * @returns {*} Setting value
+     */
+    getSetting(key, fallback = null) {
+        return getSetting(key, fallback);
+    },
+
+    /**
+     * Check if debug logging is enabled for a level
+     * @param {string} level - Debug level to check
+     * @returns {boolean} Whether logging is enabled
+     */
+    isDebugEnabled(level = 'info') {
+        return isDebugEnabled(level);
+    },
+
+    /**
+     * Open a minimal dialog with a single OK button.
+     * @param {Object} [opts]
+     * @param {string} [opts.title]   - Override dialog title
+     * @param {string} [opts.content] - Override HTML body
+     * @returns {Promise<boolean>} resolves true on OK, false on close
+     */
+    async openDialog(opts = {}) {
+        const token = canvas?.tokens?.controlled?.[0];
+        if (!token) {
+            ui.notifications.warn(this.localize("warn.selectAToken"));
+            return false;
+        }
+        
+        const title = opts.title ?? this.localize("dialogs.attack.title");
+        const content = opts.content ?? `<p>${this.localize("dialogs.attack.modifiers")}</p>`;
+        
+        return new Promise((resolve) => {
+            const dlg = new Dialog({
+                title,
+                content,
+                buttons: {
+                    ok: {
+                        label: this.localize("dialogs.attack.roll"),
+                        callback: () => resolve(true)
+                    }
+                },
+                default: "ok",
+                close: () => resolve(false)
+            }, { jQuery: true });
+            dlg.render(true);
+        });
+    },
+
+    /**
+     * Create a notification with proper localization
+     * @param {string} message - Localization key for message
+     * @param {string} type - Notification type (info, warning, error)
+     * @param {Object} [data] - Data for message interpolation
+     */
+    notify(message, type = 'info', data = {}) {
+        const localizedMessage = this.localize(message, data);
+        ui.notifications[type](localizedMessage);
+    },
+
+    /**
+     * Log debug information based on module settings
+     * @param {string} level - Log level (debug, info, warning, error)
+     * @param {string} message - Message to log
+     * @param {*} [data] - Additional data to log
+     */
+    log(level, message, data = null) {
+        if (!this.isDebugEnabled(level)) return;
+        
+        const prefix = `[${MODULE_ID}]`;
+        const logData = data ? [prefix, message, data] : [prefix, message];
+        
+        switch (level) {
+            case 'debug':
+                console.debug(...logData);
+                break;
+            case 'info':
+                console.info(...logData);
+                break;
+            case 'warning':
+                console.warn(...logData);
+                break;
+            case 'error':
+                console.error(...logData);
+                break;
+            default:
+                console.log(...logData);
+        }
+    }
 };
-
-// Export the API object
-export default SW5EQoL;
