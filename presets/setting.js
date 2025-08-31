@@ -24,7 +24,7 @@ export const DEFAULT_SETTINGS = {
             'dark': 'Dark Theme',
             'bendu': 'Bendu Theme'
         },
-        default: 'auto'
+        default: 'bendu'
     },
     
     'chat-card-style': {
