@@ -66,20 +66,7 @@ export class GenericRollHandler {
                 return false;
             }
 
-            // Validate actorId for attack dialogs
-            if (options.type.toLowerCase() === 'attack') {
-                if (!options.actorId || typeof options.actorId !== 'string') {
-                    API.log('error', 'Actor ID is required for attack dialogs');
-                    return false;
-                }
-                
-                // Verify the actor exists
-                const actor = game.actors.get(options.actorId);
-                if (!actor) {
-                    API.log('error', `Actor not found: ${options.actorId}`);
-                    return false;
-                }
-            }
+
 
             // Validate modifiers array if provided
             if (options.modifiers && !Array.isArray(options.modifiers)) {
@@ -125,14 +112,16 @@ export class GenericRollHandler {
                 }, { 
                     jQuery: true,
                     width: 600,        // remember to update dialogs.css to match
-                    resizable: true 
+                    resizable: false
                 });
 
                 // Render dialog
                 dialog.render(true);
 
                 // Setup input handler after dialog is rendered
-                this.setupInputHandler(dialogElement, options);
+                setTimeout(() => {
+                    this.setupInputHandler(dialogElement, options);
+                }, 0);
 
             } catch (error) {
                 API.log('error', 'Failed to show dialog', error);
@@ -147,7 +136,10 @@ export class GenericRollHandler {
     setupInputHandler(dialogElement, options) {
         try {
             // Find the actual dialog element in the DOM
-            const actualDialogElement = document.querySelector('.dialog-content');
+            const actualDialogElement = document.querySelector('.window-app .window-content') ||
+                                       document.querySelector('.dialog .dialog-content') ||
+                                       document.querySelector('.dialog-content') ||
+                                       document.querySelector('.window-content');
             if (!actualDialogElement) {
                 API.log('warning', 'Could not find dialog content element');
                 return;

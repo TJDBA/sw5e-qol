@@ -42,15 +42,15 @@ export async function testGenericRollDialog(actorId = null) {
         
         if (result) {
             API.log('info', 'Dialog result:', result);
-            console.log('Dialog completed successfully:', result);
+            API.log('info', 'Dialog completed successfully:', result);
         } else {
             API.log('info', 'Dialog was cancelled or failed');
-            console.log('Dialog was cancelled or failed');
+            API.log('info', 'Dialog was cancelled or failed');
         }
 
     } catch (error) {
         API.log('error', 'Test failed', error);
-        console.error('Test failed:', error);
+        API.log('error', 'Test failed:', error);
     }
 }
 
@@ -82,12 +82,12 @@ export async function testSkillCheckDialog(actorId = null) {
         
         if (result) {
             API.log('info', 'Skill check result:', result);
-            console.log('Skill check completed:', result);
+            API.log('info', 'Skill check completed:', result);
         }
 
     } catch (error) {
         API.log('error', 'Skill check test failed', error);
-        console.error('Skill check test failed:', error);
+        API.log('error', 'Skill check test failed:', error);
     }
 }
 
@@ -126,12 +126,12 @@ export async function testDamageDialog(actorId = null) {
         
         if (result) {
             API.log('info', 'Damage roll result:', result);
-            console.log('Damage roll completed:', result);
+            API.log('info', 'Damage roll completed:', result);
         }
 
     } catch (error) {
         API.log('error', 'Damage test failed', error);
-        console.error('Damage test failed:', error);
+        API.log('error', 'Damage test failed:', error);
     }
 }
 
@@ -147,7 +147,7 @@ export async function testThemeSwitching(actorId = null) {
         const themes = ['bendu', 'light', 'dark','tech'];
         
         for (const theme of themes) {
-            console.log(`Testing theme: ${theme}`);
+            API.log('debug', `Testing theme: ${theme}`);
             
             const options = {
                 actorId: actorId, // Save the actor ID
@@ -167,7 +167,7 @@ export async function testThemeSwitching(actorId = null) {
             
             const result = await handler.openDialog(options);
             if (result) {
-                console.log(`Theme ${theme} test completed successfully`);
+                API.log('info', `Theme ${theme} test completed successfully`);
             }
             
             // Small delay between tests
@@ -175,7 +175,7 @@ export async function testThemeSwitching(actorId = null) {
         }
         
     } catch (error) {
-        console.error('Theme switching test failed:', error);
+        API.log('error', 'Theme switching test failed:', error);
     }
 }
 

@@ -67,21 +67,20 @@ export const API = {
     /**
      * Register module settings with FoundryVTT
      */
-    registerSettings() {
+    async registerSettings() {
         try {
             // Import settings dynamically to avoid circular imports
-            import('./presets/setting.js').then(({ DEFAULT_SETTINGS }) => {
-                // Register each setting (without menu categories)
-                for (const [key, setting] of Object.entries(DEFAULT_SETTINGS)) {
-                    game.settings.register(MODULE_ID, key, setting);
-                }
-                
-                console.log('SW5E QoL Module: Settings registered successfully');
-            }).catch(error => {
-                console.error('SW5E QoL Module: Failed to register settings', error);
-            });
+            const { DEFAULT_SETTINGS } = await import('./presets/setting.js');
+            
+            // Register each setting (without menu categories)
+            for (const [key, setting] of Object.entries(DEFAULT_SETTINGS)) {
+                game.settings.register(MODULE_ID, key, setting);
+            }
+            
+            console.log('SW5E QoL Module: Settings registered successfully');
         } catch (error) {
             console.error('SW5E QoL Module: Failed to register settings', error);
+            throw error;
         }
     },
 
@@ -157,26 +156,6 @@ export const API = {
                 break;
             default:
                 console.log(...logData);
-        }
-    },
-
-    /**
-     * Get the currently selected token's actor ID
-     * @returns {string|null} The actor ID or null if no token is selected
-     */
-    getSelectedTokenActorId() {
-        try {
-            const selectedTokens = canvas.tokens.controlled;
-            if (selectedTokens.length === 0) {
-                this.log('warning', 'No token selected');
-                return null;
-            }
-            
-            const token = selectedTokens[0];
-            return token.actor.id;
-        } catch (error) {
-            this.log('error', 'Failed to get selected token actor ID', error);
-            return null;
         }
     }
 };

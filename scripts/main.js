@@ -7,7 +7,6 @@ console.log('SW5E QoL Module: main.js is loading...');
 
 // Don't import anything during the import phase - wait for FoundryVTT to be ready
 let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, themeManager;
-let testGenericRollDialog, testSkillCheckDialog, testDamageDialog, testThemeSwitching, GenericRollTests;
 
 /**
  * Initialize the module
@@ -59,23 +58,13 @@ Hooks.once('init', async function() {
             console.error('SW5E QoL Module: Failed to import ThemeManager', error);
         }
         
-        try {
-            const testModule = await import('./test-generic-roll.js');
-            testGenericRollDialog = testModule.testGenericRollDialog;
-            testSkillCheckDialog = testModule.testSkillCheckDialog;
-            testDamageDialog = testModule.testDamageDialog;
-            testThemeSwitching = testModule.testThemeSwitching;
-            GenericRollTests = testModule.GenericRollTests;
-            console.log('SW5E QoL Module: Test functions imported successfully');
-        } catch (error) {
-            console.error('SW5E QoL Module: Failed to import test functions', error);
-        }
+
         
         console.log('SW5E QoL Module: All imports completed');
         
         // Register module settings first (after imports)
         if (API && API.registerSettings) {
-            API.registerSettings();
+            await API.registerSettings();
             console.log('SW5E QoL Module: Settings registered');
         }
         
@@ -95,20 +84,8 @@ Hooks.once('init', async function() {
                 ...(GenericInputHandler && { GenericInputHandler }),
                 ...(themeManager && { themeManager }),
                 
-                // Test functions (only if imported successfully)
-                ...(testGenericRollDialog && { testGenericRollDialog }),
-                ...(testSkillCheckDialog && { testSkillCheckDialog }),
-                ...(testDamageDialog && { testDamageDialog }),
-                ...(testThemeSwitching && { testThemeSwitching }),
-                ...(GenericRollTests && { GenericRollTests }),
-                
                 // Utility functions (only if imported successfully)
                 ...(API && { API }),
-                
-                // Individual utility functions
-                ...(testModule && testModule.getSelectedTokenActorId && { 
-                    getSelectedTokenActorId: testModule.getSelectedTokenActorId 
-                }),
                 
                 // Debug info
                 debug: {
@@ -117,9 +94,7 @@ Hooks.once('init', async function() {
                         GenericRollHandler: !!GenericRollHandler,
                         GenericRollRenderer: !!GenericRollRenderer,
                         GenericInputHandler: !!GenericInputHandler,
-                        themeManager: !!themeManager,
-                        testFunctions: !!testGenericRollDialog,
-                        getSelectedTokenActorId: !!(testModule && testModule.getSelectedTokenActorId)
+                        themeManager: !!themeManager
                     }
                 }
             };
@@ -145,14 +120,8 @@ Hooks.once('ready', async function() {
         const module = game.modules.get('sw5e-qol');
         if (module && module.api) {
             console.log('Available API functions:', Object.keys(module.api));
-            
-            if (module.api.testGenericRollDialog) {
-                console.log('✅ Test functions are available!');
-                console.log('Try: game.modules.get("sw5e-qol").api.testGenericRollDialog()');
-            } else {
-                console.log('❌ Test functions are NOT available');
-                console.log('Debug info:', module.api.debug);
-            }
+            console.log('✅ SW5E QoL Module is ready!');
+            console.log('Core components available:', module.api.debug.imports);
         }
         
     } catch (error) {

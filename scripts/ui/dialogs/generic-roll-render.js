@@ -39,7 +39,7 @@ export class GenericRollRenderer {
 
             for (const section of sections) {
                 const template = await this.loadTemplate(section);
-                console.log(`Loaded template for ${section}:`, template); // Debug log
+                API.log('debug', `Loaded template for ${section}:`, template);
                 this.sectionTemplates.set(section, template);
             }
         } catch (error) {
@@ -78,7 +78,7 @@ export class GenericRollRenderer {
             
             // Render base dialog
             const baseTemplate = await this.loadTemplate('generic-roll-base');
-            console.log('Base template path:', baseTemplate); // Debug log
+            API.log('debug', 'Base template path:', baseTemplate);
             const baseHtml = await renderTemplate(baseTemplate, dialogData);
             
             // Create temporary container to parse HTML
@@ -210,7 +210,7 @@ export class GenericRollRenderer {
             case 'save':
                 return ['Item', 'Force', 'Tech', 'Untyped'];
             case 'damage':
-                return ['Energy', 'Kinetic', 'Force', 'Ion'];
+                return ['kinetic','energy','ion','acid','cold','fire','force','lightning','necrotic','poison','psychic','sonic','true'];
             default:
                 return ['Untyped'];
         }
@@ -239,45 +239,11 @@ export class GenericRollRenderer {
      */
     getItemsForType(dialogType, dialogData = {}) {
         try {
-            // For attack dialogs, populate with equipped weapons
-            if (dialogType.toLowerCase() === 'attack' && dialogData.actorId) {
-                return this.getEquippedWeapons(dialogData.actorId);
-            }
-            
-            // For other dialog types, return empty array for now
+            // For now, return empty array for all dialog types
+            // This can be extended later for specific functionality
             return [];
         } catch (error) {
             API.log('error', 'Failed to get items for dialog type', error);
-            return [];
-        }
-    }
-
-    /**
-     * Get equipped weapons for an actor
-     * @param {string} actorId - The actor's ID
-     * @returns {Array} Array of weapon objects with id and name properties
-     */
-    getEquippedWeapons(actorId) {
-        try {
-            const actor = game.actors.get(actorId);
-            if (!actor) {
-                API.log('warning', `Actor not found: ${actorId}`);
-                return [];
-            }
-
-            // Get all items that are weapons and equipped
-            const weapons = actor.items.filter(item => {
-                return item.type === 'weapon' && item.system.equipped;
-            });
-
-            // Map to the format expected by the template
-            return weapons.map(weapon => ({
-                id: weapon.id,
-                name: weapon.name
-            }));
-
-        } catch (error) {
-            API.log('error', 'Failed to get equipped weapons', error);
             return [];
         }
     }
