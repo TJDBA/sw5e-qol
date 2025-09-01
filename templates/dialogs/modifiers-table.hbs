@@ -1,0 +1,24 @@
+<div class="modifiers-table-section">
+    <table class="modifiers-table">
+        <thead>
+            <tr>
+                <th>{{localize "SW5E-QOL.interface.modifier"}}</th>
+                <th>{{localize "SW5E-QOL.interface.type"}}</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="modifiers-tbody">
+            {{#each modifiers}}
+            <tr data-modifier-id="{{@index}}" class="modifier-row">
+                <td>{{name}}</td>
+                <td>{{type}}</td>
+                <td>{{modifier}}</td>
+                <td>
+                    <input type="checkbox" class="modifier-toggle" {{#if isEnabled}}checked{{/if}} data-modifier-id="{{@index}}">
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>

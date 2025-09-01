@@ -11,9 +11,11 @@
 		]
 	},
 	"esmodules": [
-		"scripts/main.js"
+		"scripts/main.js",
+		"scripts/test-generic-roll.js"
 	],
 	"styles": [
+		"styles/dialogs.css",
 		"styles/bendu_theme.css",
 		"styles/light_theme.css",
 		"styles/dark_theme.css"

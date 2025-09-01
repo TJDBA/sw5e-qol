@@ -1,5 +1,5 @@
 // sw5e-helper-starter/scripts/api.js
-import { MODULE_ID, getSetting, isDebugEnabled } from '../presets/setting.js';
+import { MODULE_ID, getSetting as getModuleSetting, isDebugEnabled as isModuleDebugEnabled } from './presets/setting.js';
 
 /**
  * SW5E QoL API - Main interface for module functionality
@@ -52,7 +52,7 @@ export const API = {
      * @returns {*} Setting value
      */
     getSetting(key, fallback = null) {
-        return getSetting(key, fallback);
+        return getModuleSetting(key, fallback);
     },
 
     /**
@@ -61,7 +61,7 @@ export const API = {
      * @returns {boolean} Whether logging is enabled
      */
     isDebugEnabled(level = 'info') {
-        return isDebugEnabled(level);
+        return isModuleDebugEnabled(level);
     },
 
     /**

@@ -27,7 +27,27 @@
 				"roll": "Roll Save",
 				"dc": "Difficulty Class",
 				"saveType": "Save Type"
+			},
+			"skill": {
+				"title": "Skill Check",
+				"roll": "Roll Skill"
 			}
+		},
+		
+		"interface": {
+			"modifier": "Modifier",
+			"type": "Type",
+			"add": "Add",
+			"advantage": "Advantage",
+			"normal": "Normal",
+			"disadvantage": "Disadvantage",
+			"rollMode": "Roll Mode",
+			"publicRoll": "Public Roll",
+			"privateGM": "Private GM",
+			"blindGM": "Blind GM",
+			"sellRoll": "Sell Roll",
+			"roll": "Roll",
+			"invalidDialogType": "Invalid dialog type provided"
 		},
 		
 		"cards": {

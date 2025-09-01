@@ -14,6 +14,45 @@
     --light-warning: #ffa726;
     --light-success: #66bb6a;
     --light-info: #2196f3;
+    
+    /* Generic Roll Dialog Theme Variables */
+    --dialog-bg: var(--light-bg-primary);
+    --dialog-text: var(--light-text-primary);
+    --dialog-border: 2px solid var(--light-border-dark);
+    --dialog-header-border: 2px solid var(--light-accent);
+    --dialog-title-color: var(--light-accent);
+    --section-divider-border: 1px solid var(--light-border-light);
+    
+    /* Table Variables */
+    --table-border: 1px solid var(--light-border-dark);
+    --table-bg: var(--light-bg-secondary);
+    --table-cell-border: 1px solid var(--light-border-light);
+    --table-header-bg: var(--light-bg-tertiary);
+    --table-header-text: var(--light-text-header);
+    --table-row-hover-bg: var(--light-bg-primary);
+    
+    /* Input Variables */
+    --input-border: 1px solid var(--light-border-light);
+    --input-bg: #ffffff;
+    --input-text: var(--light-text-primary);
+    
+    /* Button Variables */
+    --btn-success-bg: var(--light-success);
+    --btn-success-text: white;
+    --btn-success-hover-bg: #55a955;
+    --btn-primary-bg: var(--light-accent);
+    --btn-primary-text: white;
+    --btn-primary-hover-bg: #3d8bd9;
+    --btn-primary-shadow: 0 4px 15px rgba(77, 166, 255, 0.3);
+    --btn-primary-hover-shadow: 0 6px 20px rgba(77, 166, 255, 0.5);
+    
+    /* Radio Variables */
+    --radio-text: var(--light-text-primary);
+    --radio-accent: var(--light-accent);
+    --radio-hover-text: var(--light-accent);
+    
+    /* Label Variables */
+    --label-text: var(--light-text-header);
 }
 
 /* Body theming */

@@ -1,0 +1,25 @@
+<div class="add-modifier-section">
+    <div class="modifier-input-row">
+        <input type="text" class="modifier-name-input" placeholder="{{localize 'SW5E-QOL.interface.modifier'}}">
+        <input type="number" class="modifier-value-input" placeholder="0">
+        <select class="modifier-type-select">
+            {{#each modifierTypes}}
+            <option value="{{this}}">{{this}}</option>
+            {{/each}}
+        </select>
+        <button type="button" class="add-modifier-btn">{{localize "SW5E-QOL.interface.add"}}</button>
+    </div>
+    <div class="modifier-input-row">
+        <input type="text" class="modifier-name-input" placeholder="{{localize 'SW5E-QOL.interface.modifier'}}">
+        <input type="number" class="modifier-value-input" placeholder="0" min="1">
+        <select class="modifier-dice-select">
+            <option value="1d4">1d4</option>
+            <option value="1d6">1d6</option>
+            <option value="1d8">1d8</option>
+            <option value="1d10">1d10</option>
+            <option value="1d12">1d12</option>
+            <option value="1d20">1d20</option>
+        </select>
+        <button type="button" class="add-modifier-btn">{{localize "SW5E-QOL.interface.add"}}</button>
+    </div>
+</div>

@@ -14,6 +14,45 @@
     --bendu-warning: #cc9966;
     --bendu-success: #888888;
     --bendu-info: #777777;
+    
+    /* Generic Roll Dialog Theme Variables */
+    --dialog-bg: var(--bendu-bg-primary);
+    --dialog-text: var(--bendu-text-primary);
+    --dialog-border: 2px solid var(--bendu-border-dark);
+    --dialog-header-border: 2px solid var(--bendu-accent);
+    --dialog-title-color: var(--bendu-accent);
+    --section-divider-border: 1px solid var(--bendu-border-light);
+    
+    /* Table Variables */
+    --table-border: 1px solid var(--bendu-border-dark);
+    --table-bg: var(--bendu-bg-secondary);
+    --table-cell-border: 1px solid var(--bendu-border-light);
+    --table-header-bg: var(--bendu-bg-tertiary);
+    --table-header-text: var(--bendu-accent);
+    --table-row-hover-bg: var(--bendu-bg-primary);
+    
+    /* Input Variables */
+    --input-border: 1px solid var(--bendu-border-light);
+    --input-bg: var(--bendu-bg-secondary);
+    --input-text: var(--bendu-text-primary);
+    
+    /* Button Variables */
+    --btn-success-bg: var(--bendu-success);
+    --btn-success-text: white;
+    --btn-success-hover-bg: #777777;
+    --btn-primary-bg: var(--bendu-accent);
+    --btn-primary-text: white;
+    --btn-primary-hover-bg: #777777;
+    --btn-primary-shadow: 0 4px 15px rgba(153, 153, 153, 0.3);
+    --btn-primary-hover-shadow: 0 6px 20px rgba(153, 153, 153, 0.5);
+    
+    /* Radio Variables */
+    --radio-text: var(--bendu-text-primary);
+    --radio-accent: var(--bendu-accent);
+    --radio-hover-text: var(--bendu-accent);
+    
+    /* Label Variables */
+    --label-text: var(--bendu-accent);
 }
 
 /* Body theming */
