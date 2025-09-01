@@ -7,7 +7,20 @@ import { API } from '../../api.js';
 export class GenericRollRenderer {
     constructor() {
         this.sectionTemplates = new Map();
-        this.loadSectionTemplates();
+        this.initialized = false;
+        this.init();
+    }
+
+    /**
+     * Initialize the renderer
+     */
+    async init() {
+        try {
+            await this.loadSectionTemplates();
+            this.initialized = true;
+        } catch (error) {
+            API.log('error', 'Failed to initialize renderer', error);
+        }
     }
 
     /**
@@ -24,7 +37,8 @@ export class GenericRollRenderer {
             ];
 
             for (const section of sections) {
-                const template = await this.loadTemplate(`dialogs/${section}`);
+                const template = await this.loadTemplate(section);
+                console.log(`Loaded template for ${section}:`, template); // Debug log
                 this.sectionTemplates.set(section, template);
             }
         } catch (error) {
@@ -37,7 +51,9 @@ export class GenericRollRenderer {
      */
     async loadTemplate(templateName) {
         try {
-            return await renderTemplate(`modules/sw5e-qol/templates/${templateName}.hbs`, {});
+            // Return the template path, not the rendered HTML
+            // Note: templates are in the dialogs subdirectory
+            return `modules/sw5e-qol/templates/dialogs/${templateName}.hbs`;
         } catch (error) {
             API.log('error', `Failed to load template: ${templateName}`, error);
             return '';
@@ -49,8 +65,19 @@ export class GenericRollRenderer {
      */
     async renderDialog(dialogData) {
         try {
+            // Wait for initialization to complete
+            if (!this.initialized) {
+                await this.init();
+            }
+            
+            // Check if FoundryVTT templates are available
+            if (typeof renderTemplate === 'undefined') {
+                throw new Error('FoundryVTT templates not ready. Please wait for the game to fully load.');
+            }
+            
             // Render base dialog
-            const baseTemplate = await this.loadTemplate('dialogs/generic-roll-base');
+            const baseTemplate = await this.loadTemplate('generic-roll-base');
+            console.log('Base template path:', baseTemplate); // Debug log
             const baseHtml = await renderTemplate(baseTemplate, dialogData);
             
             // Create temporary container to parse HTML
@@ -90,6 +117,11 @@ export class GenericRollRenderer {
 
                 // Prepare section data
                 const sectionData = this.prepareSectionData(sectionName, dialogData);
+                
+                // Check if FoundryVTT templates are available
+                if (typeof renderTemplate === 'undefined') {
+                    throw new Error('FoundryVTT templates not ready. Please wait for the game to fully load.');
+                }
                 
                 // Render section
                 const sectionHtml = await renderTemplate(template, sectionData);

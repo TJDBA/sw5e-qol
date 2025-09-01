@@ -20,7 +20,7 @@ export class ThemeManager {
             this.createThemeLinkElement();
             this.loadTheme(this.currentTheme);
         } catch (error) {
-            API.log('error', 'Failed to initialize theme manager', error);
+            console.error('SW5E QoL Module: Theme manager init failed', error);
         }
     }
 
@@ -43,7 +43,7 @@ export class ThemeManager {
                 document.head.appendChild(this.themeLinkElement);
             }
         } catch (error) {
-            API.log('error', 'Failed to create theme link element', error);
+            console.error('SW5E QoL Module: Failed to create theme link element', error);
         }
     }
 
@@ -54,7 +54,7 @@ export class ThemeManager {
     loadTheme(themeName) {
         try {
             if (!this.availableThemes.includes(themeName)) {
-                API.log('warning', `Invalid theme: ${themeName}. Defaulting to bendu.`);
+                console.warn(`SW5E QoL Module: Invalid theme: ${themeName}. Defaulting to bendu.`);
                 themeName = 'bendu';
             }
 
@@ -70,11 +70,11 @@ export class ThemeManager {
             
             if (this.themeLinkElement) {
                 this.themeLinkElement.href = themePath;
-                API.log('info', `Theme loaded: ${themeName} from ${themePath}`);
+                console.log(`SW5E QoL Module: Theme loaded: ${themeName} from ${themePath}`);
             }
 
         } catch (error) {
-            API.log('error', `Failed to load theme: ${themeName}`, error);
+            console.error(`SW5E QoL Module: Failed to load theme: ${themeName}`, error);
             // Fallback to default theme
             this.loadTheme('bendu');
         }
