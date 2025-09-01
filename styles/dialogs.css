@@ -12,16 +12,16 @@
  */
 
 .generic-roll-dialog {
-    padding: 1rem;
-    max-width: 800px;
+    padding: .1rem;
+    max-width: 600px;  /* remember to update generic-roll-handler.js to match */
     /* Theme-specific properties will be set by theme CSS files */
     background: var(--dialog-bg, #ffffff);
     color: var(--dialog-text, #000000);
-    border: var(--dialog-border, 1px solid #ccc);
+    border: none;
 }
 
 .dialog-header {
-    margin-bottom: 1rem;
+    margin-bottom: .1rem;
     border-bottom: var(--dialog-header-border, 2px solid #ccc);
     padding-bottom: 0.5rem;
 }
@@ -41,9 +41,10 @@
 
 /* Item Selection Section */
 .item-selection-section {
-    margin-bottom: 1rem;
+    margin-top: .5rem;
+    margin-bottom: .1rem;
     display: grid;
-    grid-template-columns: 15% 85%;
+    grid-template-columns: 15% 83%;
     gap: 0.5rem;
     align-items: center;
 }
@@ -61,16 +62,19 @@
     justify-self: start;
 }
 
+/* Fix item select dropdown width issue */
 .item-select {
     padding: 0.5rem;
     border: var(--input-border, 1px solid #ddd);
     border-radius: 4px;
-    background: var(--input-bg, #ffffff);
+    background: var(--dropdown-bg, var(--input-bg, #ffffff)); /* Use dropdown background */
     color: var(--input-text, #333);
-    height: 2.5rem;
-    line-height: 1.5;
+    height: 2.2rem;
+    line-height: 1.2;
     vertical-align: middle;
     width: 100%;
+    box-sizing: border-box; /* Ensure padding doesn't extend beyond container */
+    max-width: 100%; /* Prevent overflow */
 }
 
 .preset-controls-group {
@@ -80,15 +84,18 @@
     align-items: center;
 }
 
+/* Fix preset select dropdown width */
 .preset-select {
     padding: 0.5rem;
     border: var(--input-border, 1px solid #ddd);
     border-radius: 4px;
-    background: var(--input-bg, #ffffff);
+    background: var(--dropdown-bg, var(--input-bg, #ffffff)); /* Use dropdown background */
     color: var(--input-text, #333);
-    height: 2.5rem;
-    line-height: 1.5;
+    height: 2.2rem;
+    line-height: 1.2;
     vertical-align: middle;
+    box-sizing: border-box; /* Ensure padding doesn't extend beyond container */
+    max-width: 100%; /* Prevent overflow */
 }
 
 .save-preset-btn,
@@ -98,18 +105,20 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9rem;
-    height: 2.5rem;
-    line-height: 1.5;
+    height: 2.2rem; /* Reduced from 2.5rem to match input height */
+    line-height: 1.2; /* Adjusted for new height */
 }
 
+/* Update save button to use theme background */
 .save-preset-btn {
     background: var(--btn-primary-bg, #2196F3);
     color: var(--btn-primary-text, white);
 }
 
+/* Add specific delete button background color */
 .delete-preset-btn {
-    background: var(--btn-danger-bg, #f44336);
-    color: var(--btn-danger-text, white);
+    background: var(--btn-delete-bg, #d32f2f); /* Slightly dark red */
+    color: var(--btn-delete-text, white);
 }
 
 .save-preset-btn:hover {
@@ -117,19 +126,19 @@
 }
 
 .delete-preset-btn:hover {
-    background: var(--btn-danger-hover-bg, #da190b);
+    background: var(--btn-delete-hover-bg, #b71c1c); /* Darker red on hover */
 }
 
-/* Section Dividers */
-.section-divider {
+/* Update section divider to use theme color */
+.generic-roll-dialog .section-divider {
     border: none;
-    border-top: var(--section-divider-border, 1px solid #ddd);
+    border-top: var(--section-divider-color, 1px solid #ddd);
     margin: .1rem 0;
 }
 
 /* Modifiers Table */
 .modifiers-table-section {
-    margin-bottom: 1rem;
+    margin-bottom: .1rem;
 }
 
 .modifiers-table {
@@ -171,7 +180,7 @@
     padding: 0.25rem;
     border: var(--input-border, 1px solid #ddd);
     border-radius: 4px;
-    background: var(--input-bg, #ffffff);
+    background: var(--dropdown-bg, var(--input-bg, #ffffff)); /* Use dropdown background */
     color: var(--input-text, #333);
     font-size: 0.9rem;
 }
@@ -180,13 +189,14 @@
 .add-modifier-section {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--add-modifier-section-gap, 0.5rem);
 }
 
+/* Fix add modifier grid to eliminate the large gap */
 .modifier-input-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-    gap: 0.5rem;
+    grid-template-columns: var(--modifier-input-row-columns, 2fr 1fr 1fr 1fr auto);  /* Changed from 2fr 1fr 1fr 1fr 1fr to 2fr 1fr 1fr 1fr auto */
+    gap: var(--modifier-input-row-gap, 0.5rem);
     align-items: center;
 }
 
@@ -194,38 +204,38 @@
 .modifier-value-input,
 .modifier-type-select,
 .modifier-dice-select {
-    padding: 0.5rem;
+    padding: var(--input-padding, 0.5rem);
     border: var(--input-border, 1px solid #ddd);
-    border-radius: 4px;
-    font-size: 0.9rem;
-    background: var(--input-bg, #ffffff);
+    border-radius: var(--input-border-radius, 4px);
+    font-size: var(--input-font-size, 0.9rem);
+    background: var(--dropdown-bg, var(--input-bg, #ffffff)); /* Use dropdown background */
     color: var(--input-text, #333);
-    height: 2.5rem; /* Fixed height to match buttons */
-    line-height: 1.5; /* Fix text alignment */
+    height: 2.2rem; /* Reduced from 2.5rem to match text input height */
+    line-height: 1.2; /* Adjusted for new height */
     vertical-align: middle;
 }
 
-.add-modifier-btn {
+.generic-roll-dialog .add-modifier-btn {
     padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    background: var(--btn-primary-bg, #2196F3);
-    color: var(--btn-primary-text, white);
-    transition: all 0.2s ease;
-    height: 2.5rem; /* Match input field height */
-    line-height: 1.5;
+    border: var(--add-modifier-btn-border, none);
+    border-radius: var(--add-modifier-btn-border-radius, 4px);
+    cursor: var(--add-modifier-btn-cursor, pointer);
+    font-size: var(--add-modifier-btn-font-size, 0.9rem);
+    background: var(--add-modifier-btn-bg, var(--btn-primary-bg, #2196F3));
+    color: var(--add-modifier-btn-text, var(--btn-primary-text, white));
+    transition: var(--add-modifier-btn-transition, all 0.2s ease);
+    height: 2.2rem; /* Reduced from 2.5rem to match input height */
+    line-height: 1.2; /* Adjusted for new height */
 }
 
-.add-modifier-btn:hover {
-    background: var(--btn-primary-hover-bg, #1976D2);
-    transform: translateY(-1px);
+.generic-roll-dialog .add-modifier-btn:hover {
+    background: var(--add-modifier-btn-hover-bg, var(--btn-primary-hover-bg, #1976D2));
+    transform: var(--add-modifier-btn-hover-transform, translateY(-1px));
 }
 
 /* Advantage Section */
 .advantage-section {
-    margin: 1rem 0;
+    margin: .1rem 0;
     text-align: center;
 }
 
@@ -289,42 +299,44 @@
 }
 
 .roll-mode-select {
-    padding: 0.5rem;
+    padding: 0.1rem;
     border: var(--input-border, 1px solid #ddd);
     border-radius: 4px;
     min-width: 150px;
-    background: var(--input-bg, #ffffff);
+    background: var(--dropdown-bg, var(--input-bg, #ffffff)); /* Use dropdown background */
     color: var(--input-text, #333);
-    height: 2.5rem;
-    line-height: 1.5;
+    height: 2.2rem; /* Reduced from 2.5rem to match text input height */
+    line-height: 1.2; /* Adjusted for new height */
     vertical-align: middle;
 }
 
 /* Roll Button Section */
 .roll-button-section {
-    margin: 1rem 0;
-    text-align: center;
+    margin: var(--roll-button-section-margin, 1rem 0);
+    text-align: var(--roll-button-section-text-align, center);
 }
 
-.roll-button {
-    padding: .5rem 2rem !important;
-    border: none !important;
-    border-radius: 6px !important;
-    cursor: pointer !important;
-    font-size: 1.1rem !important;
-    font-weight: bold !important;
-    min-width: 50px;
-    width: 33% !important;
-    background: var(--btn-primary-bg, #2196F3) !important;
-    color: var(--btn-primary-text, white) !important;
-    transition: all 0.3s ease !important;
-    box-shadow: var(--btn-primary-shadow, 0 4px 15px rgba(0, 0, 0, 0.2)) !important;
+.generic-roll-dialog .roll-button {
+    padding: 0.1rem 2rem;
+    border: var(--roll-button-border, none);
+    border-radius: var(--roll-button-border-radius, 6px);
+    cursor: var(--roll-button-cursor, pointer);
+    font-size: var(--roll-button-font-size, 1.1rem);
+    font-weight: var(--roll-button-font-weight, bold);
+    min-width: var(--roll-button-min-width, 50px);
+    width: var(--roll-button-width, 33%);
+    height: 2.2rem; /* Match other elements */
+    line-height: 1.2; /* Adjusted for new height */
+    background: var(--roll-button-bg, var(--btn-primary-bg, #2196F3));
+    color: var(--roll-button-text, var(--btn-primary-text, white));
+    transition: var(--roll-button-transition, all 0.3s ease);
+    box-shadow: var(--roll-button-shadow, var(--btn-primary-shadow, 0 4px 15px rgba(0, 0, 0, 0.2)));
 }
 
-.roll-button:hover {
-    background: var(--btn-primary-hover-bg, #1976D2) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: var(--btn-primary-hover-shadow, 0 6px 20px rgba(0, 0, 0, 0.3)) !important;
+.generic-roll-dialog .roll-button:hover {
+    background: var(--roll-button-hover-bg, var(--btn-primary-hover-bg, #1976D2));
+    transform: var(--roll-button-hover-transform, translateY(-2px));
+    box-shadow: var(--roll-button-hover-shadow, var(--btn-primary-hover-shadow, 0 6px 20px rgba(0, 0, 0, 0.3)));
 }
 
 /* Toggle Switch for Modifier Enable/Disable */
@@ -446,4 +458,35 @@
         align-items: flex-start;
         gap: 0.5rem;
     }
+}
+
+/* Style dropdown options to match theme */
+select option {
+    background: var(--dropdown-bg, var(--input-bg, #ffffff));
+    color: var(--input-text, #333);
+    padding: 0.5rem;
+}
+
+/* Style dropdown when opened */
+select:focus {
+    outline: none;
+    border-color: var(--input-focus-border, var(--accent-color, #007bff));
+    box-shadow: 0 0 0 2px var(--input-focus-shadow, rgba(0, 123, 255, 0.25));
+}
+
+/* Ensure all select elements use consistent styling */
+.modifier-type-select,
+.modifier-dice-select,
+.attribute-select,
+.roll-mode-select {
+    padding: 0.5rem;
+    border: var(--input-border, 1px solid #ddd);
+    border-radius: 4px;
+    background: var(--dropdown-bg, var(--input-bg, #ffffff)); /* Use dropdown background */
+    color: var(--input-text, #333);
+    height: 2.2rem;
+    line-height: 1.2;
+    vertical-align: middle;
+    box-sizing: border-box; /* Ensure padding doesn't extend beyond container */
+    max-width: 100%; /* Prevent overflow */
 }

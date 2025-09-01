@@ -68,6 +68,21 @@
     --btn-danger-bg: #f44336;
     --btn-danger-text: white;
     --btn-danger-hover-bg: #da190b;
+    
+    /* Delete Button Variables */
+    --btn-delete-bg: #d32f2f; /* Slightly dark red */
+    --btn-delete-text: white;
+    --btn-delete-hover-bg: #b71c1c; /* Darker red on hover */
+    
+    /* Dropdown Background */
+    --dropdown-bg: var(--dark-bg-secondary); /* Matches theme background */
+    
+    /* Section Divider Color */
+    --section-divider-color: 1px solid var(--dark-border-light);
+    
+    /* Input Focus States */
+    --input-focus-border: var(--dark-accent);
+    --input-focus-shadow: rgba(255, 51, 51, 0.25);
 }
 
 /* Body theming */
@@ -482,4 +497,64 @@ body.theme-dark::before {
 .sw5e-qol-damage[data-theme="dark"] .brutal-info {
     color: var(--dark-warning);
     border-top: 1px solid var(--dark-border-light);
+}
+
+/* Fix item select dropdown width issue */
+.item-select {
+    padding: 0.5rem;
+    border: var(--input-border, 1px solid #ddd);
+    border-radius: 4px;
+    background: var(--dropdown-bg, var(--input-bg, #ffffff)); /* Use dropdown background */
+    color: var(--input-text, #333);
+    height: 2.2rem;
+    line-height: 1.2;
+    vertical-align: middle;
+    width: 100%;
+    box-sizing: border-box; /* Ensure padding doesn't extend beyond container */
+    max-width: 100%; /* Prevent overflow */
+}
+
+/* Fix preset select dropdown width */
+.preset-select {
+    padding: 0.5rem;
+    border: var(--input-border, 1px solid #ddd);
+    border-radius: 4px;
+    background: var(--dropdown-bg, var(--input-bg, #ffffff)); /* Use dropdown background */
+    color: var(--input-text, #333);
+    height: 2.2rem;
+    line-height: 1.2;
+    vertical-align: middle;
+    box-sizing: border-box; /* Ensure padding doesn't extend beyond container */
+    max-width: 100%; /* Prevent overflow */
+}
+
+/* Style dropdown options to match theme */
+select option {
+    background: var(--dropdown-bg, var(--input-bg, #ffffff));
+    color: var(--input-text, #333);
+    padding: 0.5rem;
+}
+
+/* Style dropdown when opened */
+select:focus {
+    outline: none;
+    border-color: var(--input-focus-border, var(--accent-color, #007bff));
+    box-shadow: 0 0 0 2px var(--input-focus-shadow, rgba(0, 123, 255, 0.25));
+}
+
+/* Ensure all select elements use consistent styling */
+.modifier-type-select,
+.modifier-dice-select,
+.attribute-select,
+.roll-mode-select {
+    padding: 0.5rem;
+    border: var(--input-border, 1px solid #ddd);
+    border-radius: 4px;
+    background: var(--dropdown-bg, var(--input-bg, #ffffff)); /* Use dropdown background */
+    color: var(--input-text, #333);
+    height: 2.2rem;
+    line-height: 1.2;
+    vertical-align: middle;
+    box-sizing: border-box; /* Ensure padding doesn't extend beyond container */
+    max-width: 100%; /* Prevent overflow */
 }

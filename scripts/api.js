@@ -158,5 +158,25 @@ export const API = {
             default:
                 console.log(...logData);
         }
+    },
+
+    /**
+     * Get the currently selected token's actor ID
+     * @returns {string|null} The actor ID or null if no token is selected
+     */
+    getSelectedTokenActorId() {
+        try {
+            const selectedTokens = canvas.tokens.controlled;
+            if (selectedTokens.length === 0) {
+                this.log('warning', 'No token selected');
+                return null;
+            }
+            
+            const token = selectedTokens[0];
+            return token.actor.id;
+        } catch (error) {
+            this.log('error', 'Failed to get selected token actor ID', error);
+            return null;
+        }
     }
 };

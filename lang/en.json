@@ -105,7 +105,8 @@
 			"con": "Constitution",
 			"int": "Intelligence",
 			"wis": "Wisdom",
-			"cha": "Charisma"
+			"cha": "Charisma",
+			"none": "None"
 		}
 		
 	}

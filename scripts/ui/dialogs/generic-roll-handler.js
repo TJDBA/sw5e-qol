@@ -66,6 +66,21 @@ export class GenericRollHandler {
                 return false;
             }
 
+            // Validate actorId for attack dialogs
+            if (options.type.toLowerCase() === 'attack') {
+                if (!options.actorId || typeof options.actorId !== 'string') {
+                    API.log('error', 'Actor ID is required for attack dialogs');
+                    return false;
+                }
+                
+                // Verify the actor exists
+                const actor = game.actors.get(options.actorId);
+                if (!actor) {
+                    API.log('error', `Actor not found: ${options.actorId}`);
+                    return false;
+                }
+            }
+
             // Validate modifiers array if provided
             if (options.modifiers && !Array.isArray(options.modifiers)) {
                 API.log('error', 'Modifiers must be an array');
@@ -109,7 +124,7 @@ export class GenericRollHandler {
                     close: () => resolve(null)
                 }, { 
                     jQuery: true,
-                    width: 800,        // allow the layout to breathe
+                    width: 600,        // remember to update dialogs.css to match
                     resizable: true 
                 });
 

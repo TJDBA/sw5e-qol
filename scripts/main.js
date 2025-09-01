@@ -105,6 +105,11 @@ Hooks.once('init', async function() {
                 // Utility functions (only if imported successfully)
                 ...(API && { API }),
                 
+                // Individual utility functions
+                ...(testModule && testModule.getSelectedTokenActorId && { 
+                    getSelectedTokenActorId: testModule.getSelectedTokenActorId 
+                }),
+                
                 // Debug info
                 debug: {
                     imports: {
@@ -113,7 +118,8 @@ Hooks.once('init', async function() {
                         GenericRollRenderer: !!GenericRollRenderer,
                         GenericInputHandler: !!GenericInputHandler,
                         themeManager: !!themeManager,
-                        testFunctions: !!testGenericRollDialog
+                        testFunctions: !!testGenericRollDialog,
+                        getSelectedTokenActorId: !!(testModule && testModule.getSelectedTokenActorId)
                     }
                 }
             };
