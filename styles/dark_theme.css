@@ -53,6 +53,21 @@
     
     /* Label Variables */
     --label-text: var(--dark-accent);
+    
+    /* Toggle Switch Variables */
+    --toggle-on-bg: var(--dark-accent);
+    --toggle-off-bg: var(--dark-border-dark);
+    --toggle-label-color: var(--dark-text-light);
+    
+    /* FoundryVTT Dialog Override Variables */
+    --dialog-header-bg: var(--dark-bg-tertiary);
+    --dialog-buttons-bg: var(--dark-bg-tertiary);
+    --dialog-buttons-border: 1px solid var(--dark-border-dark);
+    
+    /* Button Variables */
+    --btn-danger-bg: #f44336;
+    --btn-danger-text: white;
+    --btn-danger-hover-bg: #da190b;
 }
 
 /* Body theming */
@@ -77,7 +92,7 @@ body.theme-dark::before {
 }
 
 /* Dark Side Card Styling */
-.sw5e-helper-card[data-theme="dark"] {
+.sw5e-qol-card[data-theme="dark"] {
     border: 2px solid var(--dark-border-dark);
     background: linear-gradient(135deg, var(--dark-bg-primary) 0%, var(--dark-bg-secondary) 100%);
     box-shadow: 
@@ -86,18 +101,18 @@ body.theme-dark::before {
     color: var(--dark-text-primary);
 }
 
-.sw5e-helper-card[data-theme="dark"] .card-header {
+.sw5e-qol-card[data-theme="dark"] .card-header {
     background: linear-gradient(135deg, #440000 0%, #220000 100%);
     border-bottom: 2px solid var(--dark-border-light);
     color: var(--dark-text-header);
 }
 
-.sw5e-helper-card[data-theme="dark"] .weapon-title .name {
+.sw5e-qol-card[data-theme="dark"] .weapon-title .name {
     color: var(--dark-text-header);
     text-shadow: 0 0 8px rgba(255, 51, 51, 0.8);
 }
 
-.sw5e-helper-card[data-theme="dark"] .weapon-icon {
+.sw5e-qol-card[data-theme="dark"] .weapon-icon {
     background: linear-gradient(135deg, #330000 0%, #550000 50%, #330000 100%);
     border: 2px solid var(--dark-border-light);
     box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
@@ -113,12 +128,12 @@ body.theme-dark::before {
     }
 }
 
-.sw5e-helper-card[data-theme="dark"] .card-controls {
+.sw5e-qol-card[data-theme="dark"] .card-controls {
     background: var(--dark-bg-secondary);
     border-bottom: 1px solid var(--dark-border-light);
 }
 
-.sw5e-helper-card[data-theme="dark"] .quick-btn {
+.sw5e-qol-card[data-theme="dark"] .quick-btn {
     background: linear-gradient(135deg, #cc3333 0%, #aa0000 100%);
     border: 1px solid #ff3333;
     color: white;
@@ -126,44 +141,44 @@ body.theme-dark::before {
     text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
 }
 
-.sw5e-helper-card[data-theme="dark"] .quick-btn:hover {
+.sw5e-qol-card[data-theme="dark"] .quick-btn:hover {
     background: linear-gradient(135deg, #ee4444 0%, #cc0000 100%);
     box-shadow: 0 0 12px rgba(255, 0, 0, 0.5);
 }
 
-.sw5e-helper-card[data-theme="dark"] .gm-btn {
+.sw5e-qol-card[data-theme="dark"] .gm-btn {
     background: linear-gradient(135deg, #440000 0%, #220000 100%);
     border: 1px solid var(--dark-border-light);
     color: var(--dark-text-primary);
     box-shadow: 0 2px 8px rgba(255, 0, 0, 0.2);
 }
 
-.sw5e-helper-card[data-theme="dark"] .gm-btn:hover {
+.sw5e-qol-card[data-theme="dark"] .gm-btn:hover {
     background: linear-gradient(135deg, #660000 0%, #440000 100%);
     box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
 }
 
-.sw5e-helper-card[data-theme="dark"] .target-row {
+.sw5e-qol-card[data-theme="dark"] .target-row {
     background: #1a0808;
     border-bottom: 1px solid var(--dark-border-light);
     color: var(--dark-text-primary);
 }
 
-.sw5e-helper-card[data-theme="dark"] .target-row:nth-child(even) {
+.sw5e-qol-card[data-theme="dark"] .target-row:nth-child(even) {
     background: #150505;
 }
 
-.sw5e-helper-card[data-theme="dark"] .target-name {
+.sw5e-qol-card[data-theme="dark"] .target-name {
     color: var(--dark-text-header);
     text-shadow: 0 0 6px rgba(255, 51, 51, 0.6);
 }
 
-.sw5e-helper-card[data-theme="dark"] .target-name:hover {
+.sw5e-qol-card[data-theme="dark"] .target-name:hover {
     text-shadow: 0 0 10px rgba(255, 51, 51, 1);
     color: #ff8888;
 }
 
-.sw5e-helper-card[data-theme="dark"] .action-btn {
+.sw5e-qol-card[data-theme="dark"] .action-btn {
     background: linear-gradient(135deg, #660000 0%, #440000 100%);
     border: 1px solid var(--dark-border-light);
     color: var(--dark-text-primary);
@@ -171,300 +186,300 @@ body.theme-dark::before {
     text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
 }
 
-.sw5e-helper-card[data-theme="dark"] .action-btn:hover {
+.sw5e-qol-card[data-theme="dark"] .action-btn:hover {
     background: linear-gradient(135deg, #880000 0%, #550000 100%);
     box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
 }
 
-.sw5e-helper-card[data-theme="dark"] .action-btn.apply-full {
+.sw5e-qol-card[data-theme="dark"] .action-btn.apply-full {
     background: linear-gradient(135deg, #aa3300 0%, #662200 100%);
     border-color: #ff6600;
 }
 
-.sw5e-helper-card[data-theme="dark"] .action-btn.apply-half {
+.sw5e-qol-card[data-theme="dark"] .action-btn.apply-half {
     background: linear-gradient(135deg, #883300 0%, #551100 100%);
     border-color: #cc4400;
 }
 
 /* Dark Side Status Indicators */
-.sw5e-helper-card[data-theme="dark"] .status-hit .status-indicator { 
+.sw5e-qol-card[data-theme="dark"] .status-hit .status-indicator { 
     color: #ff3333; 
     text-shadow: 0 0 8px currentColor;
 }
 
-.sw5e-helper-card[data-theme="dark"] .status-miss .status-indicator { 
+.sw5e-qol-card[data-theme="dark"] .status-miss .status-indicator { 
     color: #aa0000; 
     opacity: 0.8;
 }
 
-.sw5e-helper-card[data-theme="dark"] .status-crit .status-indicator { 
+.sw5e-qol-card[data-theme="dark"] .status-crit .status-indicator { 
     color: #ff6600; 
     text-shadow: 0 0 12px currentColor;
 }
 
-.sw5e-helper-card[data-theme="dark"] .status-pending .status-indicator { 
+.sw5e-qol-card[data-theme="dark"] .status-pending .status-indicator { 
     color: #666; 
 }
 
 /* Dark Side Damage Styling */
-.sw5e-helper-card[data-theme="dark"] .damage-roll {
+.sw5e-qol-card[data-theme="dark"] .damage-roll {
     color: var(--dark-warning);
     text-shadow: 0 0 8px rgba(255, 102, 0, 0.6);
 }
 
-.sw5e-helper-card[data-theme="dark"] .damage-roll.pending {
+.sw5e-qol-card[data-theme="dark"] .damage-roll.pending {
     color: #666;
     text-shadow: none;
 }
 
 /* Dark Side Dialog Styling */
-.sw5e-helper-attack[data-theme="dark"],
-.sw5e-helper-damage[data-theme="dark"] {
+.sw5e-qol-attack[data-theme="dark"],
+.sw5e-qol-damage[data-theme="dark"] {
     background: var(--dark-bg-primary);
     border: 1px solid var(--dark-border-dark);
     color: var(--dark-text-primary);
 }
 
-.sw5e-helper-attack[data-theme="dark"] .window-header,
-.sw5e-helper-damage[data-theme="dark"] .window-header {
+.sw5e-qol-attack[data-theme="dark"] .window-header,
+.sw5e-qol-damage[data-theme="dark"] .window-header {
     background: linear-gradient(135deg, #440000 0%, #220000 100%);
     color: var(--dark-text-header);
 }
 
-.sw5e-helper-attack[data-theme="dark"] .window-content,
-.sw5e-helper-damage[data-theme="dark"] .window-content {
+.sw5e-qol-attack[data-theme="dark"] .window-content,
+.sw5e-qol-damage[data-theme="dark"] .window-content {
     background: var(--dark-bg-primary);
     color: var(--dark-text-primary);
 }
 
-.sw5e-helper-attack[data-theme="dark"] .form-row select,
-.sw5e-helper-attack[data-theme="dark"] .form-row input,
-.sw5e-helper-damage[data-theme="dark"] .form-row select,
-.sw5e-helper-damage[data-theme="dark"] .form-row input {
+.sw5e-qol-attack[data-theme="dark"] .form-row select,
+.sw5e-qol-attack[data-theme="dark"] .form-row input,
+.sw5e-qol-damage[data-theme="dark"] .form-row select,
+.sw5e-qol-damage[data-theme="dark"] .form-row input {
     background: var(--dark-bg-secondary);
     border: 1px solid var(--dark-border-light);
     color: var(--dark-text-primary);
 }
 
-.sw5e-helper-attack[data-theme="dark"] .form-row select:focus,
-.sw5e-helper-attack[data-theme="dark"] .form-row input:focus,
-.sw5e-helper-damage[data-theme="dark"] .form-row select:focus,
-.sw5e-helper-damage[data-theme="dark"] .form-row input:focus {
+.sw5e-qol-attack[data-theme="dark"] .form-row select:focus,
+.sw5e-qol-attack[data-theme="dark"] .form-row input:focus,
+.sw5e-qol-damage[data-theme="dark"] .form-row select:focus,
+.sw5e-qol-damage[data-theme="dark"] .form-row input:focus {
     border-color: var(--dark-accent);
     box-shadow: 0 0 0 1px var(--dark-accent);
 }
 
-.sw5e-helper-attack[data-theme="dark"] .dialog-button.primary,
-.sw5e-helper-damage[data-theme="dark"] .dialog-button.primary {
+.sw5e-qol-attack[data-theme="dark"] .dialog-button.primary,
+.sw5e-qol-damage[data-theme="dark"] .dialog-button.primary {
     background: linear-gradient(135deg, #cc3333 0%, #aa0000 100%);
     border-color: var(--dark-border-light);
     color: white;
     box-shadow: 0 0 8px rgba(255, 0, 0, 0.3);
 }
 
-.sw5e-helper-attack[data-theme="dark"] .compact-section,
-.sw5e-helper-damage[data-theme="dark"] .compact-section {
+.sw5e-qol-attack[data-theme="dark"] .compact-section,
+.sw5e-qol-damage[data-theme="dark"] .compact-section {
     background: var(--dark-bg-secondary);
     border: 1px solid var(--dark-border-light);
 }
 
-.sw5e-helper-attack[data-theme="dark"] .section-header,
-.sw5e-helper-damage[data-theme="dark"] .section-header {
+.sw5e-qol-attack[data-theme="dark"] .section-header,
+.sw5e-qol-damage[data-theme="dark"] .section-header {
     color: var(--dark-accent);
 }
 
 /* Dark Side Button Text Content (using CSS) */
-.sw5e-helper-card[data-theme="dark"] .quick-btn[data-action="card-quick-damage"]::after {
+.sw5e-qol-card[data-theme="dark"] .quick-btn[data-action="card-quick-damage"]::after {
     content: " Unleash";
 }
 
-.sw5e-helper-card[data-theme="dark"] .quick-btn[data-action="card-mod-damage"]::after {
+.sw5e-qol-card[data-theme="dark"] .quick-btn[data-action="card-mod-damage"]::after {
     content: " Channel";
 }
 
-.sw5e-helper-card[data-theme="dark"] .gm-btn[data-action="gm-apply-all-full"]::after {
+.sw5e-qol-card[data-theme="dark"] .gm-btn[data-action="gm-apply-all-full"]::after {
     content: "Execute All";
 }
 
 /* Override default text content for dark theme */
-.sw5e-helper-card[data-theme="dark"] .quick-btn,
-.sw5e-helper-card[data-theme="dark"] .gm-btn[data-action="gm-apply-all-full"] {
+.sw5e-qol-card[data-theme="dark"] .quick-btn,
+.sw5e-qol-card[data-theme="dark"] .gm-btn[data-action="gm-apply-all-full"] {
     font-size: 0; /* Hide default text */
 }
 
-.sw5e-helper-card[data-theme="dark"] .quick-btn[data-action="card-quick-damage"]::before {
+.sw5e-qol-card[data-theme="dark"] .quick-btn[data-action="card-quick-damage"]::before {
     content: "⚡";
     font-size: 11px;
     margin-right: 4px;
 }
 
-.sw5e-helper-card[data-theme="dark"] .quick-btn[data-action="card-mod-damage"]::before {
+.sw5e-qol-card[data-theme="dark"] .quick-btn[data-action="card-mod-damage"]::before {
     content: "🎲";
     font-size: 11px;
     margin-right: 4px;
 }
 
 /* Dark Side specific effects */
-.sw5e-helper-card[data-theme="dark"] .target-row.missing {
+.sw5e-qol-card[data-theme="dark"] .target-row.missing {
     opacity: 0.4;
     background: var(--dark-bg-tertiary);
 }
 
-.sw5e-helper-card[data-theme="dark"] .applied-indicator {
+.sw5e-qol-card[data-theme="dark"] .applied-indicator {
     color: var(--dark-success);
     text-shadow: 0 0 6px currentColor;
 }
 
-.sw5e-helper-card[data-theme="dark"] .info-icon {
+.sw5e-qol-card[data-theme="dark"] .info-icon {
     color: var(--dark-text-light);
     text-shadow: 0 0 4px rgba(255, 51, 51, 0.3);
 }
 
-.sw5e-helper-card[data-theme="dark"] .info-icon:hover {
+.sw5e-qol-card[data-theme="dark"] .info-icon:hover {
     color: var(--dark-accent);
     text-shadow: 0 0 8px rgba(255, 51, 51, 0.6);
 }
 
 /* Dark Side alternating row colors */
-.sw5e-helper-card[data-theme="dark"] .target-row.even {
+.sw5e-qol-card[data-theme="dark"] .target-row.even {
     background-color: rgba(136, 0, 0, 0.05);
 }
 
-.sw5e-helper-card[data-theme="dark"] .target-row.odd {
+.sw5e-qol-card[data-theme="dark"] .target-row.odd {
     background-color: rgba(68, 0, 0, 0.05);
 }
 
 /* Dark Side target separators */
-.sw5e-helper-card[data-theme="dark"] .target-row + .target-row {
+.sw5e-qol-card[data-theme="dark"] .target-row + .target-row {
     border-top: 1px solid rgba(255, 51, 51, 0.1);
 }
 
 /* Dark Side save line styling */
-.sw5e-helper-card[data-theme="dark"] .save-line {
+.sw5e-qol-card[data-theme="dark"] .save-line {
     background: var(--dark-bg-tertiary);
     border-top: 1px solid var(--dark-border-light);
     color: var(--dark-text-primary);
 }
 
-.sw5e-helper-card[data-theme="dark"] .save-dc {
+.sw5e-qol-card[data-theme="dark"] .save-dc {
     color: var(--dark-accent);
     text-shadow: 0 0 6px rgba(255, 51, 51, 0.4);
 }
 
-.sw5e-helper-card[data-theme="dark"] .save-result-inline {
+.sw5e-qol-card[data-theme="dark"] .save-result-inline {
     color: var(--dark-success);
     text-shadow: 0 0 6px currentColor;
 }
 
 /* Dark Side mini-btn styling */
-.sw5e-helper-card[data-theme="dark"] .mini-btn {
+.sw5e-qol-card[data-theme="dark"] .mini-btn {
     background: var(--dark-info);
     border: 1px solid var(--dark-accent);
     color: white;
     box-shadow: 0 2px 6px rgba(170, 0, 0, 0.3);
 }
 
-.sw5e-helper-card[data-theme="dark"] .mini-btn:hover {
+.sw5e-qol-card[data-theme="dark"] .mini-btn:hover {
     background: #cc0000;
     box-shadow: 0 4px 10px rgba(170, 0, 0, 0.5);
 }
 
 /* Dark Side status badges from helper.css integration */
-.sw5e-helper-card[data-theme="dark"] .status-hit { 
+.sw5e-qol-card[data-theme="dark"] .status-hit { 
     background: #4a1a1a; 
     color: #ffdddd; 
     border: 1px solid #ff3333;
 }
 
-.sw5e-helper-card[data-theme="dark"] .status-miss { 
+.sw5e-qol-card[data-theme="dark"] .status-miss { 
     background: #2a0a0a; 
     color: #cc8888; 
     border: 1px solid #880000;
 }
 
-.sw5e-helper-card[data-theme="dark"] .status-crit { 
+.sw5e-qol-card[data-theme="dark"] .status-crit { 
     background: #4a2200; 
     color: #ffcc88; 
     border: 1px solid #ff6600;
 }
 
-.sw5e-helper-card[data-theme="dark"] .status-fumble { 
+.sw5e-qol-card[data-theme="dark"] .status-fumble { 
     background: #330000; 
     color: #ff9999; 
     border: 1px solid #aa0000;
 }
 
-.sw5e-helper-card[data-theme="dark"] .status-manual-damage { 
+.sw5e-qol-card[data-theme="dark"] .status-manual-damage { 
     background: #4a1100; 
     color: #ffdd88; 
     border: 1px solid #cc4400;
 }
 
 /* Dark Side expand arrow */
-.sw5e-helper-card[data-theme="dark"] .expand-arrow {
+.sw5e-qol-card[data-theme="dark"] .expand-arrow {
     color: var(--dark-text-light);
     text-shadow: 0 0 4px rgba(255, 0, 0, 0.2);
 }
 
 /* Dark Side attack/damage totals */
-.sw5e-helper-card[data-theme="dark"] .attack-total,
-.sw5e-helper-card[data-theme="dark"] .damage-summary {
+.sw5e-qol-card[data-theme="dark"] .attack-total,
+.sw5e-qol-card[data-theme="dark"] .damage-summary {
     color: var(--dark-text-primary);
     text-shadow: 0 0 6px rgba(255, 51, 51, 0.4);
 }
 
 /* Dark Side portrait styling */
-.sw5e-helper-card[data-theme="dark"] .portrait {
+.sw5e-qol-card[data-theme="dark"] .portrait {
     border: 2px solid var(--dark-border-light);
     box-shadow: 0 0 8px rgba(255, 0, 0, 0.3);
 }
 
 /* Dark Side extra damage rows (for damage dialog) */
-.sw5e-helper-damage[data-theme="dark"] .extra-row {
+.sw5e-qol-damage[data-theme="dark"] .extra-row {
     background: var(--dark-bg-secondary);
     border: 1px solid var(--dark-border-light);
 }
 
-.sw5e-helper-damage[data-theme="dark"] .extra-row input[type="text"] {
+.sw5e-qol-damage[data-theme="dark"] .extra-row input[type="text"] {
     background: var(--dark-bg-primary);
     border: 1px solid var(--dark-border-light);
     color: var(--dark-text-primary);
 }
 
-.sw5e-helper-damage[data-theme="dark"] .extra-row select {
+.sw5e-qol-damage[data-theme="dark"] .extra-row select {
     background: var(--dark-bg-primary);
     border: 1px solid var(--dark-border-light);
     color: var(--dark-text-primary);
 }
 
-.sw5e-helper-damage[data-theme="dark"] .del-btn {
+.sw5e-qol-damage[data-theme="dark"] .del-btn {
     background: #cc0000;
     border: 1px solid #ff3333;
     color: white;
     box-shadow: 0 2px 6px rgba(204, 0, 0, 0.3);
 }
 
-.sw5e-helper-damage[data-theme="dark"] .del-btn:hover {
+.sw5e-qol-damage[data-theme="dark"] .del-btn:hover {
     background: #ff0000;
     box-shadow: 0 4px 10px rgba(204, 0, 0, 0.5);
 }
 
 /* Dark Side weapon damage section */
-.sw5e-helper-damage[data-theme="dark"] .weapon-damage-section {
+.sw5e-qol-damage[data-theme="dark"] .weapon-damage-section {
     background: var(--dark-bg-secondary);
     border: 1px solid var(--dark-border-light);
 }
 
-.sw5e-helper-damage[data-theme="dark"] .damage-part .formula {
+.sw5e-qol-damage[data-theme="dark"] .damage-part .formula {
     color: var(--dark-accent);
     text-shadow: 0 0 4px rgba(255, 51, 51, 0.3);
 }
 
-.sw5e-helper-damage[data-theme="dark"] .damage-part .type {
+.sw5e-qol-damage[data-theme="dark"] .damage-part .type {
     color: var(--dark-text-light);
 }
 
-.sw5e-helper-damage[data-theme="dark"] .brutal-info {
+.sw5e-qol-damage[data-theme="dark"] .brutal-info {
     color: var(--dark-warning);
     border-top: 1px solid var(--dark-border-light);
 }

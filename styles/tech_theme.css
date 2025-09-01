@@ -1,0 +1,506 @@
+/* styles/themes/tech.css - Tech Power (Industrial/Cybernetic) Theme */
+
+/* Tech Power Theme Variables */
+:root {
+    --tech-bg-primary: #1a1c20;
+    --tech-bg-secondary: #252830;
+    --tech-bg-tertiary: #181a1e;
+    --tech-border-dark: #ff8800;
+    --tech-border-light: #ffaa33;
+    --tech-text-header: #ffcc66;
+    --tech-text-primary: #e8e8e8;
+    --tech-text-light: #b8b8b8;
+    --tech-accent: #ff8800;
+    --tech-accent-secondary: #00dddd;
+    --tech-warning: #ffaa00;
+    --tech-success: #00cc88;
+    --tech-info: #0099dd;
+    
+    /* Generic Roll Dialog Theme Variables */
+    --dialog-bg: var(--tech-bg-primary);
+    --dialog-text: var(--tech-text-primary);
+    --dialog-border: 2px solid var(--tech-border-dark);
+    --dialog-header-border: 2px solid var(--tech-accent);
+    --dialog-title-color: var(--tech-accent);
+    --section-divider-border: 1px solid var(--tech-border-light);
+    
+    /* Section Header Variables */
+    --section-header-color: var(--tech-accent);
+    --section-header-border: 2px solid var(--tech-border-light);
+    
+    /* Table Variables */
+    --table-border: 1px solid var(--tech-border-dark);
+    --table-bg: var(--tech-bg-secondary);
+    --table-cell-border: 1px solid var(--tech-border-light);
+    --table-header-bg: var(--tech-bg-tertiary);
+    --table-header-text: var(--tech-accent);
+    --table-row-hover-bg: var(--tech-bg-primary);
+    
+    /* Input Variables */
+    --input-border: 1px solid var(--tech-border-light);
+    --input-bg: var(--tech-bg-secondary);
+    --input-text: var(--tech-text-primary);
+    
+    /* Button Variables */
+    --btn-success-bg: var(--tech-success);
+    --btn-success-text: white;
+    --btn-success-hover-bg: #00aa77;
+    --btn-primary-bg: var(--tech-accent);
+    --btn-primary-text: white;
+    --btn-primary-hover-bg: #ee7700;
+    --btn-primary-shadow: 0 4px 15px rgba(255, 136, 0, 0.3);
+    --btn-primary-hover-shadow: 0 6px 20px rgba(255, 136, 0, 0.5);
+    
+    /* Radio Variables */
+    --radio-text: var(--tech-text-primary);
+    --radio-accent: var(--tech-accent);
+    --radio-hover-text: var(--tech-accent);
+    
+    /* Label Variables */
+    --label-text: var(--tech-accent);
+    
+    /* Toggle Switch Variables */
+    --toggle-on-bg: var(--tech-accent);
+    --toggle-off-bg: var(--tech-border-dark);
+    --toggle-label-color: var(--tech-text-light);
+    
+    /* FoundryVTT Dialog Override Variables */
+    --dialog-header-bg: var(--tech-bg-tertiary);
+    --dialog-buttons-bg: var(--tech-bg-tertiary);
+    --dialog-buttons-border: 1px solid var(--tech-border-dark);
+}
+
+/* Body theming */
+body.theme-tech {
+    background: linear-gradient(135deg, #0f1113 0%, #1a1c20 100%);
+    transition: all 0.5s ease;
+}
+
+body.theme-tech::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 15% 25%, rgba(255, 136, 0, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 85% 75%, rgba(0, 221, 221, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(0, 153, 221, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Tech grid overlay */
+body.theme-tech::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        linear-gradient(rgba(255, 136, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 136, 0, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Tech Card Styling */
+.sw5e-qol-card[data-theme="tech"] {
+    border: 2px solid var(--tech-border-dark);
+    background: linear-gradient(135deg, var(--tech-bg-primary) 0%, var(--tech-bg-secondary) 100%);
+    box-shadow: 
+        0 0 25px rgba(255, 136, 0, 0.3), 
+        0 0 50px rgba(0, 221, 221, 0.1),
+        inset 0 1px 0 rgba(255, 170, 51, 0.2);
+}
+
+.sw5e-qol-card[data-theme="tech"] .card-header {
+    background: linear-gradient(135deg, #2a2f35 0%, #1a1c20 100%);
+    border-bottom: 2px solid var(--tech-border-light);
+    color: var(--tech-text-header);
+}
+
+.sw5e-qol-card[data-theme="tech"] .weapon-title .name {
+    color: var(--tech-text-header);
+    text-shadow: 0 0 10px rgba(255, 136, 0, 0.8);
+}
+
+.sw5e-qol-card[data-theme="tech"] .weapon-icon {
+    background: linear-gradient(135deg, #404040 0%, #606060 50%, #404040 100%);
+    border: 2px solid var(--tech-border-light);
+    box-shadow: 
+        0 0 15px rgba(255, 136, 0, 0.6),
+        inset 0 0 10px rgba(255, 170, 51, 0.1);
+    animation: tech-pulse 3s infinite ease-in-out;
+}
+
+@keyframes tech-pulse {
+    0%, 100% { 
+        box-shadow: 0 0 15px rgba(255, 136, 0, 0.4), inset 0 0 10px rgba(255, 170, 51, 0.1);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(255, 136, 0, 0.8), inset 0 0 15px rgba(255, 170, 51, 0.2);
+    }
+}
+
+.sw5e-qol-card[data-theme="tech"] .card-controls {
+    background: linear-gradient(135deg, var(--tech-bg-secondary) 0%, var(--tech-bg-tertiary) 100%);
+    border-bottom: 1px solid var(--tech-border-light);
+}
+
+.sw5e-qol-card[data-theme="tech"] .quick-btn {
+    background: linear-gradient(135deg, #ff8800 0%, #cc6600 50%, #aa5500 100%);
+    border: 1px solid #ffaa33;
+    color: white;
+    box-shadow: 
+        0 4px 15px rgba(255, 136, 0, 0.4),
+        inset 0 1px 0 rgba(255, 170, 51, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.sw5e-qol-card[data-theme="tech"] .quick-btn:hover {
+    background: linear-gradient(135deg, #ffaa33 0%, #ee7700 50%, #cc5500 100%);
+    box-shadow: 
+        0 6px 20px rgba(255, 136, 0, 0.6),
+        inset 0 1px 0 rgba(255, 170, 51, 0.3);
+}
+
+.sw5e-qol-card[data-theme="tech"] .gm-btn {
+    background: linear-gradient(135deg, #2a2f35 0%, #1a1f25 100%);
+    border: 1px solid var(--tech-border-light);
+    color: var(--tech-text-primary);
+    box-shadow: 0 2px 8px rgba(255, 136, 0, 0.2);
+}
+
+.sw5e-qol-card[data-theme="tech"] .gm-btn:hover {
+    background: linear-gradient(135deg, #3a3f45 0%, #2a2f35 100%);
+    box-shadow: 0 4px 12px rgba(255, 136, 0, 0.3);
+}
+
+.sw5e-qol-card[data-theme="tech"] .target-row {
+    background: linear-gradient(135deg, #202428 0%, #181a1e 100%);
+    border-bottom: 1px solid var(--tech-border-light);
+}
+
+.sw5e-qol-card[data-theme="tech"] .target-row:nth-child(even) {
+    background: linear-gradient(135deg, #252830 0%, #1d2024 100%);
+}
+
+.sw5e-qol-card[data-theme="tech"] .target-name {
+    color: var(--tech-text-header);
+    text-shadow: 0 0 8px rgba(255, 136, 0, 0.7);
+}
+
+.sw5e-qol-card[data-theme="tech"] .target-name:hover {
+    text-shadow: 0 0 12px rgba(255, 136, 0, 1);
+    color: #ffdd88;
+}
+
+.sw5e-qol-card[data-theme="tech"] .action-btn {
+    background: linear-gradient(135deg, #3a3f45 0%, #2a2f35 50%, #1a1f25 100%);
+    border: 1px solid var(--tech-border-light);
+    color: var(--tech-text-primary);
+    box-shadow: 
+        0 4px 15px rgba(255, 136, 0, 0.2),
+        inset 0 1px 0 rgba(255, 170, 51, 0.1);
+}
+
+.sw5e-qol-card[data-theme="tech"] .action-btn:hover {
+    background: linear-gradient(135deg, #4a4f55 0%, #3a3f45 50%, #2a2f35 100%);
+    box-shadow: 
+        0 6px 20px rgba(255, 136, 0, 0.4),
+        inset 0 1px 0 rgba(255, 170, 51, 0.2);
+}
+
+/* Status indicators for Tech theme */
+.sw5e-qol-card[data-theme="tech"] .status-hit .status-indicator { 
+    color: #00cc88; 
+    text-shadow: 0 0 8px currentColor;
+}
+
+.sw5e-qol-card[data-theme="tech"] .status-miss .status-indicator { 
+    color: #888888; 
+    opacity: 0.7;
+}
+
+.sw5e-qol-card[data-theme="tech"] .status-crit .status-indicator { 
+    color: #ffaa00;
+    text-shadow: 0 0 12px currentColor;
+}
+
+.sw5e-qol-card[data-theme="tech"] .status-pending .status-indicator { 
+    color: #0099dd; 
+}
+
+/* Damage roll styling */
+.sw5e-qol-card[data-theme="tech"] .damage-roll {
+    color: var(--tech-warning);
+    text-shadow: 0 0 12px rgba(255, 170, 0, 0.6);
+}
+
+.sw5e-qol-card[data-theme="tech"] .damage-roll.pending {
+    color: #888888;
+    text-shadow: 0 0 8px rgba(136, 136, 136, 0.4);
+}
+
+/* Dialog theming */
+.sw5e-qol-attack[data-theme="tech"],
+.sw5e-qol-damage[data-theme="tech"] {
+    background: var(--tech-bg-primary);
+    border: 1px solid var(--tech-border-dark);
+}
+
+.sw5e-qol-attack[data-theme="tech"] .window-header,
+.sw5e-qol-damage[data-theme="tech"] .window-header {
+    background: linear-gradient(135deg, #2a2f35 0%, #1a1c20 100%);
+    color: var(--tech-text-header);
+}
+
+.sw5e-qol-attack[data-theme="tech"] .window-content,
+.sw5e-qol-damage[data-theme="tech"] .window-content {
+    background: var(--tech-bg-primary);
+    color: var(--tech-text-primary);
+}
+
+.sw5e-qol-attack[data-theme="tech"] .form-row select,
+.sw5e-qol-attack[data-theme="tech"] .form-row input,
+.sw5e-qol-damage[data-theme="tech"] .form-row select,
+.sw5e-qol-damage[data-theme="tech"] .form-row input {
+    background: var(--tech-bg-secondary);
+    border: 1px solid var(--tech-border-light);
+    color: var(--tech-text-primary);
+}
+
+.sw5e-qol-attack[data-theme="tech"] .form-row select:focus,
+.sw5e-qol-attack[data-theme="tech"] .form-row input:focus,
+.sw5e-qol-damage[data-theme="tech"] .form-row select:focus,
+.sw5e-qol-damage[data-theme="tech"] .form-row input:focus {
+    border-color: var(--tech-accent-secondary);
+    box-shadow: 0 0 0 1px var(--tech-accent-secondary);
+}
+
+.sw5e-qol-attack[data-theme="tech"] .dialog-button.primary,
+.sw5e-qol-damage[data-theme="tech"] .dialog-button.primary {
+    background: linear-gradient(135deg, #ff8800 0%, #cc6600 100%);
+    border-color: var(--tech-border-light);
+    color: white;
+    box-shadow: 0 0 8px rgba(255, 136, 0, 0.3);
+}
+
+.sw5e-qol-attack[data-theme="tech"] .compact-section,
+.sw5e-qol-damage[data-theme="tech"] .compact-section {
+    background: var(--tech-bg-secondary);
+    border: 1px solid var(--tech-border-light);
+}
+
+.sw5e-qol-attack[data-theme="tech"] .section-header,
+.sw5e-qol-damage[data-theme="tech"] .section-header {
+    color: var(--tech-accent);
+}
+
+/* Tech specific button text content */
+.sw5e-qol-card[data-theme="tech"] .quick-btn[data-action="card-quick-damage"]::after {
+    content: " Surge";
+}
+
+.sw5e-qol-card[data-theme="tech"] .quick-btn[data-action="card-mod-damage"]::after {
+    content: " Override";
+}
+
+.sw5e-qol-card[data-theme="tech"] .gm-btn[data-action="gm-apply-all-full"]::after {
+    content: "Execute Protocol";
+}
+
+/* Override default text content for tech theme */
+.sw5e-qol-card[data-theme="tech"] .quick-btn,
+.sw5e-qol-card[data-theme="tech"] .gm-btn[data-action="gm-apply-all-full"] {
+    font-size: 0; /* Hide default text */
+}
+
+.sw5e-qol-card[data-theme="tech"] .quick-btn[data-action="card-quick-damage"]::before {
+    content: "⚡";
+    font-size: 11px;
+    margin-right: 4px;
+}
+
+.sw5e-qol-card[data-theme="tech"] .quick-btn[data-action="card-mod-damage"]::before {
+    content: "⚙";
+    font-size: 11px;
+    margin-right: 4px;
+}
+
+/* Tech specific effects */
+.sw5e-qol-card[data-theme="tech"] .target-row.missing {
+    opacity: 0.4;
+    background: var(--tech-bg-tertiary);
+}
+
+/* Tech section headers */
+.generic-roll-dialog .section-header {
+    background: linear-gradient(135deg, var(--tech-bg-tertiary) 0%, var(--tech-bg-secondary) 100%);
+    border: 1px solid var(--tech-border-light);
+    box-shadow: 0 2px 8px rgba(255, 136, 0, 0.2);
+    text-shadow: 0 0 8px rgba(255, 136, 0, 0.6);
+}
+
+.sw5e-qol-card[data-theme="tech"] .applied-indicator {
+    color: var(--tech-success);
+    text-shadow: 0 0 6px currentColor;
+}
+
+.sw5e-qol-card[data-theme="tech"] .info-icon {
+    color: var(--tech-text-light);
+    text-shadow: 0 0 4px rgba(255, 136, 0, 0.3);
+}
+
+.sw5e-qol-card[data-theme="tech"] .info-icon:hover {
+    color: var(--tech-accent);
+    text-shadow: 0 0 8px rgba(255, 136, 0, 0.6);
+}
+
+/* Tech alternating row colors */
+.sw5e-qol-card[data-theme="tech"] .target-row.even {
+    background-color: rgba(255, 136, 0, 0.05);
+}
+
+.sw5e-qol-card[data-theme="tech"] .target-row.odd {
+    background-color: rgba(0, 221, 221, 0.03);
+}
+
+/* Tech target separators */
+.sw5e-qol-card[data-theme="tech"] .target-row + .target-row {
+    border-top: 1px solid rgba(255, 136, 0, 0.1);
+}
+
+/* Tech save line styling */
+.sw5e-qol-card[data-theme="tech"] .save-line {
+    background: var(--tech-bg-tertiary);
+    border-top: 1px solid var(--tech-border-light);
+    color: var(--tech-text-primary);
+}
+
+.sw5e-qol-card[data-theme="tech"] .save-dc {
+    color: var(--tech-accent);
+    text-shadow: 0 0 6px rgba(255, 136, 0, 0.4);
+}
+
+.sw5e-qol-card[data-theme="tech"] .save-result-inline {
+    color: var(--tech-success);
+    text-shadow: 0 0 6px currentColor;
+}
+
+/* Tech mini-btn styling */
+.sw5e-qol-card[data-theme="tech"] .mini-btn {
+    background: var(--tech-info);
+    border: 1px solid var(--tech-accent);
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 153, 221, 0.3);
+}
+
+.sw5e-qol-card[data-theme="tech"] .mini-btn:hover {
+    background: #00bbff;
+    box-shadow: 0 4px 10px rgba(0, 153, 221, 0.5);
+}
+
+/* Tech status badges integration */
+.sw5e-qol-card[data-theme="tech"] .status-hit { 
+    background: #1a3025; 
+    color: #88ffcc; 
+    border: 1px solid #00cc88;
+}
+
+.sw5e-qol-card[data-theme="tech"] .status-miss { 
+    background: #202428; 
+    color: #cccccc; 
+    border: 1px solid #888888;
+}
+
+.sw5e-qol-card[data-theme="tech"] .status-crit { 
+    background: #332200; 
+    color: #ffddaa; 
+    border: 1px solid #ffaa00;
+}
+
+.sw5e-qol-card[data-theme="tech"] .status-fumble { 
+    background: #1a0808; 
+    color: #ffcccc; 
+    border: 1px solid #cc3300;
+}
+
+.sw5e-qol-card[data-theme="tech"] .status-manual-damage { 
+    background: #0a2233; 
+    color: #aaddff; 
+    border: 1px solid #0099dd;
+}
+
+/* Tech expand arrow */
+.sw5e-qol-card[data-theme="tech"] .expand-arrow {
+    color: var(--tech-text-light);
+    text-shadow: 0 0 4px rgba(255, 136, 0, 0.2);
+}
+
+/* Tech attack/damage totals */
+.sw5e-qol-card[data-theme="tech"] .attack-total,
+.sw5e-qol-card[data-theme="tech"] .damage-summary {
+    color: var(--tech-text-primary);
+    text-shadow: 0 0 6px rgba(255, 136, 0, 0.4);
+}
+
+/* Tech portrait styling */
+.sw5e-qol-card[data-theme="tech"] .portrait {
+    border: 2px solid var(--tech-border-light);
+    box-shadow: 0 0 8px rgba(255, 136, 0, 0.3);
+}
+
+/* Tech extra damage rows (for damage dialog) */
+.sw5e-qol-damage[data-theme="tech"] .extra-row {
+    background: var(--tech-bg-secondary);
+    border: 1px solid var(--tech-border-light);
+}
+
+.sw5e-qol-damage[data-theme="tech"] .extra-row input[type="text"] {
+    background: var(--tech-bg-primary);
+    border: 1px solid var(--tech-border-light);
+    color: var(--tech-text-primary);
+}
+
+.sw5e-qol-damage[data-theme="tech"] .extra-row select {
+    background: var(--tech-bg-primary);
+    border: 1px solid var(--tech-border-light);
+    color: var(--tech-text-primary);
+}
+
+.sw5e-qol-damage[data-theme="tech"] .del-btn {
+    background: #cc3300;
+    border: 1px solid #ff4400;
+    color: white;
+    box-shadow: 0 2px 6px rgba(204, 51, 0, 0.3);
+}
+
+.sw5e-qol-damage[data-theme="tech"] .del-btn:hover {
+    background: #ff4400;
+    box-shadow: 0 4px 10px rgba(204, 51, 0, 0.5);
+}
+
+/* Tech weapon damage section */
+.sw5e-qol-damage[data-theme="tech"] .weapon-damage-section {
+    background: var(--tech-bg-secondary);
+    border: 1px solid var(--tech-border-light);
+}
+
+.sw5e-qol-damage[data-theme="tech"] .damage-part .formula {
+    color: var(--tech-accent);
+    text-shadow: 0 0 4px rgba(255, 136, 0, 0.3);
+}
+
+.sw5e-qol-damage[data-theme="tech"] .damage-part .type {
+    color: var(--tech-text-light);
+}
+
+.sw5e-qol-damage[data-theme="tech"] .brutal-info {
+    color: var(--tech-warning);
+    border-top: 1px solid var(--tech-border-light);
+}

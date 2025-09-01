@@ -12,26 +12,19 @@ export async function testGenericRollDialog() {
         // Test data for an attack roll
         const attackOptions = {
             type: 'attack',
-            title: 'Lightsaber Strike',
-            theme: 'bendu', // Default theme
+            title: 'Blaster Pistol',
+            theme: 'tech', // Test tech theme
             modifiers: [
                 {
-                    name: 'Strength Modifier',
-                    type: 'Item',
-                    modifier: '+3',
-                    isEnabled: true,
-                    isDice: false
-                },
-                {
                     name: 'Proficiency Bonus',
-                    type: 'Untyped',
+                    type: 'Tech',
                     modifier: '+4',
                     isEnabled: true,
                     isDice: false
                 },
                 {
-                    name: 'Bardic Inspiration',
-                    type: 'Force',
+                    name: 'Targeting Protocol',
+                    type: 'Tech',
                     modifier: '1d6',
                     isEnabled: true,
                     isDice: true
@@ -141,7 +134,7 @@ export async function testThemeSwitching() {
         const handler = new GenericRollHandler();
         
         // Test all themes
-        const themes = ['bendu', 'light', 'dark'];
+        const themes = ['bendu', 'light', 'dark','tech'];
         
         for (const theme of themes) {
             console.log(`Testing theme: ${theme}`);

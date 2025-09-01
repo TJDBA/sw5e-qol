@@ -1,0 +1,24 @@
+<div class="item-selection-section">
+    <div class="item-selection-row">
+        <label class="item-label">{{localize itemLabelKey}}</label>
+        <select class="item-select" id="item-select">
+            <option value="">--none--</option>
+            {{#each items}}
+            <option value="{{this.id}}">{{this.name}}</option>
+            {{/each}}
+        </select>
+    </div>
+    <div class="preset-selection-row">
+        <label class="preset-label">{{localize "SW5E-QOL.interface.preset"}}</label>
+        <div class="preset-controls-group">
+            <select class="preset-select" id="preset-select">
+                <option value="">--none--</option>
+                {{#each presets}}
+                <option value="{{this.id}}">{{this.name}}</option>
+                {{/each}}
+            </select>
+            <button type="button" class="save-preset-btn">{{localize "SW5E-QOL.interface.save"}}</button>
+            <button type="button" class="delete-preset-btn">{{localize "SW5E-QOL.interface.delete"}}</button>
+        </div>
+    </div>
+</div>

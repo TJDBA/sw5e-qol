@@ -1,4 +1,4 @@
-// sw5e-helper-starter/scripts/api.js
+// sw5e-qol/scripts/api.js
 import { MODULE_ID, getSetting as getModuleSetting, isDebugEnabled as isModuleDebugEnabled } from './presets/setting.js';
 
 /**

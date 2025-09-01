@@ -5,11 +5,16 @@ import { API } from '../../api.js';
  * Handles all component interactions that can be reused across different dialogs
  */
 export class GenericInputHandler {
-    constructor(dialogElement) {
+    constructor(dialogElement, handler = null) {
         this.dialogElement = dialogElement;
+        this.handler = handler;
         this.modifiers = [];
         this.advantageType = 'normal';
         this.rollMode = 'public';
+        this.selectedItem = '';
+        this.selectedPreset = '';
+        this.selectedAttribute = 'dexterity';
+        this.rollForEachTarget = false;
         this.setupEventListeners();
     }
 
@@ -18,10 +23,12 @@ export class GenericInputHandler {
      */
     setupEventListeners() {
         try {
+            this.setupItemSelection();
             this.setupModifierToggles();
             this.setupAddModifierButtons();
             this.setupAdvantageRadios();
             this.setupRollModeSelect();
+            this.setupRollButton();
             this.updateRollButtonLabel();
         } catch (error) {
             API.log('error', 'Failed to setup event listeners', error);
@@ -67,6 +74,54 @@ export class GenericInputHandler {
     }
 
     /**
+     * Setup item selection
+     */
+    setupItemSelection() {
+        const itemSelect = this.dialogElement.querySelector('#item-select');
+        const presetSelect = this.dialogElement.querySelector('#preset-select');
+        const savePresetBtn = this.dialogElement.querySelector('.save-preset-btn');
+        const deletePresetBtn = this.dialogElement.querySelector('.delete-preset-btn');
+        const attributeSelect = this.dialogElement.querySelector('#attribute-select');
+        const targetRollToggle = this.dialogElement.querySelector('#target-roll-toggle');
+
+        if (itemSelect) {
+            itemSelect.addEventListener('change', (event) => {
+                this.selectedItem = event.target.value;
+            });
+        }
+
+        if (presetSelect) {
+            presetSelect.addEventListener('change', (event) => {
+                this.selectedPreset = event.target.value;
+            });
+        }
+
+        if (savePresetBtn) {
+            savePresetBtn.addEventListener('click', () => {
+                this.savePreset();
+            });
+        }
+
+        if (deletePresetBtn) {
+            deletePresetBtn.addEventListener('click', () => {
+                this.deletePreset();
+            });
+        }
+
+        if (attributeSelect) {
+            attributeSelect.addEventListener('change', (event) => {
+                this.selectedAttribute = event.target.value;
+            });
+        }
+
+        if (targetRollToggle) {
+            targetRollToggle.addEventListener('change', (event) => {
+                this.rollForEachTarget = event.target.checked;
+            });
+        }
+    }
+
+    /**
      * Setup roll mode select
      */
     setupRollModeSelect() {
@@ -74,6 +129,22 @@ export class GenericInputHandler {
         if (select) {
             select.addEventListener('change', (event) => {
                 this.rollMode = event.target.value;
+            });
+        }
+    }
+
+    /**
+     * Setup roll button click handler
+     */
+    setupRollButton() {
+        const rollButton = this.dialogElement.querySelector('#roll-button');
+        if (rollButton) {
+            rollButton.addEventListener('click', () => {
+                // Get the result and close the dialog
+                const result = this.getDialogState();
+                if (this.handler && this.handler.resolveDialog) {
+                    this.handler.resolveDialog(result);
+                }
             });
         }
     }
@@ -133,7 +204,14 @@ export class GenericInputHandler {
             <td>${modifier.type}</td>
             <td>${modifier.modifier}</td>
             <td>
-                <input type="checkbox" class="modifier-toggle" checked data-modifier-id="${this.modifiers.length - 1}">
+                <div class="toggle-switch">
+                    <input type="checkbox" class="modifier-toggle" checked data-modifier-id="${this.modifiers.length - 1}">
+                    <span class="toggle-slider"></span>
+                    <div class="toggle-labels">
+                        <span>Off</span>
+                        <span>On</span>
+                    </div>
+                </div>
             </td>
         `;
 
@@ -227,5 +305,19 @@ export class GenericInputHandler {
     setModifiers(modifiers) {
         this.modifiers = modifiers || [];
         this.updateRollButtonLabel();
+    }
+
+    /**
+     * Save preset (placeholder)
+     */
+    savePreset() {
+        API.notify('Save preset functionality will be implemented later', 'info');
+    }
+
+    /**
+     * Delete preset (placeholder)
+     */
+    deletePreset() {
+        API.notify('Delete preset functionality will be implemented later', 'info');
     }
 }

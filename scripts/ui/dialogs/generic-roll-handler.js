@@ -93,31 +93,25 @@ export class GenericRollHandler {
     async showDialog(dialogHtml, options) {
         return new Promise((resolve) => {
             try {
+                // Store resolve function for roll button
+                this.resolveDialog = resolve;
+                
                 // Create dialog element
                 const dialogElement = document.createElement('div');
                 dialogElement.innerHTML = dialogHtml;
                 const dialogContent = dialogElement.firstElementChild;
 
-                // Create Foundry dialog
+                // Create Foundry dialog without default buttons
                 const dialog = new Dialog({
                     title: `${options.type}: ${options.title}`,
                     content: dialogContent.outerHTML,
-                    buttons: {
-                        roll: {
-                            label: API.localize('interface.roll'),
-                            callback: () => {
-                                const result = this.getDialogResult(dialogElement);
-                                resolve(result);
-                            }
-                        },
-                        cancel: {
-                            label: 'Cancel',
-                            callback: () => resolve(null)
-                        }
-                    },
-                    default: 'roll',
+                    buttons: {}, // No default buttons - we use our own roll button
                     close: () => resolve(null)
-                }, { jQuery: true });
+                }, { 
+                    jQuery: true,
+                    width: 800,        // allow the layout to breathe
+                    resizable: true 
+                });
 
                 // Render dialog
                 dialog.render(true);
@@ -145,7 +139,7 @@ export class GenericRollHandler {
             }
 
             // Create input handler
-            this.inputHandler = new GenericInputHandler(actualDialogElement);
+            this.inputHandler = new GenericInputHandler(actualDialogElement, this);
             
             // Set initial modifiers if provided
             if (options.modifiers) {

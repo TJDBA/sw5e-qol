@@ -17,7 +17,8 @@
 		"styles/dialogs.css",
 		"styles/bendu_theme.css",
 		"styles/light_theme.css",
-		"styles/dark_theme.css"
+		"styles/dark_theme.css",
+		"styles/tech_theme.css"
 	],
 	"languages": [
 		{

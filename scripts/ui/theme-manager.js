@@ -7,7 +7,7 @@ import { API } from '../api.js';
 export class ThemeManager {
     constructor() {
         this.currentTheme = 'bendu';
-        this.availableThemes = ['bendu', 'light', 'dark'];
+        this.availableThemes = ['bendu', 'light', 'dark','tech'];
         this.themeLinkElement = null;
         // Don't auto-initialize - wait for explicit init() call
     }
@@ -63,7 +63,8 @@ export class ThemeManager {
             const themeFileMap = {
                 'bendu': 'bendu_theme.css',
                 'light': 'light_theme.css',
-                'dark': 'dark_theme.css'
+                'dark': 'dark_theme.css',
+                'tech': 'tech_theme.css'
             };
             
             const themePath = `modules/sw5e-qol/styles/${themeFileMap[themeName]}`;

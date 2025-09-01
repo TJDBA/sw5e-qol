@@ -22,7 +22,8 @@ export const DEFAULT_SETTINGS = {
             'auto': 'Auto (Follow System)',
             'light': 'Light Theme',
             'dark': 'Dark Theme',
-            'bendu': 'Bendu Theme'
+            'bendu': 'Bendu Theme',
+            'tech': 'Tech Theme'
         },
         default: 'bendu'
     },

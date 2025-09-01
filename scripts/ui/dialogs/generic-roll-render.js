@@ -29,6 +29,7 @@ export class GenericRollRenderer {
     async loadSectionTemplates() {
         try {
             const sections = [
+                'item-selection',
                 'modifiers-table',
                 'add-modifier-inputs', 
                 'advantage-radio',
@@ -148,6 +149,7 @@ export class GenericRollRenderer {
             case 'skill':
             case 'save':
                 return [
+                    'item-selection',
                     'modifiers-table',
                     'add-modifier-inputs',
                     'advantage-radio',
@@ -156,6 +158,7 @@ export class GenericRollRenderer {
                 ];
             case 'damage':
                 return [
+                    'item-selection',
                     'modifiers-table',
                     'add-modifier-inputs',
                     'roll-mode-dropdown',
@@ -176,6 +179,12 @@ export class GenericRollRenderer {
         };
 
         switch (sectionName) {
+            case 'item-selection':
+                return {
+                    itemLabelKey: this.getItemLabelKey(dialogData.type),
+                    items: this.getItemsForType(dialogData.type),
+                    presets: this.getPresetsForType(dialogData.type)
+                };
             case 'modifiers-table':
                 return baseData;
             case 'add-modifier-inputs':
@@ -205,6 +214,40 @@ export class GenericRollRenderer {
             default:
                 return ['Untyped'];
         }
+    }
+
+    /**
+     * Get item label key based on dialog type
+     */
+    getItemLabelKey(dialogType) {
+        switch (dialogType.toLowerCase()) {
+            case 'attack':
+                return 'SW5E-QOL.interface.weapon';
+            case 'skill':
+                return 'SW5E-QOL.interface.skill';
+            case 'save':
+                return 'SW5E-QOL.interface.save';
+            case 'damage':
+                return 'SW5E-QOL.interface.weapon';
+            default:
+                return 'SW5E-QOL.interface.item';
+        }
+    }
+
+    /**
+     * Get items for dialog type (placeholder - will be implemented later)
+     */
+    getItemsForType(dialogType) {
+        // Placeholder - will be populated from game data
+        return [];
+    }
+
+    /**
+     * Get presets for dialog type (placeholder - will be implemented later)
+     */
+    getPresetsForType(dialogType) {
+        // Placeholder - will be populated from saved presets
+        return [];
     }
 
     /**
