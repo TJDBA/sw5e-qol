@@ -5,64 +5,9 @@
 
 console.log('SW5E QoL Module: main.js is loading...');
 
-// Try to import dependencies with error handling
+// Don't import anything during the import phase - wait for FoundryVTT to be ready
 let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, themeManager;
 let testGenericRollDialog, testSkillCheckDialog, testDamageDialog, testThemeSwitching, GenericRollTests;
-
-try {
-    console.log('SW5E QoL Module: Importing API...');
-    const apiModule = await import('./api.js');
-    API = apiModule.API;
-    console.log('SW5E QoL Module: API imported successfully');
-} catch (error) {
-    console.error('SW5E QoL Module: Failed to import API', error);
-}
-
-try {
-    console.log('SW5E QoL Module: Importing UI components...');
-    const handlerModule = await import('./ui/dialogs/generic-roll-handler.js');
-    GenericRollHandler = handlerModule.GenericRollHandler;
-    console.log('SW5E QoL Module: GenericRollHandler imported successfully');
-} catch (error) {
-    console.error('SW5E QoL Module: Failed to import GenericRollHandler', error);
-}
-
-try {
-    const rendererModule = await import('./ui/dialogs/generic-roll-render.js');
-    GenericRollRenderer = rendererModule.GenericRollRenderer;
-    console.log('SW5E QoL Module: GenericRollRenderer imported successfully');
-} catch (error) {
-    console.error('SW5E QoL Module: Failed to import GenericRollRenderer', error);
-}
-
-try {
-    const inputModule = await import('./ui/dialogs/generic-input-handler.js');
-    GenericInputHandler = inputModule.GenericInputHandler;
-    console.log('SW5E QoL Module: GenericInputHandler imported successfully');
-} catch (error) {
-    console.error('SW5E QoL Module: Failed to import GenericInputHandler', error);
-}
-
-try {
-    const themeModule = await import('./ui/theme-manager.js');
-    themeManager = themeModule.themeManager;
-    console.log('SW5E QoL Module: ThemeManager imported successfully');
-} catch (error) {
-    console.error('SW5E QoL Module: Failed to import ThemeManager', error);
-}
-
-try {
-    console.log('SW5E QoL Module: Importing test functions...');
-    const testModule = await import('./test-generic-roll.js');
-    testGenericRollDialog = testModule.testGenericRollDialog;
-    testSkillCheckDialog = testModule.testSkillCheckDialog;
-    testDamageDialog = testModule.testDamageDialog;
-    testThemeSwitching = testModule.testThemeSwitching;
-    GenericRollTests = testModule.GenericRollTests;
-    console.log('SW5E QoL Module: Test functions imported successfully');
-} catch (error) {
-    console.error('SW5E QoL Module: Failed to import test functions', error);
-}
 
 /**
  * Initialize the module
@@ -71,7 +16,70 @@ Hooks.once('init', async function() {
     try {
         console.log('SW5E QoL Module: Initializing...');
         
-        // Initialize theme manager if available
+        // Import all dependencies AFTER FoundryVTT is ready
+        console.log('SW5E QoL Module: Importing dependencies...');
+        
+        try {
+            const apiModule = await import('./api.js');
+            API = apiModule.API;
+            console.log('SW5E QoL Module: API imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import API', error);
+        }
+        
+        try {
+            const handlerModule = await import('./ui/dialogs/generic-roll-handler.js');
+            GenericRollHandler = handlerModule.GenericRollHandler;
+            console.log('SW5E QoL Module: GenericRollHandler imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import GenericRollHandler', error);
+        }
+        
+        try {
+            const rendererModule = await import('./ui/dialogs/generic-roll-render.js');
+            GenericRollRenderer = rendererModule.GenericRollRenderer;
+            console.log('SW5E QoL Module: GenericRollRenderer imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import GenericRollRenderer', error);
+        }
+        
+        try {
+            const inputModule = await import('./ui/dialogs/generic-input-handler.js');
+            GenericInputHandler = inputModule.GenericInputHandler;
+            console.log('SW5E QoL Module: GenericInputHandler imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import GenericInputHandler', error);
+        }
+        
+        try {
+            const themeModule = await import('./ui/theme-manager.js');
+            themeManager = themeModule.themeManager;
+            console.log('SW5E QoL Module: ThemeManager imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import ThemeManager', error);
+        }
+        
+        try {
+            const testModule = await import('./test-generic-roll.js');
+            testGenericRollDialog = testModule.testGenericRollDialog;
+            testSkillCheckDialog = testModule.testSkillCheckDialog;
+            testDamageDialog = testModule.testDamageDialog;
+            testThemeSwitching = testModule.testThemeSwitching;
+            GenericRollTests = testModule.GenericRollTests;
+            console.log('SW5E QoL Module: Test functions imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import test functions', error);
+        }
+        
+        console.log('SW5E QoL Module: All imports completed');
+        
+        // Register module settings first (after imports)
+        if (API && API.registerSettings) {
+            API.registerSettings();
+            console.log('SW5E QoL Module: Settings registered');
+        }
+        
+        // Initialize theme manager if available (after settings are registered)
         if (themeManager) {
             themeManager.init();
             console.log('SW5E QoL Module: Theme manager initialized');

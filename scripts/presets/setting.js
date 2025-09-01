@@ -55,7 +55,7 @@ export const DEFAULT_SETTINGS = {
             'info': 'Info, Warnings, and Errors',
             'debug': 'All Debug Information'
         },
-        default: 'degug'
+        default: 'debug'
     },
     
     'log-to-console': {
@@ -95,6 +95,10 @@ export const SETTING_CATEGORIES = {
  * @returns {*} The setting value
  */
 export function getSetting(key, fallback = null) {
+    // Check if game is available
+    if (typeof game === 'undefined' || !game.settings) {
+        return fallback;
+    }
     return game.settings.get(MODULE_ID, key) ?? fallback;
 }
 
@@ -105,6 +109,11 @@ export function getSetting(key, fallback = null) {
  * @returns {Promise} Promise that resolves when setting is saved
  */
 export async function setSetting(key, value) {
+    // Check if game is available
+    if (typeof game === 'undefined' || !game.settings) {
+        console.warn('SW5E QoL: Cannot set setting, game not ready');
+        return;
+    }
     return await game.settings.set(MODULE_ID, key, value);
 }
 
@@ -114,6 +123,11 @@ export async function setSetting(key, value) {
  * @returns {boolean} Whether logging is enabled for this level
  */
 export function isDebugEnabled(level = 'info') {
+    // Check if game is available
+    if (typeof game === 'undefined' || !game.settings) {
+        return level === 'error'; // Only show errors when game isn't ready
+    }
+    
     const debugLevel = getSetting('debug-level', 'warning');
     const levels = ['none', 'error', 'warning', 'info', 'debug'];
     const currentLevel = levels.indexOf(debugLevel);

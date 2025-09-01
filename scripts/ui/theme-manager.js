@@ -9,7 +9,7 @@ export class ThemeManager {
         this.currentTheme = 'bendu';
         this.availableThemes = ['bendu', 'light', 'dark'];
         this.themeLinkElement = null;
-        this.init();
+        // Don't auto-initialize - wait for explicit init() call
     }
 
     /**

@@ -65,6 +65,39 @@ export const API = {
     },
 
     /**
+     * Register module settings with FoundryVTT
+     */
+    registerSettings() {
+        try {
+            // Import settings dynamically to avoid circular imports
+            import('./presets/setting.js').then(({ DEFAULT_SETTINGS, SETTING_CATEGORIES }) => {
+                // Register each setting
+                for (const [key, setting] of Object.entries(DEFAULT_SETTINGS)) {
+                    game.settings.register(MODULE_ID, key, setting);
+                }
+                
+                // Register setting categories
+                for (const [categoryKey, category] of Object.entries(SETTING_CATEGORIES)) {
+                    game.settings.registerMenu(MODULE_ID, categoryKey, {
+                        name: category.name,
+                        label: category.name,
+                        hint: `Configure ${category.name.toLowerCase()} settings`,
+                        icon: 'fas fa-cog',
+                        type: categoryKey === 'interface' ? 'interface' : 'debug',
+                        restricted: false
+                    });
+                }
+                
+                console.log('SW5E QoL Module: Settings registered successfully');
+            }).catch(error => {
+                console.error('SW5E QoL Module: Failed to register settings', error);
+            });
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to register settings', error);
+        }
+    },
+
+    /**
      * Open a minimal dialog with a single OK button.
      * @param {Object} [opts]
      * @param {string} [opts.title]   - Override dialog title

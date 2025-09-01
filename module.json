@@ -11,8 +11,7 @@
 		]
 	},
 	"esmodules": [
-		"scripts/main.js",
-		"scripts/test-generic-roll.js"
+		"scripts/main.js"
 	],
 	"styles": [
 		"styles/dialogs.css",
