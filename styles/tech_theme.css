@@ -16,6 +16,7 @@
     --tech-success: #00cc88;
     --tech-info: #0099dd;
     
+    
     /* Generic Roll Dialog Theme Variables */
     --dialog-bg: var(--tech-bg-primary);
     --dialog-text: var(--tech-text-primary);
@@ -23,6 +24,7 @@
     --dialog-header-border: 2px solid var(--tech-accent);
     --dialog-title-color: var(--tech-accent);
     --section-divider-border: 1px solid var(--tech-border-light);
+    --input-text: var(--tech-text-secondary);
     
     /* Section Header Variables */
     --section-header-color: var(--tech-accent);

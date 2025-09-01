@@ -22,6 +22,7 @@
     --dialog-header-border: 2px solid var(--dark-accent);
     --dialog-title-color: var(--dark-accent);
     --section-divider-border: 1px solid var(--dark-border-light);
+    --input-text: var(--dark-text-secondary);
     
     /* Table Variables */
     --table-border: 1px solid var(--dark-border-dark);

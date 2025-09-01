@@ -3,7 +3,7 @@
  * Contains all static and default module-wide settings
  */
 
-export const MODULE_ID = 'sw5e-qol';
+export const MODULE_ID = 'SW5E-QOL';
 export const MODULE_NAME = 'SW5E Quality of Life';
 
 /**

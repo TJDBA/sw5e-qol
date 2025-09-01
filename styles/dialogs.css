@@ -166,8 +166,28 @@
     background: var(--table-row-hover-bg, #f9f9f9);
 }
 
+.modifier-row.disabled {
+    opacity: 0.5;
+    background: var(--table-row-disabled-bg, #f0f0f0);
+    color: var(--table-row-disabled-text, #999);
+}
+
+.modifier-row.disabled:hover {
+    background: var(--table-row-disabled-bg, #f0f0f0);
+}
+
 .attribute-row {
     background: var(--table-row-hover-bg, #f9f9f9);
+}
+
+.attribute-row.disabled {
+    opacity: 0.5;
+    background: var(--table-row-disabled-bg, #f0f0f0);
+    color: var(--table-row-disabled-text, #999);
+}
+
+.attribute-row.disabled:hover {
+    background: var(--table-row-disabled-bg, #f0f0f0);
 }
 
 .attribute-label {
@@ -200,10 +220,10 @@
     align-items: center;
 }
 
-.modifier-name-input,
-.modifier-value-input,
-.modifier-type-select,
-.modifier-dice-select {
+.generic-roll-dialog .modifier-name-input,
+.generic-roll-dialog .modifier-value-input,
+.generic-roll-dialog .modifier-type-select,
+.generic-roll-dialog .modifier-dice-select {
     padding: var(--input-padding, 0.5rem);
     border: var(--input-border, 1px solid #ddd);
     border-radius: var(--input-border-radius, 4px);
@@ -213,6 +233,61 @@
     height: 2.2rem; /* Reduced from 2.5rem to match text input height */
     line-height: 1.2; /* Adjusted for new height */
     vertical-align: middle;
+}
+
+/* Placeholder text theming for better readability on dark backgrounds */
+.generic-roll-dialog .modifier-name-input::placeholder,
+.generic-roll-dialog .modifier-value-input::placeholder,
+.generic-roll-dialog .modifier-dice-quantity-input::placeholder {
+    color: var(--placeholder-text, #999);
+    opacity: 1; /* Ensure placeholder is visible */
+}
+
+/* Ensure all input and select elements use theme colors within our dialog */
+.generic-roll-dialog input,
+.generic-roll-dialog select {
+    color: var(--input-text, #333);
+}
+
+/* Roll button text theming */
+.generic-roll-dialog .roll-button {
+    color: var(--roll-button-text, var(--btn-primary-text, white));
+}
+
+/* Dice Input Group - Container for quantity and die type */
+.dice-input-group {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+.generic-roll-dialog .modifier-dice-quantity-input,
+.generic-roll-dialog .modifier-dice-type-select {
+    flex: 1; /* Each takes 50% of available space */
+    padding: var(--input-padding, 0.5rem);
+    border: var(--input-border, 1px solid #ddd);
+    border-radius: var(--input-border-radius, 4px);
+    font-size: var(--input-font-size, 0.9rem);
+    background: var(--dropdown-bg, var(--input-bg, #ffffff));
+    color: var(--input-text, #333);
+    height: 2.2rem;
+    line-height: 1.2;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+/* Ensure dice input fields inherit theme colors properly */
+.generic-roll-dialog .modifier-dice-quantity-input {
+    color: var(--input-text, #333);
+}
+
+.generic-roll-dialog .modifier-dice-type-select {
+    color: var(--input-text, #333);
+}
+
+.generic-roll-dialog .modifier-dice-type-select option {
+    background: var(--dropdown-bg, var(--input-bg, #ffffff));
+    color: var(--input-text, #333);
 }
 
 .generic-roll-dialog .add-modifier-btn {
@@ -321,16 +396,19 @@
     border: var(--roll-button-border, none);
     border-radius: var(--roll-button-border-radius, 6px);
     cursor: var(--roll-button-cursor, pointer);
-    font-size: var(--roll-button-font-size, 1.1rem);
+    font-size: var(--roll-button-font-size, 1rem); /* Reduced from 1.1rem to match label text size */
     font-weight: var(--roll-button-font-weight, bold);
     min-width: var(--roll-button-min-width, 50px);
-    width: var(--roll-button-width, 33%);
+    width: var(--roll-button-width, 50%); /* Increased from 33% to 50% (50% wider) */
     height: 2.2rem; /* Match other elements */
     line-height: 1.2; /* Adjusted for new height */
     background: var(--roll-button-bg, var(--btn-primary-bg, #2196F3));
     color: var(--roll-button-text, var(--btn-primary-text, white));
     transition: var(--roll-button-transition, all 0.3s ease);
     box-shadow: var(--roll-button-shadow, var(--btn-primary-shadow, 0 4px 15px rgba(0, 0, 0, 0.2)));
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide any overflow text */
+    text-overflow: ellipsis; /* Add ellipsis if text is too long */
 }
 
 .generic-roll-dialog .roll-button:hover {

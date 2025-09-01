@@ -55,14 +55,14 @@
 			"save": "Save",
 			"item": "Item",
 			"preset": "Preset",
-			"save": "Save",
 			"delete": "Delete",
 			"attribute": "Attribute",
 			"rollForEachTarget": "Roll for each target",
 			"active_modifiers": "Active Modifiers",
 			"add_modifiers": "Add Modifiers",
 			"modifier_name": "Modifier Name",
-			"dice_modifier": "Dice Modifier"
+			"dice_modifier": "Dice Modifier",
+			"roll_button": "Roll"
 		},
 		
 		"cards": {

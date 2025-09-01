@@ -108,20 +108,24 @@ export class GenericRollHandler {
                     title: `${options.type}: ${options.title}`,
                     content: dialogContent.outerHTML,
                     buttons: {}, // No default buttons - we use our own roll button
-                    close: () => resolve(null)
+                    close: () => {
+                        this.currentDialog = null; // Clean up dialog reference
+                        resolve(null);
+                    }
                 }, { 
                     jQuery: true,
                     width: 600,        // remember to update dialogs.css to match
                     resizable: false
                 });
 
+                // Store dialog reference for input handler
+                this.currentDialog = dialog;
+
                 // Render dialog
                 dialog.render(true);
-
-                // Setup input handler after dialog is rendered
-                setTimeout(() => {
-                    this.setupInputHandler(dialogElement, options);
-                }, 0);
+                
+                // Wait for dialog to be fully rendered
+                this.waitForDialogReady(options);
 
             } catch (error) {
                 API.log('error', 'Failed to show dialog', error);
@@ -131,21 +135,46 @@ export class GenericRollHandler {
     }
 
     /**
+     * Wait for dialog to be fully rendered and then setup input handler
+     */
+    waitForDialogReady(options) {
+        const checkDialog = () => {
+            if (this.currentDialog && this.currentDialog.element && this.currentDialog.element.length > 0) {
+                const dialogContent = this.currentDialog.element.find('.window-content');
+                if (dialogContent.length > 0) {
+                    API.log('debug', 'Dialog is ready, setting up input handler');
+                    this.setupInputHandler(null, options);
+                    return;
+                }
+            }
+            
+            // If not ready, check again in the next frame
+            requestAnimationFrame(checkDialog);
+        };
+        
+        // Start checking
+        requestAnimationFrame(checkDialog);
+    }
+
+    /**
      * Setup input handler for the dialog
      */
     setupInputHandler(dialogElement, options) {
         try {
-            // Find the actual dialog element in the DOM
-            const actualDialogElement = document.querySelector('.window-app .window-content') ||
-                                       document.querySelector('.dialog .dialog-content') ||
-                                       document.querySelector('.dialog-content') ||
-                                       document.querySelector('.window-content');
+            // Find the actual dialog content element in the DOM
+            // When using jQuery: true, the dialog content is in .window-content
+            const actualDialogElement = this.currentDialog?.element?.find('.window-content')?.[0];
+                                       
             if (!actualDialogElement) {
                 API.log('warning', 'Could not find dialog content element');
+                API.log('debug', 'Dialog reference:', this.currentDialog);
+                API.log('debug', 'Dialog element:', this.currentDialog?.element);
                 return;
             }
 
-            // Create input handler
+            API.log('debug', 'Found dialog content element:', actualDialogElement);
+
+            // Create input handler with the actual DOM element
             this.inputHandler = new GenericInputHandler(actualDialogElement, this);
             
             // Set initial modifiers if provided

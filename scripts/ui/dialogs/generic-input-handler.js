@@ -41,12 +41,56 @@ export class GenericInputHandler {
     setupModifierToggles() {
         const toggles = this.dialogElement.querySelectorAll('.modifier-toggle');
         toggles.forEach(toggle => {
-            toggle.addEventListener('change', (event) => {
-                const modifierId = parseInt(event.target.dataset.modifierId);
-                this.modifiers[modifierId].isEnabled = event.target.checked;
-                this.updateRollButtonLabel();
-            });
+            // Remove existing event listeners to prevent duplicates
+            toggle.removeEventListener('change', this.handleToggleChange);
+            
+            // Add new event listener
+            toggle.addEventListener('change', this.handleToggleChange.bind(this));
         });
+    }
+
+    /**
+     * Handle toggle switch change events
+     */
+    handleToggleChange(event) {
+        const modifierId = event.target.dataset.modifierId;
+        const isChecked = event.target.checked;
+        
+        // Find the row containing this toggle
+        const row = event.target.closest('.modifier-row');
+        if (!row) {
+            API.log('warning', 'Could not find modifier row for toggle');
+            return;
+        }
+
+        // Handle special case for attribute row
+        if (modifierId === 'attribute') {
+            // For attribute row, we don't have a modifier object, just update the row state
+            this.toggleRowState(row, isChecked);
+            this.updateRollButtonLabel();
+            return;
+        }
+
+        // Handle regular modifier rows
+        const modifierIndex = parseInt(modifierId);
+        if (modifierIndex >= 0 && modifierIndex < this.modifiers.length) {
+            this.modifiers[modifierIndex].isEnabled = isChecked;
+            this.toggleRowState(row, isChecked);
+            this.updateRollButtonLabel();
+        } else {
+            API.log('warning', `Invalid modifier ID: ${modifierId}`);
+        }
+    }
+
+    /**
+     * Toggle the visual state of a modifier row
+     */
+    toggleRowState(row, isEnabled) {
+        if (isEnabled) {
+            row.classList.remove('disabled');
+        } else {
+            row.classList.add('disabled');
+        }
     }
 
     /**
@@ -142,7 +186,12 @@ export class GenericInputHandler {
             rollButton.addEventListener('click', () => {
                 // Get the result and close the dialog
                 const result = this.getDialogState();
+                
+                // Log the returned object for debugging
+                API.log('info', 'Roll button clicked - Dialog result:', result);
+                
                 if (this.handler && this.handler.resolveDialog) {
+                    this.handler.currentDialog = null; // Clean up dialog reference
                     this.handler.resolveDialog(result);
                 }
             });
@@ -155,31 +204,58 @@ export class GenericInputHandler {
     addModifier(rowIndex) {
         try {
             const row = this.dialogElement.querySelectorAll('.modifier-input-row')[rowIndex];
-            const nameInput = row.querySelector('.modifier-name-input');
-            const valueInput = row.querySelector('.modifier-value-input');
-            const typeSelect = row.querySelector('.modifier-type-select');
-            const diceSelect = row.querySelector('.modifier-dice-select');
-
-            const name = nameInput.value.trim();
-            const value = valueInput.value;
-            const type = typeSelect ? typeSelect.value : 'Untyped';
-            const dice = diceSelect ? diceSelect.value : null;
-
-            if (!name || !value) {
-                API.notify('Please fill in both name and value fields', 'warning');
+            if (!row) {
+                API.log('error', `Modifier input row ${rowIndex} not found`);
                 return;
             }
 
-            const modifier = {
+            const nameInput = row.querySelector('.modifier-name-input');
+            const valueInput = row.querySelector('.modifier-value-input');
+            const typeSelect = row.querySelector('.modifier-type-select');
+            const diceQuantityInput = row.querySelector('.modifier-dice-quantity-input');
+            const diceTypeSelect = row.querySelector('.modifier-dice-type-select');
+
+            // Validate required elements
+            if (!nameInput) {
+                API.log('error', 'Name input not found in modifier row');
+                return;
+            }
+
+            const name = nameInput.value.trim();
+            if (!name) {
+                API.notify('Please enter a modifier name', 'warning');
+                return;
+            }
+
+            // Determine if this is a dice modifier or number modifier
+            let modifier, isDice;
+            if (diceQuantityInput && diceTypeSelect && diceQuantityInput.value && diceTypeSelect.value) {
+                // This is a dice modifier row
+                const quantity = parseInt(diceQuantityInput.value) || 1;
+                const dieType = diceTypeSelect.value;
+                modifier = `${quantity}${dieType}`;
+                isDice = true;
+            } else if (valueInput && valueInput.value) {
+                // This is a number modifier row
+                modifier = parseInt(valueInput.value) >= 0 ? `+${valueInput.value}` : valueInput.value;
+                isDice = false;
+            } else {
+                API.notify('Please enter a modifier value or select dice quantity and type', 'warning');
+                return;
+            }
+
+            const type = typeSelect ? typeSelect.value : 'Untyped';
+
+            const modifierObj = {
                 name,
                 type,
-                modifier: dice || (parseInt(value) >= 0 ? `+${value}` : value),
+                modifier,
                 isEnabled: true,
-                isDice: !!dice
+                isDice
             };
 
-            this.modifiers.push(modifier);
-            this.addModifierToTable(modifier);
+            this.modifiers.push(modifierObj);
+            this.addModifierToTable(modifierObj);
             this.updateRollButtonLabel();
             this.clearInputFields(rowIndex);
 
@@ -199,18 +275,19 @@ export class GenericInputHandler {
         row.className = 'modifier-row';
         row.dataset.modifierId = this.modifiers.length - 1;
 
+        // Set initial disabled state if modifier is not enabled
+        if (!modifier.isEnabled) {
+            row.classList.add('disabled');
+        }
+
         row.innerHTML = `
             <td>${modifier.name}</td>
             <td>${modifier.type}</td>
             <td>${modifier.modifier}</td>
             <td>
                 <div class="toggle-switch">
-                    <input type="checkbox" class="modifier-toggle" checked data-modifier-id="${this.modifiers.length - 1}">
+                    <input type="checkbox" class="modifier-toggle" ${modifier.isEnabled ? 'checked' : ''} data-modifier-id="${this.modifiers.length - 1}">
                     <span class="toggle-slider"></span>
-                    <div class="toggle-labels">
-                        <span>Off</span>
-                        <span>On</span>
-                    </div>
                 </div>
             </td>
         `;
@@ -224,11 +301,62 @@ export class GenericInputHandler {
      */
     clearInputFields(rowIndex) {
         const row = this.dialogElement.querySelectorAll('.modifier-input-row')[rowIndex];
+        if (!row) return;
+
         const nameInput = row.querySelector('.modifier-name-input');
         const valueInput = row.querySelector('.modifier-value-input');
+        const diceQuantityInput = row.querySelector('.modifier-dice-quantity-input');
+        const diceTypeSelect = row.querySelector('.modifier-dice-type-select');
 
-        nameInput.value = '';
-        valueInput.value = '';
+        if (nameInput) nameInput.value = '';
+        if (valueInput) valueInput.value = '';
+        if (diceQuantityInput) diceQuantityInput.value = '1'; // Reset to default value
+        if (diceTypeSelect) diceTypeSelect.selectedIndex = 0; // Reset to first option
+    }
+
+    /**
+     * Helper function to combine dice modifiers into a sorted string
+     * @param {Array} diceArray - Array of dice strings (e.g., ["1d8", "1d4", "1d4", "1d6", "4d6"])
+     * @returns {string} Combined dice string (e.g., "1d8+5d6+2d4")
+     */
+    combineDiceModifiers(diceArray) {
+        if (!diceArray || diceArray.length === 0) {
+            return '';
+        }
+
+        // Parse and group dice by type
+        const diceGroups = {};
+        
+        diceArray.forEach(diceString => {
+            // Parse dice string (e.g., "2d8" -> quantity: 2, type: "d8")
+            const match = diceString.match(/^(\d+)(d\d+)$/);
+            if (match) {
+                const quantity = parseInt(match[1]);
+                const dieType = match[2];
+                
+                if (diceGroups[dieType]) {
+                    diceGroups[dieType] += quantity;
+                } else {
+                    diceGroups[dieType] = quantity;
+                }
+            }
+        });
+
+        // Sort die types from highest to lowest (d20, d12, d10, d8, d6, d4)
+        const dieTypeOrder = ['d20', 'd12', 'd10', 'd8', 'd6', 'd4'];
+        const sortedDieTypes = Object.keys(diceGroups).sort((a, b) => {
+            const indexA = dieTypeOrder.indexOf(a);
+            const indexB = dieTypeOrder.indexOf(b);
+            return indexA - indexB; // Lower index = higher die type
+        });
+
+        // Build combined string
+        const combinedParts = sortedDieTypes.map(dieType => {
+            const quantity = diceGroups[dieType];
+            return `${quantity}${dieType}`;
+        });
+
+        return combinedParts.join('+');
     }
 
     /**
@@ -241,19 +369,16 @@ export class GenericInputHandler {
 
             const enabledModifiers = this.modifiers.filter(m => m.isEnabled);
             if (enabledModifiers.length === 0) {
-                rollButton.textContent = `${API.localize('interface.roll')}: 1d20`;
+                rollButton.textContent = `${API.localize('interface.roll_button')}: 1d20`;
                 return;
             }
 
             const diceModifiers = enabledModifiers.filter(m => m.isDice);
             const numberModifiers = enabledModifiers.filter(m => !m.isDice);
 
-            // Combine dice modifiers
-            const diceCounts = {};
-            diceModifiers.forEach(m => {
-                const dice = m.modifier;
-                diceCounts[dice] = (diceCounts[dice] || 0) + 1;
-            });
+            // Use helper function to combine dice modifiers
+            const diceArray = diceModifiers.map(m => m.modifier);
+            const combinedDice = this.combineDiceModifiers(diceArray);
 
             // Sum number modifiers
             const numberSum = numberModifiers.reduce((sum, m) => {
@@ -261,16 +386,12 @@ export class GenericInputHandler {
             }, 0);
 
             // Build label
-            let label = `${API.localize('interface.roll')}: 1d20`;
+            let label = `${API.localize('interface.roll_button')}: 1d20`;
             
-            // Add dice
-            Object.entries(diceCounts).forEach(([dice, count]) => {
-                if (count === 1) {
-                    label += `+${dice}`;
-                } else {
-                    label += `+${count}${dice}`;
-                }
-            });
+            // Add combined dice
+            if (combinedDice) {
+                label += `+${combinedDice}`;
+            }
 
             // Add numbers
             if (numberSum > 0) {
@@ -304,7 +425,38 @@ export class GenericInputHandler {
      */
     setModifiers(modifiers) {
         this.modifiers = modifiers || [];
+        
+        // Initialize toggle states for existing modifier rows
+        this.initializeToggleStates();
         this.updateRollButtonLabel();
+    }
+
+    /**
+     * Initialize toggle states for existing modifier rows
+     */
+    initializeToggleStates() {
+        const rows = this.dialogElement.querySelectorAll('.modifier-row');
+        rows.forEach(row => {
+            const modifierId = row.dataset.modifierId;
+            
+            if (modifierId === 'attribute') {
+                // Attribute row is always enabled by default
+                this.toggleRowState(row, true);
+                return;
+            }
+            
+            const modifierIndex = parseInt(modifierId);
+            if (modifierIndex >= 0 && modifierIndex < this.modifiers.length) {
+                const isEnabled = this.modifiers[modifierIndex].isEnabled;
+                this.toggleRowState(row, isEnabled);
+                
+                // Update the toggle switch state
+                const toggle = row.querySelector('.modifier-toggle');
+                if (toggle) {
+                    toggle.checked = isEnabled;
+                }
+            }
+        });
     }
 
     /**

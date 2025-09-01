@@ -11,14 +11,17 @@
     </div>
     <div class="modifier-input-row">
         <input type="text" class="modifier-name-input" placeholder="{{localize 'SW5E-QOL.interface.dice_modifier'}}">
-        <select class="modifier-dice-select">
-            <option value="1d4">1d4</option>
-            <option value="1d6">1d6</option>
-            <option value="1d8">1d8</option>
-            <option value="1d10">1d10</option>
-            <option value="1d12">1d12</option>
-            <option value="1d20">1d20</option>
-        </select>
+        <div class="dice-input-group">
+            <input type="number" class="modifier-dice-quantity-input" placeholder="1" min="1" value="1">
+            <select class="modifier-dice-type-select">
+                <option value="d4">d4</option>
+                <option value="d6">d6</option>
+                <option value="d8">d8</option>
+                <option value="d10">d10</option>
+                <option value="d12">d12</option>
+                <option value="d20">d20</option>
+            </select>
+        </div>
         <select class="modifier-type-select">
             {{#each modifierTypes}}
             <option value="{{this}}">{{this}}</option>
