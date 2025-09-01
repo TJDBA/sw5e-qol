@@ -36,17 +36,18 @@ export class GenericInputHandler {
     }
 
     /**
-     * Setup modifier toggle checkboxes
+     * Setup modifier toggle checkboxes using event delegation
      */
     setupModifierToggles() {
-        const toggles = this.dialogElement.querySelectorAll('.modifier-toggle');
-        toggles.forEach(toggle => {
-            // Remove existing event listeners to prevent duplicates
-            toggle.removeEventListener('change', this.handleToggleChange);
-            
-            // Add new event listener
-            toggle.addEventListener('change', this.handleToggleChange.bind(this));
+        // Use event delegation on the dialog element to handle all toggle switches
+        this.dialogElement.addEventListener('change', (event) => {
+            if (event.target.classList.contains('modifier-toggle')) {
+                API.log('debug', 'Toggle switch change event detected');
+                this.handleToggleChange(event);
+            }
         });
+        
+        API.log('debug', 'Toggle switch event delegation set up');
     }
 
     /**
@@ -55,6 +56,8 @@ export class GenericInputHandler {
     handleToggleChange(event) {
         const modifierId = event.target.dataset.modifierId;
         const isChecked = event.target.checked;
+        
+        API.log('debug', `Toggle changed - ID: ${modifierId}, Checked: ${isChecked}`);
         
         // Find the row containing this toggle
         const row = event.target.closest('.modifier-row');
@@ -66,6 +69,7 @@ export class GenericInputHandler {
         // Handle special case for attribute row
         if (modifierId === 'attribute') {
             // For attribute row, we don't have a modifier object, just update the row state
+            API.log('debug', 'Handling attribute row toggle');
             this.toggleRowState(row, isChecked);
             this.updateRollButtonLabel();
             return;
@@ -74,6 +78,7 @@ export class GenericInputHandler {
         // Handle regular modifier rows
         const modifierIndex = parseInt(modifierId);
         if (modifierIndex >= 0 && modifierIndex < this.modifiers.length) {
+            API.log('debug', `Handling modifier ${modifierIndex} toggle`);
             this.modifiers[modifierIndex].isEnabled = isChecked;
             this.toggleRowState(row, isChecked);
             this.updateRollButtonLabel();
@@ -293,7 +298,7 @@ export class GenericInputHandler {
         `;
 
         tbody.appendChild(row);
-        this.setupModifierToggles(); // Re-setup event listeners
+        // Event delegation handles new toggles automatically
     }
 
     /**
