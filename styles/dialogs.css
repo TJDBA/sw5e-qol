@@ -421,80 +421,39 @@
 .toggle-switch {
     position: relative;
     display: inline-block;
-    width: 60px;
-    height: 24px;
-}
-
-.toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.toggle-slider {
-    position: absolute;
+    width: 40px;
+    height: 20px;
     cursor: pointer;
+}
+
+.toggle-switch .modifier-toggle {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2;  /* Make sure checkbox is on top */
+}
+
+.toggle-switch .toggle-slider {
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background-color: var(--toggle-off-bg, #ccc);
-    transition: 0.4s;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 0 8px;
-    font-size: 10px;
-    font-weight: bold;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    transition: .4s;
+    border-radius: 20px;
+    pointer-events: none;  /* Let clicks pass through to checkbox */
 }
 
-.toggle-slider::after {
-    content: "Off";
-    transition: 0.4s;
-}
-
-.toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
-}
-
-.toggle-switch input:checked + .toggle-slider {
+.toggle-switch .modifier-toggle:checked + .toggle-slider {
     background-color: var(--toggle-on-bg, #2196F3);
-    justify-content: flex-start;
 }
 
-.toggle-switch input:checked + .toggle-slider::after {
-    content: "On";
-}
-
-.toggle-switch input:checked + .toggle-slider:before {
-    transform: translateX(36px);
-}
-
-.toggle-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.7rem;
-    margin-top: 2px;
-    color: var(--toggle-label-color, #666);
-}
-
-.toggle-labels span:first-child {
-    margin-left: 2px;
-}
-
-.toggle-labels span:last-child {
-    margin-right: 2px;
+/* Visual feedback on hover */
+.toggle-switch:hover .toggle-slider {
+    box-shadow: 0 0 1px var(--toggle-on-bg, #2196F3);
 }
 
 /* Override FoundryVTT Dialog Styles */
