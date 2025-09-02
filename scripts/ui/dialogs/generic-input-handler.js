@@ -39,15 +39,45 @@ export class GenericInputHandler {
      * Setup modifier toggle checkboxes using event delegation
      */
     setupModifierToggles() {
-        // Use event delegation on the dialog element to handle all toggle switches
-        this.dialogElement.addEventListener('change', (event) => {
+        // Use event delegation on the parent table instead of individual listeners
+        const modifiersTable = this.dialogElement.querySelector('.modifiers-table');
+        if (!modifiersTable) {
+            API.log('warning', 'Modifiers table not found');
+            return;
+        }
+    
+        // Remove any existing listeners first
+        const oldClickHandler = modifiersTable._clickHandler;
+        const oldChangeHandler = modifiersTable._changeHandler;
+        if (oldClickHandler) modifiersTable.removeEventListener('click', oldClickHandler);
+        if (oldChangeHandler) modifiersTable.removeEventListener('change', oldChangeHandler);
+    
+        // Create delegated click handler for toggle sliders
+        const clickHandler = (event) => {
+            // If clicked on the slider span, toggle the associated checkbox
+            if (event.target.classList.contains('toggle-slider')) {
+                const checkbox = event.target.previousElementSibling;
+                if (checkbox && checkbox.classList.contains('modifier-toggle')) {
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+        };
+    
+        // Create delegated change handler for checkboxes
+        const changeHandler = (event) => {
             if (event.target.classList.contains('modifier-toggle')) {
-                API.log('debug', 'Toggle switch change event detected');
                 this.handleToggleChange(event);
             }
-        });
+        };
+    
+        // Add delegated listeners
+        modifiersTable.addEventListener('click', clickHandler);
+        modifiersTable.addEventListener('change', changeHandler);
         
-        API.log('debug', 'Toggle switch event delegation set up');
+        // Store references for cleanup
+        modifiersTable._clickHandler = clickHandler;
+        modifiersTable._changeHandler = changeHandler;
     }
 
     /**
@@ -57,6 +87,8 @@ export class GenericInputHandler {
         const modifierId = event.target.dataset.modifierId;
         const isChecked = event.target.checked;
         
+
+        API.log('debug', 'Toggle switch change event detected');
         API.log('debug', `Toggle changed - ID: ${modifierId}, Checked: ${isChecked}`);
         
         // Find the row containing this toggle
@@ -164,9 +196,22 @@ export class GenericInputHandler {
         }
 
         if (targetRollToggle) {
-            targetRollToggle.addEventListener('change', (event) => {
-                this.rollForEachTarget = event.target.checked;
-            });
+            // Handle the target roll toggle the same way as modifier toggles
+            const targetToggleSwitch = targetRollToggle.closest('.toggle-switch');
+            if (targetToggleSwitch) {
+                // Click handler for the slider
+                targetToggleSwitch.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('toggle-slider')) {
+                        targetRollToggle.checked = !targetRollToggle.checked;
+                        this.rollForEachTarget = targetRollToggle.checked;
+                    }
+                });
+                
+                // Change handler for the checkbox itself
+                targetRollToggle.addEventListener('change', (event) => {
+                    this.rollForEachTarget = event.target.checked;
+                });
+            }
         }
     }
 

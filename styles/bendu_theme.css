@@ -11,6 +11,7 @@
     --bendu-text-primary: #f0f0f0;
     --bendu-text-light: #b0b0b0;
     --bendu-accent: #999999;
+    --bendu-accent-secondary: #666666;
     --bendu-warning: #cc9966;
     --bendu-success: #888888;
     --bendu-info: #777777;
@@ -84,6 +85,9 @@
     /* Input Focus States */
     --input-focus-border: var(--bendu-accent);
     --input-focus-shadow: rgba(153, 153, 153, 0.25);
+    
+    /* Button Active States */
+    --btn-primary-active-bg: var(--bendu-accent-secondary);
 }
 
 /* Body theming */

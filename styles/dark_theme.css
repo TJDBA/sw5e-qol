@@ -11,6 +11,7 @@
     --dark-text-primary: #ffcccc;
     --dark-text-light: #cc8888;
     --dark-accent: #ff3333;
+    --dark-accent-secondary: #cc0000;
     --dark-warning: #ff6600;
     --dark-success: #cc3333;
     --dark-info: #aa0000;
@@ -84,6 +85,9 @@
     /* Input Focus States */
     --input-focus-border: var(--dark-accent);
     --input-focus-shadow: rgba(255, 51, 51, 0.25);
+    
+    /* Button Active States */
+    --btn-primary-active-bg: var(--dark-accent-secondary);
 }
 
 /* Body theming */

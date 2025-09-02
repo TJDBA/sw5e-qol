@@ -1,0 +1,63 @@
+{
+  "_examples": {
+    "arrayAtEnd": {
+      "basePath": "{Item}.system.damage",
+      "isArray": false,
+      "subpaths": {
+        "parts": ".parts[]",
+        "firstPart": ".parts[0]",
+        "partTypes": ".parts[].type"
+      }
+    },
+    "arrayInMiddle": {
+      "basePath": "{Actor}.system.classes",
+      "isArray": true,
+      "subpaths": {
+        "levels": ".levels",
+        "firstClassLevels": "[0].levels",
+        "secondClassLevels": "[1].levels"
+      }
+    },
+    "nestedArrays": {
+      "basePath": "{Item}.system.effects",
+      "isArray": true,
+      "subpaths": {
+        "targets": "[].targets[]",
+        "firstEffectFirstTarget": "[0].targets[0]",
+        "targetNames": "[].targets[].name"
+      }
+    }
+  },
+  "power": {
+    "ForcePowers": {
+      "basePath": "{Actor}.itemTypes.power",
+      "isArray": true,
+      "filters": {
+        "school": ["Universal", "Light", "Dark"]
+      },
+      "subpaths": {
+        "name": ".name",
+        "level": ".labels.level",
+        "actionType": ".system.actionType",
+        "prepared": ".system.prepared",
+        "uses": ".system.uses",
+        "school": ".labels.school"
+      }
+    },
+    "TechPowers": {
+      "basePath": "{Actor}.itemTypes.power",
+      "isArray": true,
+      "filters": {
+        "school": ["Tech"]
+      },
+      "subpaths": {
+        "name": ".name",
+        "level": ".labels.level",
+        "actionType": ".system.actionType",
+        "prepared": ".system.prepared",
+        "uses": ".system.uses",
+        "school": ".labels.school"
+      }
+    }
+  }
+}

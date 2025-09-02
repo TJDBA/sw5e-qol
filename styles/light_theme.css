@@ -11,6 +11,7 @@
     --light-text-primary: #2c3e50;
     --light-text-light: #546e7a;
     --light-accent: #4da6ff;
+    --light-accent-secondary: #2196f3;
     --light-warning: #ffa726;
     --light-success: #66bb6a;
     --light-info: #2196f3;
@@ -84,6 +85,9 @@
     /* Input Focus States */
     --input-focus-border: var(--light-accent);
     --input-focus-shadow: rgba(77, 166, 255, 0.25);
+    
+    /* Button Active States */
+    --btn-primary-active-bg: var(--light-accent-secondary);
 }
 
 /* Body theming */
