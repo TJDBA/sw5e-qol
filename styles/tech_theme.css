@@ -10,8 +10,8 @@
     --tech-text-header: #ffcc66;
     --tech-text-primary: #e8e8e8;
     --tech-text-light: #b8b8b8;
-    --tech-accent: #ff8800;
-    --tech-accent-secondary: #00dddd;
+    --tech-accent: #af5d00;
+    --tech-accent-secondary: #009292;
     --tech-warning: #ffaa00;
     --tech-success: #00cc88;
     --tech-info: #0099dd;
@@ -50,6 +50,7 @@
     --btn-primary-bg: var(--tech-accent);
     --btn-primary-text: white;
     --btn-primary-hover-bg: #ee7700;
+    --btn-primary-active-bg: var(--tech-accent-secondary);
     --btn-primary-shadow: 0 4px 15px rgba(255, 136, 0, 0.3);
     --btn-primary-hover-shadow: 0 6px 20px rgba(255, 136, 0, 0.5);
     
