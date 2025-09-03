@@ -3,5 +3,5 @@
  * Location: scripts/ui/cards/index.js
  */
 
-// Note: This directory is currently empty
-// Add exports here when card functionality is implemented
+export { CardRenderer } from './card-renderer.js';
+export { CardHandler } from './card-handler.js';

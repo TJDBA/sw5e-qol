@@ -1,0 +1,15 @@
+<div class="roll-visualization {{#if collapsed}}collapsed{{else}}expanded{{/if}}" data-message-id="{{messageId}}">
+    <div class="roll-header">
+        <button class="expand-toggle" data-action="expand-roll" data-message-id="{{messageId}}">
+            <i class="fas fa-chevron-{{#if collapsed}}right{{else}}down{{/if}}"></i>
+            Roll Details
+        </button>
+    </div>
+    <div class="roll-content">
+        {{#if roll}}
+            {{{roll.render}}}
+        {{else}}
+            <div class="roll-placeholder">No roll data available</div>
+        {{/if}}
+    </div>
+</div>

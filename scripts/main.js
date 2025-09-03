@@ -6,7 +6,7 @@
 console.log('SW5E QoL Module: main.js is loading...');
 
 // Don't import anything during the import phase - wait for FoundryVTT to be ready
-let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, themeManager;
+let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, themeManager, CardHandler, CardRenderer;
 
 /**
  * Initialize the module
@@ -58,6 +58,22 @@ Hooks.once('init', async function() {
             console.error('SW5E QoL Module: Failed to import ThemeManager', error);
         }
         
+         // Import card system components
+         try {
+            const cardHandlerModule = await import('./ui/cards/card-handler.js');
+            CardHandler = cardHandlerModule.CardHandler;
+            console.log('SW5E QoL Module: CardHandler imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import CardHandler', error);
+        }
+        
+        try {
+            const cardRendererModule = await import('./ui/cards/card-renderer.js');
+            CardRenderer = cardRendererModule.CardRenderer;
+            console.log('SW5E QoL Module: CardRenderer imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import CardRenderer', error);
+        }
 
         
         console.log('SW5E QoL Module: All imports completed');
@@ -83,6 +99,8 @@ Hooks.once('init', async function() {
                 ...(GenericRollRenderer && { GenericRollRenderer }),
                 ...(GenericInputHandler && { GenericInputHandler }),
                 ...(themeManager && { themeManager }),
+                ...(CardHandler && { CardHandler }),
+                ...(CardRenderer && { CardRenderer }),
                 
                 // Utility functions (only if imported successfully)
                 ...(API && { API }),
@@ -94,7 +112,9 @@ Hooks.once('init', async function() {
                         GenericRollHandler: !!GenericRollHandler,
                         GenericRollRenderer: !!GenericRollRenderer,
                         GenericInputHandler: !!GenericInputHandler,
-                        themeManager: !!themeManager
+                        themeManager: !!themeManager,
+                        CardHandler: !!CardHandler,
+                        CardRenderer: !!CardRenderer
                     }
                 }
             };
@@ -139,3 +159,118 @@ Hooks.once('disable', function() {
         console.error('SW5E QoL Module: Disable error', error);
     }
 });
+
+// Corrected test function - copy and paste this into the console
+async function testCardSystemConsole() {
+    try {
+        console.log('Starting card system test...');
+        
+        // Get the module and check if CardHandler is available
+        const module = game.modules.get('sw5e-qol');
+        if (!module || !module.api || !module.api.CardHandler) {
+            console.error('CardHandler not available. Make sure the module is loaded and the card system is imported.');
+            console.log('Available API functions:', module?.api ? Object.keys(module.api) : 'No API available');
+            console.log('Import status:', module?.api?.debug?.imports);
+            return;
+        }
+        
+        // Create an instance of CardHandler (it's a class, not an instance)
+        const handler = new module.api.CardHandler();
+        console.log('CardHandler instance created, creating test cards...');
+        
+        // Test 1: Simple damage card
+        console.log('Creating damage card...');
+        
+        // Create a mock roll for testing
+        const mockRoll = new Roll("2d8 + 3");
+        await mockRoll.evaluate();
+        
+        // Add flavor to dice for damage types
+        mockRoll.terms.forEach(term => {
+            if (term instanceof Die) {
+                term.options.flavor = "energy";
+            }
+        });
+
+        const cardData = {
+            cardType: 'damage',
+            title: 'Lightsaber Damage',
+            userId: game.user.id,
+            roll: mockRoll,
+            results: {
+                TotalDam: 12,
+                TotalCritDam: 0,
+                TotalDamByType: { energy: 12 },
+                TotalCritDamByType: {},
+                RollArray: [mockRoll],
+                CritRollArray: [],
+                TargetRef: "test-target-1"
+            },
+            targets: [
+                {
+                    tokenID: "test-target-1",
+                    crit: false,
+                    name: "Test Target 1"
+                }
+            ],
+            actions: [
+                {
+                    action: 'roll-save',
+                    label: 'Roll Save',
+                    icon: 'fas fa-dice-d20',
+                    class: 'primary',
+                    data: {
+                        saveType: 'dex',
+                        dc: 15
+                    }
+                }
+            ]
+        };
+
+        const message = await handler.createCard(cardData);
+        console.log(`✅ Damage card created with message ID: ${message.id}`);
+        
+        // Test 2: Attack card
+        console.log('Creating attack card...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const attackRoll = new Roll("1d20 + 7");
+        await attackRoll.evaluate();
+
+        const attackCardData = {
+            cardType: 'attack',
+            title: 'Blaster Pistol Attack',
+            userId: game.user.id,
+            roll: attackRoll,
+            results: {
+                total: 18,
+                target: "test-target-2"
+            },
+            target: {
+                tokenID: "test-target-2",
+                name: "Test Target 2"
+            },
+            actions: [
+                {
+                    action: 'reroll',
+                    label: 'Reroll',
+                    icon: 'fas fa-redo',
+                    class: 'secondary'
+                }
+            ]
+        };
+
+        const attackMessage = await handler.createCard(attackCardData);
+        console.log(`✅ Attack card created with message ID: ${attackMessage.id}`);
+        
+        console.log('🎉 Card system test completed successfully!');
+        console.log('Check the chat log to see your test cards.');
+        
+    } catch (error) {
+        console.error('❌ Card system test failed:', error);
+        console.error('Error details:', error.stack);
+    }
+}
+
+// Run the test
+testCardSystemConsole();

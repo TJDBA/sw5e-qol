@@ -1,0 +1,15 @@
+<div class="target-info">
+    {{#if targets}}
+    <h4>Targets:</h4>
+    <div class="target-list">
+        {{#each targets}}
+        <div class="target-item">
+            <span class="target-name">{{this.name}}</span>
+            <span class="target-status {{#if this.crit}}crit{{else}}normal{{/if}}">
+                {{#if this.crit}}Critical{{else}}Normal{{/if}}
+            </span>
+        </div>
+        {{/each}}
+    </div>
+    {{/if}}
+</div>

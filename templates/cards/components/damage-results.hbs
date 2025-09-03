@@ -1,0 +1,44 @@
+<div class="damage-results">
+    <div class="damage-summary">
+        <div class="damage-total">
+            <span class="damage-label">Total Damage:</span>
+            <span class="damage-value">{{results.TotalDam}}</span>
+        </div>
+        {{#if results.TotalCritDam}}
+        <div class="crit-damage-total">
+            <span class="crit-label">Critical Damage:</span>
+            <span class="crit-value">{{results.TotalCritDam}}</span>
+        </div>
+        {{/if}}
+    </div>
+    
+    {{#if results.TotalDamByType}}
+    <div class="damage-by-type">
+        <h4>Damage by Type:</h4>
+        <div class="damage-types">
+            {{#each results.TotalDamByType}}
+            <div class="damage-type">
+                <span class="type-name">{{@key}}:</span>
+                <span class="type-value">{{this}}</span>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+    {{/if}}
+    
+    {{#if targets}}
+    <div class="target-damage">
+        <h4>Targets:</h4>
+        <div class="target-list">
+            {{#each targets}}
+            <div class="target-item">
+                <span class="target-name">{{this.name}}</span>
+                <span class="target-status {{#if this.crit}}crit{{else}}normal{{/if}}">
+                    {{#if this.crit}}Critical Hit{{else}}Hit{{/if}}
+                </span>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+    {{/if}}
+</div>

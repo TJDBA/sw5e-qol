@@ -1,0 +1,26 @@
+
+
+
+<div class="save-results">
+    <div class="save-summary">
+        <div class="save-total">
+            <span class="save-label">{{saveType}} Save:</span>
+            <span class="save-value">{{results.total}}</span>
+        </div>
+        <div class="save-dc">
+            <span class="dc-label">DC:</span>
+            <span class="dc-value">{{results.dc}}</span>
+        </div>
+        {{#if results.success}}
+        <div class="save-result success">
+            <i class="fas fa-check-circle"></i>
+            <span>Success!</span>
+        </div>
+        {{else}}
+        <div class="save-result failure">
+            <i class="fas fa-times-circle"></i>
+            <span>Failure</span>
+        </div>
+        {{/if}}
+    </div>
+</div>

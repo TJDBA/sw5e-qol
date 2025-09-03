@@ -1,0 +1,29 @@
+
+
+
+<div class="attack-results">
+    <div class="attack-summary">
+        <div class="attack-total">
+            <span class="attack-label">Attack Roll:</span>
+            <span class="attack-value">{{results.total}}</span>
+        </div>
+        {{#if results.success}}
+        <div class="attack-result success">
+            <i class="fas fa-check-circle"></i>
+            <span>Hit!</span>
+        </div>
+        {{else}}
+        <div class="attack-result miss">
+            <i class="fas fa-times-circle"></i>
+            <span>Miss</span>
+        </div>
+        {{/if}}
+    </div>
+    
+    {{#if target}}
+    <div class="target-info">
+        <span class="target-label">Target:</span>
+        <span class="target-name">{{target.name}}</span>
+    </div>
+    {{/if}}
+</div>

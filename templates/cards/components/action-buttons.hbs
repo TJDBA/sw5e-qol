@@ -1,0 +1,13 @@
+<div class="action-buttons">
+    {{#each actions}}
+        <button class="action-button {{this.class}}" 
+                data-action="{{this.action}}" 
+                data-message-id="{{../messageId}}"
+                {{#each this.data}}
+                    data-{{@key}}="{{this}}"
+                {{/each}}>
+            <i class="{{this.icon}}"></i>
+            {{this.label}}
+        </button>
+    {{/each}}
+</div>
