@@ -3,5 +3,8 @@
  * Location: scripts/core/workflow/index.js
  */
 
-// Note: This directory is currently empty
-// Add exports here when workflow functionality is implemented
+// Export workflow configuration
+export * from './workflow-config.js';
+
+// Export workflow manager
+export { WorkflowManager } from './workflow-manager.js';

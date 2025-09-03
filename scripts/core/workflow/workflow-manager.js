@@ -5,6 +5,7 @@ import {
     getStepValidationProperties, 
     validateStepState 
 } from './workflow-config.js';
+import { API } from '../../api.js';
 
 /**
  * WorkflowManager - Handles sequential step-based workflows for game actions
@@ -42,7 +43,7 @@ export class WorkflowManager {
     setWorkflow(id) {
         const workflow = getWorkflowConfig(id);
         if (!workflow) {
-            console.warn(`WorkflowManager: Workflow "${id}" not found`);
+            API.log('warning', `WorkflowManager: Workflow "${id}" not found`);
             return false;
         }
 
@@ -171,13 +172,13 @@ export class WorkflowManager {
 
         const workflow = getWorkflowConfig(state.workflowId);
         if (!workflow) {
-            console.warn(`WorkflowManager: Cannot restore state for unknown workflow "${state.workflowId}"`);
+            API.log('warning', `WorkflowManager: Cannot restore state for unknown workflow "${state.workflowId}"`);
             return false;
         }
 
         // Validate step index
         if (state.stepIndex < 0 || state.stepIndex >= workflow.workflowSteps.length) {
-            console.warn(`WorkflowManager: Invalid step index ${state.stepIndex} for workflow "${state.workflowId}"`);
+            API.log('warning', `WorkflowManager: Invalid step index ${state.stepIndex} for workflow "${state.workflowId}"`);
             return false;
         }
 
