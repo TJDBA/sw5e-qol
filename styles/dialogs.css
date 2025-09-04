@@ -176,6 +176,7 @@
     text-align: left;
     border: none; /* Remove vertical lines */
     border-bottom: var(--table-cell-border, 1px solid #ddd); /* Keep horizontal lines only */
+    color: var(--table-cell-text, var(--dialog-text, #000000));
 }
 
 .generic-roll-dialog .modifiers-table th {
@@ -258,6 +259,7 @@
 }
 
 /* Placeholder text theming for better readability on dark backgrounds */
+.generic-roll-dialog input::placeholder,
 .generic-roll-dialog .modifier-name-input::placeholder,
 .generic-roll-dialog .modifier-value-input::placeholder,
 .generic-roll-dialog .modifier-dice-quantity-input::placeholder {
@@ -611,4 +613,319 @@ select:focus {
     vertical-align: middle;
     box-sizing: border-box; /* Ensure padding doesn't extend beyond container */
     max-width: 100%; /* Prevent overflow */
+}
+
+/* =============================================================================
+   THEME SCOPING FOR DIALOGS
+   =============================================================================
+   These classes allow individual dialogs to have their own themes without
+   affecting the global page theme. Each theme class overrides the CSS variables
+   for that specific dialog.
+   ============================================================================= */
+
+/* Bendu Theme Dialog Scoping */
+.generic-roll-dialog.theme-bendu {
+    /* Dialog Background */
+    --dialog-bg: var(--bendu-bg-primary);
+    --dialog-text: var(--bendu-text-primary);
+    --dialog-border: 1px solid var(--bendu-border-light);
+    
+    /* Dialog Header */
+    --dialog-header-bg: var(--bendu-bg-tertiary);
+    --dialog-header-border: 2px solid var(--bendu-border-light);
+    --dialog-title-color: var(--bendu-text-primary);
+    
+    /* Dialog Buttons */
+    --dialog-buttons-bg: var(--bendu-bg-tertiary);
+    --dialog-buttons-border: 1px solid var(--bendu-border-light);
+    
+    /* Button Variables */
+    --btn-primary-bg: var(--bendu-accent);
+    --btn-primary-text: #ffffff;
+    --btn-primary-hover-bg: var(--bendu-accent-secondary);
+    --btn-primary-shadow: 0 4px 15px rgba(153, 153, 153, 0.3);
+    --btn-primary-hover-shadow: 0 6px 20px rgba(153, 153, 153, 0.4);
+    --btn-primary-active-bg: var(--bendu-accent-secondary);
+    
+    /* Input Variables */
+    --input-bg: var(--bendu-bg-secondary);
+    --input-text: var(--bendu-text-primary);
+    --input-border: 1px solid var(--bendu-border-light);
+    --input-focus-border: var(--bendu-accent);
+    --input-focus-shadow: rgba(153, 153, 153, 0.25);
+    
+    /* Dropdown Background */
+    --dropdown-bg: var(--bendu-bg-secondary);
+    
+    /* Table Variables */
+    --table-bg: var(--bendu-bg-primary);
+    --table-border: 1px solid var(--bendu-border-light);
+    --table-header-bg: var(--bendu-bg-tertiary);
+    --table-header-text: var(--bendu-accent);
+    --table-cell-text: var(--bendu-text-primary);
+    --table-cell-border: 1px solid var(--bendu-border-light);
+    --table-row-hover-bg: var(--bendu-bg-secondary);
+    --table-row-disabled-bg: var(--bendu-bg-tertiary);
+    --table-row-disabled-text: var(--bendu-text-muted);
+    
+    /* Label Variables */
+    --label-text: var(--bendu-accent);
+    
+    /* Radio Variables */
+    --radio-text: var(--bendu-text-primary);
+    --radio-accent: var(--bendu-accent);
+    --radio-hover-text: var(--bendu-accent);
+    
+    /* Toggle Switch Variables */
+    --toggle-on-bg: var(--bendu-accent);
+    --toggle-off-bg: var(--bendu-border-dark);
+    --toggle-label-color: var(--bendu-text-light);
+    
+    /* Section Divider */
+    --section-divider-color: 1px solid var(--bendu-border-light);
+    
+    /* Delete Button Variables */
+    --btn-delete-bg: #d32f2f;
+    --btn-delete-text: white;
+    --btn-delete-hover-bg: #b71c1c;
+    
+    /* Placeholder text */
+    --placeholder-text: #cccccc;
+}
+
+/* Bendu Theme Placeholder Text */
+.generic-roll-dialog.theme-bendu input::placeholder,
+.generic-roll-dialog.theme-bendu .modifier-name-input::placeholder,
+.generic-roll-dialog.theme-bendu .modifier-value-input::placeholder,
+.generic-roll-dialog.theme-bendu .modifier-dice-quantity-input::placeholder {
+    color: #cccccc;
+    opacity: 1;
+}
+
+/* Dark Theme Dialog Scoping */
+.generic-roll-dialog.theme-dark {
+    /* Dialog Background */
+    --dialog-bg: var(--dark-bg-primary);
+    --dialog-text: var(--dark-text-primary);
+    --dialog-border: 1px solid var(--dark-border-light);
+    
+    /* Dialog Header */
+    --dialog-header-bg: var(--dark-bg-tertiary);
+    --dialog-header-border: 2px solid var(--dark-border-light);
+    --dialog-title-color: var(--dark-text-primary);
+    
+    /* Dialog Buttons */
+    --dialog-buttons-bg: var(--dark-bg-tertiary);
+    --dialog-buttons-border: 1px solid var(--dark-border-light);
+    
+    /* Button Variables */
+    --btn-primary-bg: #8B0000;
+    --btn-primary-text: #ffffff;
+    --btn-primary-hover-bg: #A52A2A;
+    --btn-primary-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+    --btn-primary-hover-shadow: 0 6px 20px rgba(139, 0, 0, 0.4);
+    --btn-primary-active-bg: #660000;
+    
+    /* Input Variables */
+    --input-bg: var(--dark-bg-secondary);
+    --input-text: var(--dark-text-primary);
+    --input-border: 1px solid var(--dark-border-light);
+    --input-focus-border: var(--dark-accent);
+    --input-focus-shadow: rgba(255, 51, 51, 0.25);
+    
+    /* Dropdown Background */
+    --dropdown-bg: var(--dark-bg-secondary);
+    
+    /* Table Variables */
+    --table-bg: var(--dark-bg-primary);
+    --table-border: 1px solid var(--dark-border-light);
+    --table-header-bg: var(--dark-bg-tertiary);
+    --table-header-text: var(--dark-accent);
+    --table-cell-text: var(--dark-text-primary);
+    --table-cell-border: 1px solid var(--dark-border-light);
+    --table-row-hover-bg: var(--dark-bg-secondary);
+    --table-row-disabled-bg: var(--dark-bg-tertiary);
+    --table-row-disabled-text: var(--dark-text-muted);
+    
+    /* Label Variables */
+    --label-text: var(--dark-accent);
+    
+    /* Radio Variables */
+    --radio-text: var(--dark-text-primary);
+    --radio-accent: var(--dark-accent);
+    --radio-hover-text: var(--dark-accent);
+    
+    /* Toggle Switch Variables */
+    --toggle-on-bg: var(--dark-accent);
+    --toggle-off-bg: var(--dark-border-dark);
+    --toggle-label-color: var(--dark-text-light);
+    
+    /* Section Divider */
+    --section-divider-color: 1px solid var(--dark-border-light);
+    
+    /* Delete Button Variables */
+    --btn-delete-bg: #d32f2f;
+    --btn-delete-text: white;
+    --btn-delete-hover-bg: #b71c1c;
+    
+    /* Placeholder text */
+    --placeholder-text: #cccccc;
+}
+
+/* Dark Theme Placeholder Text */
+.generic-roll-dialog.theme-dark input::placeholder,
+.generic-roll-dialog.theme-dark .modifier-name-input::placeholder,
+.generic-roll-dialog.theme-dark .modifier-value-input::placeholder,
+.generic-roll-dialog.theme-dark .modifier-dice-quantity-input::placeholder {
+    color: #cccccc;
+    opacity: 1;
+}
+
+/* Light Theme Dialog Scoping */
+.generic-roll-dialog.theme-light {
+    /* Dialog Background */
+    --dialog-bg: var(--light-bg-primary);
+    --dialog-text: var(--light-text-primary);
+    --dialog-border: 1px solid var(--light-border-light);
+    
+    /* Dialog Header */
+    --dialog-header-bg: var(--light-bg-tertiary);
+    --dialog-header-border: 2px solid var(--light-border-light);
+    --dialog-title-color: var(--light-text-primary);
+    
+    /* Dialog Buttons */
+    --dialog-buttons-bg: var(--light-bg-tertiary);
+    --dialog-buttons-border: 1px solid var(--light-border-light);
+    
+    /* Button Variables */
+    --btn-primary-bg: var(--light-accent);
+    --btn-primary-text: var(--light-text-light);
+    --btn-primary-hover-bg: var(--light-accent-secondary);
+    --btn-primary-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    --btn-primary-hover-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    --btn-primary-active-bg: var(--light-accent-secondary);
+    
+    /* Input Variables */
+    --input-bg: var(--light-bg-secondary);
+    --input-text: var(--light-text-primary);
+    --input-border: 1px solid var(--light-border-light);
+    --input-focus-border: var(--light-accent);
+    --input-focus-shadow: rgba(0, 123, 255, 0.25);
+    
+    /* Dropdown Background */
+    --dropdown-bg: var(--light-bg-secondary);
+    
+    /* Table Variables */
+    --table-bg: var(--light-bg-primary);
+    --table-border: 1px solid var(--light-border-light);
+    --table-header-bg: var(--light-bg-tertiary);
+    --table-header-text: var(--light-accent);
+    --table-cell-text: var(--light-text-primary);
+    --table-cell-border: 1px solid var(--light-border-light);
+    --table-row-hover-bg: var(--light-bg-secondary);
+    --table-row-disabled-bg: var(--light-bg-tertiary);
+    --table-row-disabled-text: var(--light-text-muted);
+    
+    /* Label Variables */
+    --label-text: var(--light-accent);
+    
+    /* Radio Variables */
+    --radio-text: var(--light-text-primary);
+    --radio-accent: var(--light-accent);
+    --radio-hover-text: var(--light-accent);
+    
+    /* Toggle Switch Variables */
+    --toggle-on-bg: var(--light-accent);
+    --toggle-off-bg: var(--light-border-dark);
+    --toggle-label-color: var(--light-text-light);
+    
+    /* Section Divider */
+    --section-divider-color: 1px solid var(--light-border-light);
+    
+    /* Delete Button Variables */
+    --btn-delete-bg: #d32f2f;
+    --btn-delete-text: white;
+    --btn-delete-hover-bg: #b71c1c;
+    
+    /* Placeholder text */
+    --placeholder-text: var(--light-text-muted);
+}
+
+/* Tech Theme Dialog Scoping */
+.generic-roll-dialog.theme-tech {
+    /* Dialog Background */
+    --dialog-bg: var(--tech-bg-primary);
+    --dialog-text: var(--tech-text-primary);
+    --dialog-border: 1px solid var(--tech-border-light);
+    
+    /* Dialog Header */
+    --dialog-header-bg: var(--tech-bg-tertiary);
+    --dialog-header-border: 2px solid var(--tech-border-light);
+    --dialog-title-color: var(--tech-text-primary);
+    
+    /* Dialog Buttons */
+    --dialog-buttons-bg: var(--tech-bg-tertiary);
+    --dialog-buttons-border: 1px solid var(--tech-border-light);
+    
+    /* Button Variables */
+    --btn-primary-bg: var(--tech-accent);
+    --btn-primary-text: #ffffff;
+    --btn-primary-hover-bg: var(--tech-accent-secondary);
+    --btn-primary-shadow: 0 4px 15px rgba(255, 136, 0, 0.3);
+    --btn-primary-hover-shadow: 0 6px 20px rgba(255, 136, 0, 0.4);
+    --btn-primary-active-bg: var(--tech-accent-secondary);
+    
+    /* Input Variables */
+    --input-bg: var(--tech-bg-secondary);
+    --input-text: var(--tech-text-primary);
+    --input-border: 1px solid var(--tech-border-light);
+    --input-focus-border: var(--tech-accent);
+    --input-focus-shadow: rgba(255, 136, 0, 0.25);
+    
+    /* Dropdown Background */
+    --dropdown-bg: var(--tech-bg-secondary);
+    
+    /* Table Variables */
+    --table-bg: var(--tech-bg-primary);
+    --table-border: 1px solid var(--tech-border-light);
+    --table-header-bg: var(--tech-bg-tertiary);
+    --table-header-text: var(--tech-accent);
+    --table-cell-text: var(--tech-text-primary);
+    --table-cell-border: 1px solid var(--tech-border-light);
+    --table-row-hover-bg: var(--tech-bg-secondary);
+    --table-row-disabled-bg: var(--tech-bg-tertiary);
+    --table-row-disabled-text: var(--tech-text-muted);
+    
+    /* Label Variables */
+    --label-text: var(--tech-accent);
+    
+    /* Radio Variables */
+    --radio-text: var(--tech-text-primary);
+    --radio-accent: var(--tech-accent);
+    --radio-hover-text: var(--tech-accent);
+    
+    /* Toggle Switch Variables */
+    --toggle-on-bg: var(--tech-accent);
+    --toggle-off-bg: var(--tech-border-dark);
+    --toggle-label-color: var(--tech-text-light);
+    
+    /* Section Divider */
+    --section-divider-color: 1px solid var(--tech-border-light);
+    
+    /* Delete Button Variables */
+    --btn-delete-bg: #d32f2f;
+    --btn-delete-text: white;
+    --btn-delete-hover-bg: #b71c1c;
+    
+    /* Placeholder text */
+    --placeholder-text: #cccccc;
+}
+
+/* Tech Theme Placeholder Text */
+.generic-roll-dialog.theme-tech input::placeholder,
+.generic-roll-dialog.theme-tech .modifier-name-input::placeholder,
+.generic-roll-dialog.theme-tech .modifier-value-input::placeholder,
+.generic-roll-dialog.theme-tech .modifier-dice-quantity-input::placeholder {
+    color: #cccccc;
+    opacity: 1;
 }

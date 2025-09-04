@@ -180,6 +180,68 @@ export async function testThemeSwitching(actorId = null) {
 }
 
 /**
+ * Test multiple dialogs with different themes simultaneously
+ * This tests the new theme isolation feature
+ * @param {string} actorId - The ID of the actor making the check
+ */
+export async function testMultipleDialogThemes(actorId = null) {
+    try {
+        const handler = new GenericRollHandler();
+        
+        // Test opening multiple dialogs with different themes simultaneously
+        const themes = ['bendu', 'light', 'dark', 'tech'];
+        const dialogs = [];
+        
+        API.log('info', 'Testing multiple dialogs with different themes simultaneously...');
+        
+        // Open all dialogs at once
+        for (let i = 0; i < themes.length; i++) {
+            const theme = themes[i];
+            const options = {
+                actorId: actorId,
+                type: 'attack',
+                title: `Multi-Theme Test - ${theme}`,
+                theme: theme,
+                modifiers: [
+                    {
+                        name: `Test Modifier ${i + 1}`,
+                        type: 'Untyped',
+                        modifier: `+${i + 1}`,
+                        isEnabled: true,
+                        isDice: false
+                    }
+                ]
+            };
+            
+            // Open dialog (don't await - open them all at once)
+            const dialogPromise = handler.openDialog(actorId, 'attack', options);
+            dialogs.push({ theme, promise: dialogPromise });
+            
+            // Small delay between opening dialogs
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        API.log('info', `Opened ${dialogs.length} dialogs with different themes. Check that each dialog maintains its own theme.`);
+        API.log('info', 'Expected behavior: Each dialog should have its own theme without affecting others or the global theme.');
+        
+        // Wait for all dialogs to complete
+        for (const dialog of dialogs) {
+            try {
+                const result = await dialog.promise;
+                if (result) {
+                    API.log('info', `Dialog with ${dialog.theme} theme completed successfully`);
+                }
+            } catch (error) {
+                API.log('error', `Dialog with ${dialog.theme} theme failed:`, error);
+            }
+        }
+        
+    } catch (error) {
+        API.log('error', 'Multiple dialog theme test failed:', error);
+    }
+}
+
+/**
  * Helper function to get the currently selected token's actor ID
  * @returns {string|null} The actor ID or null if no token is selected
  */

@@ -7,8 +7,10 @@ import { API } from '../api.js';
 export class ThemeManager {
     constructor() {
         this.currentTheme = 'bendu';
+        this.originalTheme = 'bendu'; // Store original theme before any dialogs
         this.availableThemes = ['bendu', 'light', 'dark','tech'];
         this.themeLinkElement = null;
+        this.activeDialogs = new Map(); // Track dialog-specific themes
         // Don't auto-initialize - wait for explicit init() call
     }
 
@@ -111,6 +113,7 @@ export class ThemeManager {
      * @param {Object} options - Dialog options or theme preferences
      * @param {string} [options.theme] - Specific theme to use
      * @param {string} [options.type] - Dialog type (can influence theme choice)
+     * @deprecated Use setThemeForDialog(dialogId, options) instead
      */
     setThemeForDialog(options = {}) {
         try {
@@ -135,6 +138,126 @@ export class ThemeManager {
         } catch (error) {
             API.log('error', 'Failed to set theme for dialog', error);
             return 'bendu';
+        }
+    }
+
+    /**
+     * Set theme for specific dialog without changing global theme
+     * @param {string} dialogId - Unique identifier for the dialog
+     * @param {Object} options - Dialog options or theme preferences
+     * @param {string} [options.theme] - Specific theme to use
+     * @param {string} [options.type] - Dialog type (can influence theme choice)
+     * @returns {string} The theme that was applied
+     */
+    setThemeForDialog(dialogId, options = {}) {
+        try {
+            // Determine theme to use
+            let themeToUse = this.determineTheme(options);
+            
+            // Store dialog-specific theme
+            this.activeDialogs.set(dialogId, themeToUse);
+            
+            // If this is the first dialog, save original theme
+            if (this.activeDialogs.size === 1) {
+                this.originalTheme = this.currentTheme;
+                API.log('debug', `Saved original theme: ${this.originalTheme}`);
+            }
+            
+            API.log('debug', `Set theme ${themeToUse} for dialog ${dialogId}`);
+            return themeToUse;
+
+        } catch (error) {
+            API.log('error', 'Failed to set theme for dialog', error);
+            return 'bendu';
+        }
+    }
+
+    /**
+     * Determine which theme to use based on options
+     * @param {Object} options - Dialog options
+     * @returns {string} Theme name to use
+     */
+    determineTheme(options = {}) {
+        // Priority 1: Explicit theme in options
+        if (options.theme && this.isThemeAvailable(options.theme)) {
+            return options.theme;
+        }
+        // Priority 2: Theme based on dialog type (future enhancement)
+        else if (options.type) {
+            return this.getThemeForDialogType(options.type);
+        }
+        // Priority 3: User preference (future enhancement)
+        // else if (userPreference) {
+        //     return userPreference;
+        // }
+        
+        // Default
+        return 'bendu';
+    }
+
+    /**
+     * Apply theme to specific dialog element
+     * @param {HTMLElement} dialogElement - The dialog element to theme
+     * @param {string} themeName - Name of the theme to apply
+     */
+    applyThemeToDialog(dialogElement, themeName) {
+        try {
+            if (!dialogElement) {
+                API.log('warning', 'No dialog element provided for theming');
+                return;
+            }
+
+            // Remove any existing theme classes
+            this.availableThemes.forEach(theme => {
+                dialogElement.classList.remove(`theme-${theme}`);
+            });
+
+            // Add the new theme class
+            dialogElement.classList.add(`theme-${themeName}`);
+            
+            // Apply theme-specific CSS variables to dialog
+            this.applyThemeVariables(dialogElement, themeName);
+            
+            API.log('debug', `Applied theme ${themeName} to dialog element`);
+
+        } catch (error) {
+            API.log('error', 'Failed to apply theme to dialog', error);
+        }
+    }
+
+    /**
+     * Apply theme-specific CSS variables to dialog element
+     * @param {HTMLElement} dialogElement - The dialog element
+     * @param {string} themeName - Name of the theme
+     */
+    applyThemeVariables(dialogElement, themeName) {
+        try {
+            // This will be handled by CSS classes, but we could add custom properties here if needed
+            // For now, the CSS classes will handle the theming
+            API.log('debug', `Applied theme variables for ${themeName}`);
+        } catch (error) {
+            API.log('error', 'Failed to apply theme variables', error);
+        }
+    }
+
+    /**
+     * Remove theme for specific dialog and restore original if needed
+     * @param {string} dialogId - Unique identifier for the dialog
+     */
+    removeDialogTheme(dialogId) {
+        try {
+            if (this.activeDialogs.has(dialogId)) {
+                this.activeDialogs.delete(dialogId);
+                API.log('debug', `Removed theme for dialog ${dialogId}`);
+                
+                // If no more dialogs, restore original theme
+                if (this.activeDialogs.size === 0) {
+                    this.loadTheme(this.originalTheme);
+                    API.log('debug', `Restored original theme: ${this.originalTheme}`);
+                }
+            }
+        } catch (error) {
+            API.log('error', 'Failed to remove dialog theme', error);
         }
     }
 

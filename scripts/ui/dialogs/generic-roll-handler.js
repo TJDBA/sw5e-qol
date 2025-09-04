@@ -11,14 +11,12 @@ export class GenericRollHandler {
     constructor() {
         this.renderer = new GenericRollRenderer();
         this.inputHandler = null;
+        this.currentDialogId = null; // Track current dialog ID for theme cleanup
     }
 
     /**
      * Open a generic roll dialog
      * @param {Object} options - Dialog configuration
-     * @param {string} options.type - Dialog type (attack, skill, save, damage)
-     * @param {string} options.title - Dialog title
-     * @param {Array} options.modifiers - Array of modifier objects
      * @returns {Promise<Object|null>} Dialog result or null on error
      */
     async openDialog(options) {
@@ -28,8 +26,11 @@ export class GenericRollHandler {
                 return null;
             }
 
-            // Set theme for dialog
-            const appliedTheme = themeManager.setThemeForDialog(options);
+            // Generate unique dialog ID
+            this.currentDialogId = `dialog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+            // Set theme for this specific dialog (without changing global theme)
+            const appliedTheme = themeManager.setThemeForDialog(this.currentDialogId, options);
             API.log('info', `Applied theme: ${appliedTheme} for dialog type: ${options.type}`);
 
             // Render dialog
@@ -109,6 +110,11 @@ export class GenericRollHandler {
                     content: dialogContent.outerHTML,
                     buttons: {}, // No default buttons - we use our own roll button
                     close: () => {
+                        // Clean up theme for this dialog
+                        if (this.currentDialogId) {
+                            themeManager.removeDialogTheme(this.currentDialogId);
+                            this.currentDialogId = null;
+                        }
                         this.currentDialog = null; // Clean up dialog reference
                         resolve(null);
                     }
@@ -124,6 +130,9 @@ export class GenericRollHandler {
                 // Render dialog
                 dialog.render(true);
                 
+                // Apply theme to dialog element after rendering
+                this.applyDialogTheme(dialog, options);
+                
                 // Wait for dialog to be fully rendered
                 this.waitForDialogReady(options);
 
@@ -132,6 +141,35 @@ export class GenericRollHandler {
                 resolve(null);
             }
         });
+    }
+
+    /**
+     * Apply theme to dialog element
+     */
+    applyDialogTheme(dialog, options) {
+        try {
+            // Wait a bit for the dialog to be fully rendered in the DOM
+            setTimeout(() => {
+                if (dialog && dialog.element && dialog.element.length > 0) {
+                    // Find the actual dialog content element with the generic-roll-dialog class
+                    const dialogElement = dialog.element.find('.generic-roll-dialog')[0];
+                    if (dialogElement) {
+                        // Get the theme that was set for this dialog
+                        const themeName = themeManager.activeDialogs.get(this.currentDialogId);
+                        if (themeName) {
+                            themeManager.applyThemeToDialog(dialogElement, themeName);
+                            API.log('debug', `Applied theme ${themeName} to dialog element:`, dialogElement);
+                        } else {
+                            API.log('warning', `No theme found for dialog ${this.currentDialogId}`);
+                        }
+                    } else {
+                        API.log('warning', 'Could not find .generic-roll-dialog element in dialog');
+                    }
+                }
+            }, 100); // Small delay to ensure DOM is ready
+        } catch (error) {
+            API.log('error', 'Failed to apply dialog theme', error);
+        }
     }
 
     /**
