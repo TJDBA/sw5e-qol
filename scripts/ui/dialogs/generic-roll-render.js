@@ -1,4 +1,5 @@
 import { API } from '../../api.js';
+import { featureManager } from '../../features/feature-manager.js';
 
 /**
  * Generic Roll Dialog Renderer
@@ -17,6 +18,7 @@ export class GenericRollRenderer {
     async init() {
         try {
             await this.loadSectionTemplates();
+            await featureManager.init();
             this.initialized = true;
         } catch (error) {
             API.log('error', 'Failed to initialize renderer', error);
@@ -31,7 +33,8 @@ export class GenericRollRenderer {
             const sections = [
                 'item-selection',
                 'modifiers-table',
-                'add-modifier-inputs', 
+                'add-modifier-inputs',
+                'features',
                 'advantage-radio',
                 'roll-mode-dropdown',
                 'roll-button'
@@ -52,6 +55,11 @@ export class GenericRollRenderer {
      */
     async loadTemplate(templateName) {
         try {
+            // Special handling for features section
+            if (templateName === 'features') {
+                return null; // Features are rendered dynamically
+            }
+            
             // Return the template path, not the rendered HTML
             // Note: templates are in the dialogs subdirectory
             return `modules/sw5e-qol/templates/dialogs/${templateName}.hbs`;
@@ -110,6 +118,18 @@ export class GenericRollRenderer {
             const sections = this.getSectionOrder(dialogData.type);
             
             for (const sectionName of sections) {
+                // Special handling for features section
+                if (sectionName === 'features') {
+                    const featuresHtml = await this.renderFeaturesSection(dialogData);
+                    if (featuresHtml) {
+                        if (dialogBody.children.length > 0) {
+                            dialogBody.appendChild(this.createDivider());
+                        }
+                        dialogBody.insertAdjacentHTML('beforeend', featuresHtml);
+                    }
+                    continue;
+                }
+
                 const template = this.sectionTemplates.get(sectionName);
                 if (!template) {
                     API.log('warning', `Section template not found: ${sectionName}`);
@@ -152,6 +172,7 @@ export class GenericRollRenderer {
                     'item-selection',
                     'modifiers-table',
                     'add-modifier-inputs',
+                    'features',
                     'advantage-radio',
                     'roll-mode-dropdown',
                     'roll-button'
@@ -161,6 +182,7 @@ export class GenericRollRenderer {
                     'item-selection',
                     'modifiers-table',
                     'add-modifier-inputs',
+                    'features',
                     'roll-mode-dropdown',
                     'roll-button'
                 ];
@@ -254,6 +276,97 @@ export class GenericRollRenderer {
     getPresetsForType(dialogType) {
         // Placeholder - will be populated from saved presets
         return [];
+    }
+
+    /**
+     * Render the features section
+     */
+    async renderFeaturesSection(dialogData) {
+        try {
+            const { actor, type: dialogType, themeName, featureState } = dialogData;
+            
+            // Get available features for this actor and dialog type
+            const availableFeatures = featureManager.getAvailableFeatures(actor, dialogType);
+            
+            if (!availableFeatures || availableFeatures.length === 0) {
+                return ''; // No features to display
+            }
+
+            // Get theme name from dialog data or default to 'bendu'
+            const theme = themeName || 'bendu';
+            
+            let featuresHTML = `
+                <div class="features-section">
+                    <div class="section-header" style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 8px;
+                        padding: 4px 0;
+                        border-bottom: 1px solid var(--${theme}-border-light, #888888);
+                    ">
+                        <h3 style="margin: 0; color: var(--${theme}-accent, #999999); font-size: 1.1em;">
+                            Features
+                        </h3>
+                        <button type="button" class="toggle-features" style="
+                            background: var(--${theme}-bg-secondary, #4a4a4a);
+                            color: var(--${theme}-text-primary, #f0f0f0);
+                            border: 1px solid var(--${theme}-border-light, #888888);
+                            padding: 2px 8px;
+                            border-radius: 3px;
+                            font-size: 0.9em;
+                            cursor: pointer;
+                        ">
+                            Collapse
+                        </button>
+                    </div>
+                    <div class="features-content" style="display: block;">
+            `;
+
+            // Loop through available features
+            for (const feature of availableFeatures) {
+                try {
+                    // Get feature state from previous dialog or default
+                    const featureData = featureState?.[feature.id] || {};
+                    
+                    // Validate feature
+                    const validation = feature.validationLogic({
+                        actor: actor,
+                        dialogType: dialogType,
+                        featureData: featureData
+                    });
+                    
+                    if (validation === true) {
+                        // Render feature HTML
+                        const featureHTML = feature.htmlTemplate({
+                            actor: actor,
+                            dialogType: dialogType,
+                            themeName: theme,
+                            featureData: featureData
+                        });
+                        featuresHTML += featureHTML;
+                    } else {
+                        // Feature validation failed, log and skip
+                        API.log('warning', `Feature ${feature.name} validation failed: ${validation}`);
+                    }
+                } catch (error) {
+                    // Log error and render error HTML
+                    API.log('error', `Failed to render feature ${feature.name}:`, error);
+                    featuresHTML += feature.renderErrorHTML(theme, error);
+                }
+            }
+
+            featuresHTML += `
+                    </div>
+                </div>
+            `;
+
+            return featuresHTML;
+
+        } catch (error) {
+            API.log('error', 'Failed to render features section', error);
+            return '';
+        }
     }
 
     /**

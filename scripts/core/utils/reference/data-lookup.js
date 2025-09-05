@@ -117,3 +117,5 @@ function getArrayFromPath(object, pathConfig, additionalFilter = null) {
         return [];
     }
 }
+
+export { getDataPaths, resolveDataPath, filterArrayByCriteria, getArrayFromPath };

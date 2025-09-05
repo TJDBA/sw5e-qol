@@ -2,6 +2,7 @@ import { API } from '../../api.js';
 import { GenericRollRenderer } from './generic-roll-render.js';
 import { GenericInputHandler } from './generic-input-handler.js';
 import { themeManager } from '../theme-manager.js';
+import { featureManager } from '../../features/feature-manager.js';
 
 /**
  * Generic Roll Dialog Handler
@@ -16,18 +17,47 @@ export class GenericRollHandler {
 
     /**
      * Open a generic roll dialog
-     * @param {Object} options - Dialog configuration
+     * @param {string} ownerID - The ID of the actor/token making the checkn     
+     * @param {string} dialogType - The type of dialog to open (attack, skill, save, damage, ability)n     
+     * @param {Object} options - Optional dialog configuration (will be created if not provided)
      * @returns {Promise<Object|null>} Dialog result or null on error
      */
-    async openDialog(options) {
+    async openDialog(ownerID, dialogType, options = null) {
         try {
             // Validate input
-            if (!this.validateDialogOptions(options)) {
-                return null;
-            }
+            const ownerType = this.validateOwnerID(ownerID);            
+            if (ownerType === 'invalid') {                
+                ui.notifications.warn('Please select a valid actor or token to make this roll.');                
+                API.log('warning', `Invalid ownerID provided: ${ownerID}`);                
+                return null; n }            
+                
+                if (!this.validateDialogType(dialogType)) {
+                    ui.notifications.warn(`Invalid dialog type: ${dialogType}. Must be one of: attack, skill, save, damage, ability`);                
+                    API.log('warning', `Invalid dialogType provided: ${dialogType}`);                
+                    return null;  
+                }
 
-            // Generate unique dialog ID
+                if (!options) {
+                    options = {};
+                }
+
+                options.ownerID = ownerID;
+                options.dialogType = dialogType;
+                options.ownerType = ownerType;
+
+                if (!this.validateAndSetDefaults(options)) {
+                    return null;
+                }
+
+                // Get actor for feature discovery
+                const actor = this.getActorFromOwnerID(ownerID, ownerType);
+                if (actor) {
+                    // Get available features for this actor and dialog type
+                    options.availableFeatures = featureManager.getAvailableFeatures(actor, dialogType);
+                    options.actor = actor;
+                }
             this.currentDialogId = `dialog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            this.currentOptions = options; // Store options for later use
 
             // Set theme for this specific dialog (without changing global theme)
             const appliedTheme = themeManager.setThemeForDialog(this.currentDialogId, options);
@@ -35,10 +65,10 @@ export class GenericRollHandler {
 
             // Render dialog
             const dialogHtml = await this.renderer.renderDialog(options);
-            
+
             // Create and show dialog
             const result = await this.showDialog(dialogHtml, options);
-            
+
             return result;
 
         } catch (error) {
@@ -98,7 +128,7 @@ export class GenericRollHandler {
             try {
                 // Store resolve function for roll button
                 this.resolveDialog = resolve;
-                
+
                 // Create dialog element
                 const dialogElement = document.createElement('div');
                 dialogElement.innerHTML = dialogHtml;
@@ -118,7 +148,7 @@ export class GenericRollHandler {
                         this.currentDialog = null; // Clean up dialog reference
                         resolve(null);
                     }
-                }, { 
+                }, {
                     jQuery: true,
                     width: 600,        // remember to update dialogs.css to match
                     resizable: false
@@ -129,10 +159,10 @@ export class GenericRollHandler {
 
                 // Render dialog
                 dialog.render(true);
-                
+
                 // Apply theme to dialog element after rendering
                 this.applyDialogTheme(dialog, options);
-                
+
                 // Wait for dialog to be fully rendered
                 this.waitForDialogReady(options);
 
@@ -185,11 +215,11 @@ export class GenericRollHandler {
                     return;
                 }
             }
-            
+
             // If not ready, check again in the next frame
             requestAnimationFrame(checkDialog);
         };
-        
+
         // Start checking
         requestAnimationFrame(checkDialog);
     }
@@ -202,7 +232,7 @@ export class GenericRollHandler {
             // Find the actual dialog content element in the DOM
             // When using jQuery: true, the dialog content is in .window-content
             const actualDialogElement = this.currentDialog?.element?.find('.window-content')?.[0];
-                                       
+
             if (!actualDialogElement) {
                 API.log('warning', 'Could not find dialog content element');
                 API.log('debug', 'Dialog reference:', this.currentDialog);
@@ -214,7 +244,7 @@ export class GenericRollHandler {
 
             // Create input handler with the actual DOM element
             this.inputHandler = new GenericInputHandler(actualDialogElement, this);
-            
+
             // Set initial modifiers if provided
             if (options.modifiers) {
                 this.inputHandler.setModifiers(options.modifiers);
@@ -235,10 +265,77 @@ export class GenericRollHandler {
                 return null;
             }
 
-            return this.inputHandler.getDialogState();
+            const dialogState = this.inputHandler.getDialogState();
+            
+            // Add feature data to dialog state
+            if (this.currentOptions?.availableFeatures) {
+                dialogState.features = this.collectFeatureData(dialogElement);
+                dialogState.availableFeatures = this.currentOptions.availableFeatures;
+            }
+
+            return dialogState;
 
         } catch (error) {
             API.log('error', 'Failed to get dialog result', error);
+            return null;
+        }
+    }
+
+    /**
+     * Collect feature data from dialog form
+     */
+    collectFeatureData(dialogElement) {
+        try {
+            const featureData = {};
+            
+            if (!this.currentOptions?.availableFeatures) {
+                return featureData;
+            }
+
+            // Loop through available features
+            for (const feature of this.currentOptions.availableFeatures) {
+                try {
+                    // Get feature state from form
+                    const featureState = feature.collectState(dialogElement);
+                    
+                    // Validate feature
+                    const validation = feature.validationLogic({
+                        actor: this.currentOptions.actor,
+                        dialogType: this.currentOptions.dialogType,
+                        featureData: featureState
+                    });
+                    
+                    if (validation === true) {
+                        featureData[feature.id] = featureState;
+                    } else {
+                        API.log('warning', `Feature ${feature.name} validation failed: ${validation}`);
+                    }
+                } catch (error) {
+                    API.log('error', `Failed to collect data for feature ${feature.name}:`, error);
+                }
+            }
+            
+            return featureData;
+        } catch (error) {
+            API.log('error', 'Failed to collect feature data', error);
+            return {};
+        }
+    }
+
+    /**
+     * Get actor from owner ID and type
+     */
+    getActorFromOwnerID(ownerID, ownerType) {
+        try {
+            if (ownerType === 'actor') {
+                return game.actors.get(ownerID);
+            } else if (ownerType === 'token') {
+                const token = canvas.tokens.get(ownerID);
+                return token?.actor;
+            }
+            return null;
+        } catch (error) {
+            API.log('error', 'Failed to get actor from owner ID', error);
             return null;
         }
     }
@@ -255,5 +352,64 @@ export class GenericRollHandler {
      */
     isValidDialogType(type) {
         return this.getAvailableDialogTypes().includes(type.toLowerCase());
+    }
+
+    /**
+     * Validate owner ID and return type
+     */
+    validateOwnerID(ownerID) {
+        try {
+            if (!ownerID) return 'invalid';
+            
+            // Check if it's an actor ID
+            if (game.actors.get(ownerID)) {
+                return 'actor';
+            }
+            
+            // Check if it's a token ID
+            if (canvas.tokens.get(ownerID)) {
+                return 'token';
+            }
+            
+            return 'invalid';
+        } catch (error) {
+            API.log('error', 'Error validating owner ID', error);
+            return 'invalid';
+        }
+    }
+
+    /**
+     * Validate dialog type
+     */
+    validateDialogType(dialogType) {
+        const validTypes = ['attack', 'skill', 'save', 'damage', 'ability'];
+        return validTypes.includes(dialogType.toLowerCase());
+    }
+
+    /**
+     * Validate and set defaults for dialog options
+     */
+    validateAndSetDefaults(options) {
+        try {
+            // Set default type if not provided
+            if (!options.type) {
+                options.type = options.dialogType || 'attack';
+            }
+
+            // Set default title if not provided
+            if (!options.title) {
+                options.title = options.type.charAt(0).toUpperCase() + options.type.slice(1);
+            }
+
+            // Set default modifiers array
+            if (!options.modifiers) {
+                options.modifiers = [];
+            }
+
+            return true;
+        } catch (error) {
+            API.log('error', 'Error validating dialog options', error);
+            return false;
+        }
     }
 }

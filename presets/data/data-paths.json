@@ -13,7 +13,7 @@
       "basePath": "{Actor}.system.classes",
       "isArray": true,
       "subpaths": {
-        "levels": ".levels",
+        "levels": "levels",
         "firstClassLevels": "[0].levels",
         "secondClassLevels": "[1].levels"
       }
@@ -28,6 +28,15 @@
       }
     }
   },
+  "class": {
+      "basePath": "{Actor}.itemTypes.class",
+      "isArray": true,
+      "subpaths": {
+        "levels": "[].system.levels",
+        "name": "[].name",
+        "featureAdvancements": "[].system.advancement"
+      }
+    },
   "power": {
     "ForcePowers": {
       "basePath": "{Actor}.itemTypes.power",
