@@ -28,21 +28,27 @@ export class FeatureManager {
     }
 
     /**
-     * Load all feature packs from the packs directory
+     * Load all feature packs using simplified direct imports
      */
     async loadFeaturePacks() {
         try {
-            // Import feature packs statically through index
-            const { ForceEmpoweredSelfFeature } = await import('./packs/index.js');
-            
-            // Register features
-            const features = [
-                new ForceEmpoweredSelfFeature()
+            // Import all feature classes directly - future-proof and maintainable
+            const featureModules = [
+                await import('./packs/force-empowered-self.js'),
+                // Future features just add here:
+                // await import('./packs/action-surge.js'),
+                // await import('./packs/sneak-attack.js'),
             ];
 
-            for (const feature of features) {
-                this.loadedFeatures.set(feature.id, feature);
-                API.log('debug', `Loaded feature pack: ${feature.name} (${feature.id})`);
+            // Instantiate and register
+            for (const module of featureModules) {
+                try {
+                    const feature = new module.default();
+                    this.loadedFeatures.set(feature.id, feature);
+                    API.log('debug', `Loaded feature pack: ${feature.name} (${feature.id})`);
+                } catch (error) {
+                    API.log('error', `Failed to instantiate feature from module:`, error);
+                }
             }
         } catch (error) {
             API.log('error', 'Failed to load feature packs', error);
@@ -87,22 +93,29 @@ export class FeatureManager {
     isFeatureAvailable(actor, feature) {
         try {
             // Check feats - exact name match
-            const hasFeat = actor.itemTypes.feats.some(feat => 
+            const hasFeat = actor.itemTypes.feat.some(feat => 
                 feat.name === feature.name
             );
-            if (hasFeat) {
-                API.log('debug', `Feature ${feature.name} found in feats for actor ${actor.name}`);
-                return true;
+            if (actor.itemTypes?.feat && Array.isArray(actor.itemTypes.feat)) {
+                const hasFeat = actor.itemTypes.feat.some(feat => 
+                    feat.name === feature.name
+                );
+                if (hasFeat) {
+                    API.log('debug', `Feature ${feature.name} found in feats for actor ${actor.name}`);
+                    return true;
+                }
             }
 
-            // Check equipment properties
-            const hasEquipment = actor.items.equipment.some(item => 
-                item.system.properties && 
-                item.system.properties[feature.name] === true
-            );
-            if (hasEquipment) {
-                API.log('debug', `Feature ${feature.name} found in equipment for actor ${actor.name}`);
-                return true;
+            // Check equipment properties (with safety check)
+            if (actor.itemTypes?.equipment && Array.isArray(actor.itemTypes.equipment)) {
+                const hasEquipment = actor.itemTypes.equipment.some(item => 
+                    item.system?.properties && 
+                    item.system.properties[feature.name] === true
+                );
+                if (hasEquipment) {
+                    API.log('debug', `Feature ${feature.name} found in equipment for actor ${actor.name}`);
+                    return true;
+                }
             }
 
             return false;

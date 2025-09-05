@@ -74,6 +74,14 @@ Hooks.once('init', async function() {
         } catch (error) {
             console.error('SW5E QoL Module: Failed to import CardRenderer', error);
         }
+        
+        // Import feature system
+        try {
+            await import('./features/init.js');
+            console.log('SW5E QoL Module: Feature system imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import feature system', error);
+        }
 
         
         console.log('SW5E QoL Module: All imports completed');

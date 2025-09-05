@@ -28,7 +28,8 @@
       }
     }
   },
-  "class": {
+  "actors": {
+    "class": {
       "basePath": "{Actor}.itemTypes.class",
       "isArray": true,
       "subpaths": {
@@ -36,7 +37,8 @@
         "name": "[].name",
         "featureAdvancements": "[].system.advancement"
       }
-    },
+    }
+  },
   "power": {
     "ForcePowers": {
       "basePath": "{Actor}.itemTypes.power",

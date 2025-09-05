@@ -1,4 +1,6 @@
 import { BaseFeature } from '../base-feature.js';
+import { API } from '../../api.js';
+import { getDataPaths } from '../../core/utils/reference/data-lookup.js';
 
 /**
  * Force-Empowered Self Feature Pack
@@ -35,7 +37,10 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
         try {
             if (dialogType === "damage") {
                 
-                const dataPaths = getDataPaths("class");
+                // Use foundry.utils.getProperty directly
+                const getProperty = foundry.utils.getProperty;
+                
+                const dataPaths = getDataPaths("actors", "class");
 
                 // Get the class array from the actor using the basePath in dataPaths
                 const classArray = getProperty(actor, dataPaths.basePath.replace("{Actor}", "system").replace(/^system\./, ""));
@@ -98,6 +103,7 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
                 return '';
             }
         } catch (error) {
+            API.log('error', `Failed to render Force-Empowered Self HTML:`, error);
             return this.renderErrorHTML(themeName, error);
         }
     }
@@ -116,6 +122,7 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
 
             return this.getDamageModifiers(actor, dialogState, featureData);
         } catch (error) {
+            API.log('error', `Failed to get Force-Empowered Self modifiers:`, error);
             return [];
         }
     }

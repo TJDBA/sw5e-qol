@@ -18,7 +18,6 @@ export class GenericRollRenderer {
     async init() {
         try {
             await this.loadSectionTemplates();
-            await featureManager.init();
             this.initialized = true;
         } catch (error) {
             API.log('error', 'Failed to initialize renderer', error);

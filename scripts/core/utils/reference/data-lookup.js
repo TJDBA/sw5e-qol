@@ -2,6 +2,8 @@
 // DATA PATH RESOLUTION
 // ============================================================================
 
+import { API } from '../../../api.js';
+import dataPathsConfig from '../../../../presets/data/data-paths.json' assert { type: 'json' };
 /**
  * Get the data paths for types stored on an object
  * Returns an object with the paths to various items related to the resource type.
@@ -17,7 +19,7 @@
 function getDataPaths(category, type, options = {}) {
     try {
         // Load the data paths configuration
-        const dataPaths = JSON.parse(FileLib.read("sw5e-qol", "presets/data/data-paths.json"));
+        const dataPaths = dataPathsConfig;
         
         // Check if category exists
         if (!dataPaths[category]) {
@@ -118,4 +120,5 @@ function getArrayFromPath(object, pathConfig, additionalFilter = null) {
     }
 }
 
+// Export all utility functions
 export { getDataPaths, resolveDataPath, filterArrayByCriteria, getArrayFromPath };
