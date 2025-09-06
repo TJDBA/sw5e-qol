@@ -40,7 +40,7 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
                 // Use foundry.utils.getProperty directly
                 const getProperty = foundry.utils.getProperty;
                 
-                const dataPaths = getDataPaths("actors", "class");
+                const dataPaths = getDataPaths("actor", "class");
 
                 // Get the class array from the actor using the basePath in dataPaths
                 const classArray = getProperty(actor, dataPaths.basePath.replace("{Actor}", "system").replace(/^system\./, ""));

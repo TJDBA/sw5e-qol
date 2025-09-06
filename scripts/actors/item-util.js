@@ -308,3 +308,132 @@ export function buildConsumableSelectionList(actor, options = {}) {
 export function buildPowerSelectionList(actor, options = {}) {
     return buildItemSelectionList(actor, 'power', options);
 }
+
+/**
+ * Get weapon damage information for the selected item
+ * @param {Object} actor - The actor object
+ * @param {string} itemID - The weapon item ID
+ * @returns {Object} Weapon damage data object
+ */
+export function getWeaponDamageData(actor, itemID) {
+    try {
+        if (!actor || !itemID) {
+            return {
+                type: 'None',
+                modifier: '0',
+                isEnabled: false
+            };
+        }
+
+        const item = actor.items.get(itemID);
+        if (!item || item.type !== 'weapon') {
+            return {
+                type: 'None',
+                modifier: '0',
+                isEnabled: false
+            };
+        }
+
+        const damage = item.system?.damage;
+        if (!damage || !damage.parts || damage.parts.length === 0) {
+            return {
+                type: 'None',
+                modifier: '0',
+                isEnabled: false
+            };
+        }
+
+        // Get the first damage part
+        const firstDamage = damage.parts[0];
+        const damageType = firstDamage[1] || 'Untyped';
+        let damageFormula = firstDamage[0] || '0';
+        
+        API.log('debug', `Original damage formula: "${damageFormula}"`);
+
+        // Check if damage formula contains "+@mod" and remove it if it does
+        if (damageFormula.includes('+@mod')) {
+            damageFormula = damageFormula.replace(/\s*\+\s*@mod\s*/g, '');
+            API.log('debug', `After removing +@mod: "${damageFormula}"`);
+        }
+
+        return {
+            type: damageType,
+            modifier: damageFormula,
+            isEnabled: true
+        };
+    } catch (error) {
+        API.log('error', 'Failed to get weapon damage data', error);
+        return {
+            type: 'None',
+            modifier: '0',
+            isEnabled: false
+        };
+    }
+}
+
+/**
+ * Check if weapon is a smart weapon
+ * @param {Object} actor - The actor object
+ * @param {string} itemID - The weapon item ID
+ * @returns {boolean} True if the weapon is smart
+ */
+export function isSmartWeapon(actor, itemID) {
+    try {
+        if (!actor || !itemID) return false;
+
+        const item = actor.items.get(itemID);
+        if (!item || item.type !== 'weapon') return false;
+
+        // Check if weapon has smart property
+        const properties = item.system?.properties;
+        
+        // Handle different property formats
+        if (Array.isArray(properties)) {
+            return properties.includes('smart') || properties.includes('Smart');
+        } else if (typeof properties === 'object' && properties !== null) {
+            // Properties might be an object with boolean values
+            return properties.smart === true || properties.Smart === true;
+        } else if (typeof properties === 'string') {
+            // Properties might be a comma-separated string
+            return properties.toLowerCase().includes('smart');
+        }
+        
+        return false;
+    } catch (error) {
+        API.log('error', 'Failed to check if weapon is smart', error);
+        return false;
+    }
+}
+
+/**
+ * Get smart weapon data
+ * @param {Object} actor - The actor object
+ * @param {string} itemID - The weapon item ID
+ * @returns {Promise<Object|null>} Smart weapon data or null
+ */
+export async function getSmartWeaponData(actor, itemID) {
+    try {
+        if (!actor || !itemID) return null;
+
+        const item = actor.items.get(itemID);
+        if (!item || item.type !== 'weapon') return null;
+
+        // Get smart weapon dex score (this would need to be stored somewhere)
+        // For now, we'll use a placeholder 
+        const smartWeaponDex =  0;
+        const smartWeaponDexModifier = Math.floor((smartWeaponDex - 10) / 2);
+
+        // Get smart weapon proficiency bonus (this would need to be stored somewhere)
+        // For now, we'll use a placeholder
+        const smartWeaponProficiency = 0;
+
+        return {
+            dex: smartWeaponDex,
+            dexModifier: smartWeaponDexModifier,
+            proficiency: smartWeaponProficiency
+        };
+    } catch (error) {
+        API.log('error', 'Failed to get smart weapon data', error);
+        return null;
+    }
+}

@@ -28,7 +28,16 @@
       }
     }
   },
-  "actors": {
+  "actor": {
+    "character": {
+      "basePath": "{Actor}",
+      "isArray": false,
+      "subpaths": {
+        "prof": "system.attributes.prof",
+        "level": "system.details.level",
+        "abilities": "system.abilities"
+      }
+    },
     "class": {
       "basePath": "{Actor}.itemTypes.class",
       "isArray": true,
@@ -79,12 +88,14 @@
         "id": ".id",
         "name": ".name",
         "attackBonus": ".system.attackBonus",
-        "damage": ".system.damage[]",
+        "damage": ".system.damage",
+        "damageParts": ".system.damage.parts[]",
+        "versatileDamage": ".system.damage.versatile",
         "criticalThreshold": ".system.critical.threshold",
-        "properties": ".system.properties[]",
-        "save": ".system.save[]",
+        "properties": ".system.properties",
+        "save": ".system.save",
         "ability": ".system.ability",
-        "ammo": ".system.ammo[]"
+        "ammo": ".system.ammo"
       }
     }
   }

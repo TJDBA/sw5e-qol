@@ -1,4 +1,6 @@
 import { API } from '../../api.js';
+import { getWeaponDamageData, isSmartWeapon, getSmartWeaponData } from '../../actors/item-util.js';
+import { getAbilityModifier, getWeaponAbility, getProficiencyBonus } from '../../actors/actor-util.js';
 
 /**
  * Generic Input Handler for Dialog Components
@@ -15,6 +17,7 @@ export class GenericInputHandler {
         this.selectedPreset = '';
         this.selectedAttribute = 'dexterity';
         this.rollForEachTarget = false;
+        this.featureStates = {}; // Initialize feature states
         this.setupEventListeners();
     }
 
@@ -30,7 +33,11 @@ export class GenericInputHandler {
             this.setupRollModeSelect();
             this.setupRollButton();
             this.setupCollapsibleSections();
+            this.setupAttributeSelect();
             this.updateRollButtonLabel();
+            
+            // Initialize weapon rows after all other setup
+            this.initializeWeaponRows();
         } catch (error) {
             API.log('error', 'Failed to setup event listeners', error);
         }
@@ -40,45 +47,68 @@ export class GenericInputHandler {
      * Setup modifier toggle checkboxes using event delegation
      */
     setupModifierToggles() {
-        // Use event delegation on the parent table instead of individual listeners
-        const modifiersTable = this.dialogElement.querySelector('.modifiers-table');
-        if (!modifiersTable) {
-            API.log('warning', 'Modifiers table not found');
+        // Use event delegation on the dialog body to catch all toggle switches
+        const dialogBody = this.dialogElement.querySelector('#dialog-body');
+        if (!dialogBody) {
+            API.log('warning', 'Dialog body not found');
             return;
         }
     
         // Remove any existing listeners first
-        const oldClickHandler = modifiersTable._clickHandler;
-        const oldChangeHandler = modifiersTable._changeHandler;
-        if (oldClickHandler) modifiersTable.removeEventListener('click', oldClickHandler);
-        if (oldChangeHandler) modifiersTable.removeEventListener('change', oldChangeHandler);
+        const oldClickHandler = dialogBody._clickHandler;
+        const oldChangeHandler = dialogBody._changeHandler;
+        if (oldClickHandler) dialogBody.removeEventListener('click', oldClickHandler);
+        if (oldChangeHandler) dialogBody.removeEventListener('change', oldChangeHandler);
     
-        // Create delegated click handler for toggle sliders
+        // Create delegated click handler for toggle sliders and checkboxes
         const clickHandler = (event) => {
-            // If clicked on the slider span, toggle the associated checkbox
-            if (event.target.classList.contains('toggle-slider')) {
-                const checkbox = event.target.previousElementSibling;
-                if (checkbox && checkbox.classList.contains('modifier-toggle')) {
+            API.log('debug', 'Click event detected on:', event.target);
+            API.log('debug', 'Target classes:', event.target.className);
+            
+            // If clicked on the toggle-switch div, find the checkbox inside
+            if (event.target.classList.contains('toggle-switch')) {
+                const checkbox = event.target.querySelector('.modifier-toggle');
+                if (checkbox) {
+                    API.log('debug', 'Toggling checkbox via toggle-switch click');
                     checkbox.checked = !checkbox.checked;
                     checkbox.dispatchEvent(new Event('change', { bubbles: true }));
                 }
+            }
+            // If clicked on the slider span, toggle the associated checkbox
+            else if (event.target.classList.contains('toggle-slider')) {
+                const checkbox = event.target.previousElementSibling;
+                if (checkbox && checkbox.classList.contains('modifier-toggle')) {
+                    API.log('debug', 'Toggling checkbox via slider click');
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+            // If clicked directly on a modifier-toggle checkbox, let the change event handle it
+            else if (event.target.classList.contains('modifier-toggle')) {
+                API.log('debug', 'Direct checkbox click detected');
+                // The change event will be triggered automatically
+                return;
             }
         };
     
         // Create delegated change handler for checkboxes
         const changeHandler = (event) => {
+            API.log('debug', 'Change event detected on:', event.target);
+            API.log('debug', 'Target classes:', event.target.className);
+            API.log('debug', 'Target dataset:', event.target.dataset);
+            
             if (event.target.classList.contains('modifier-toggle')) {
                 this.handleToggleChange(event);
             }
         };
     
         // Add delegated listeners
-        modifiersTable.addEventListener('click', clickHandler);
-        modifiersTable.addEventListener('change', changeHandler);
+        dialogBody.addEventListener('click', clickHandler);
+        dialogBody.addEventListener('change', changeHandler);
         
         // Store references for cleanup
-        modifiersTable._clickHandler = clickHandler;
-        modifiersTable._changeHandler = changeHandler;
+        dialogBody._clickHandler = clickHandler;
+        dialogBody._changeHandler = changeHandler;
     }
 
     /**
@@ -86,37 +116,48 @@ export class GenericInputHandler {
      */
     handleToggleChange(event) {
         const modifierId = event.target.dataset.modifierId;
+        const featureId = event.target.dataset.featureId;
         const isChecked = event.target.checked;
         
-
         API.log('debug', 'Toggle switch change event detected');
-        API.log('debug', `Toggle changed - ID: ${modifierId}, Checked: ${isChecked}`);
+        API.log('debug', `Toggle changed - Modifier ID: ${modifierId}, Feature ID: ${featureId}, Checked: ${isChecked}`);
         
-        // Find the row containing this toggle
-        const row = event.target.closest('.modifier-row');
-        if (!row) {
-            API.log('warning', 'Could not find modifier row for toggle');
+        // Handle feature toggles
+        if (featureId) {
+            this.handleFeatureToggle(featureId, isChecked, event);
             return;
         }
+        
+        // Handle modifier toggles (existing logic)
+        if (modifierId) {
+            // Find the row containing this toggle
+            const row = event.target.closest('.modifier-row');
+            if (!row) {
+                API.log('warning', 'Could not find modifier row for toggle');
+                return;
+            }
 
-        // Handle special case for attribute row
-        if (modifierId === 'attribute') {
-            // For attribute row, we don't have a modifier object, just update the row state
-            API.log('debug', 'Handling attribute row toggle');
-            this.toggleRowState(row, isChecked);
-            this.updateRollButtonLabel();
-            return;
-        }
+            // Handle special case for attribute row
+            if (modifierId === 'attribute') {
+                // For attribute row, we don't have a modifier object, just update the row state
+                API.log('debug', 'Handling attribute row toggle');
+                this.toggleRowState(row, isChecked);
+                this.updateRollButtonLabel();
+                return;
+            }
 
-        // Handle regular modifier rows
-        const modifierIndex = parseInt(modifierId);
-        if (modifierIndex >= 0 && modifierIndex < this.modifiers.length) {
-            API.log('debug', `Handling modifier ${modifierIndex} toggle`);
-            this.modifiers[modifierIndex].isEnabled = isChecked;
-            this.toggleRowState(row, isChecked);
-            this.updateRollButtonLabel();
+            // Handle regular modifier rows
+            const modifierIndex = parseInt(modifierId);
+            if (modifierIndex >= 0 && modifierIndex < this.modifiers.length) {
+                API.log('debug', `Handling modifier ${modifierIndex} toggle`);
+                this.modifiers[modifierIndex].isEnabled = isChecked;
+                this.toggleRowState(row, isChecked);
+                this.updateRollButtonLabel();
+            } else {
+                API.log('warning', `Invalid modifier ID: ${modifierId}`);
+            }
         } else {
-            API.log('warning', `Invalid modifier ID: ${modifierId}`);
+            API.log('warning', 'Toggle switch has neither modifier ID nor feature ID');
         }
     }
 
@@ -129,6 +170,85 @@ export class GenericInputHandler {
         } else {
             row.classList.add('disabled');
         }
+    }
+
+    /**
+     * Handle feature toggle changes
+     */
+    handleFeatureToggle(featureId, isChecked, event) {
+        try {
+            API.log('debug', `Handling feature toggle - ID: ${featureId}, Checked: ${isChecked}`);
+            
+            // Find the row containing this toggle - try multiple selectors
+            let row = event.target.closest('.modifier-row');
+            if (!row) {
+                row = event.target.closest('.feature-row');
+            }
+            if (!row) {
+                row = event.target.closest('tr');
+            }
+            
+            if (!row) {
+                API.log('warning', 'Could not find feature row for toggle');
+                return;
+            }
+
+            // Update feature state
+            this.updateFeatureState(featureId, isChecked);
+            
+            // Update row visual state
+            this.toggleRowState(row, isChecked);
+            
+            // Update roll button label if needed
+            this.updateRollButtonLabel();
+            
+            // Trigger feature-specific logic if needed
+            this.onFeatureToggle(featureId, isChecked);
+            
+        } catch (error) {
+            API.log('error', `Error handling feature toggle: ${error.message}`);
+        }
+    }
+
+    /**
+     * Update feature state in the dialog data
+     */
+    updateFeatureState(featureId, isEnabled) {
+        // Initialize feature state if it doesn't exist
+        if (!this.featureStates) {
+            this.featureStates = {};
+        }
+        
+        // Update the specific feature state
+        this.featureStates[featureId] = {
+            enabled: isEnabled,
+            timestamp: Date.now()
+        };
+        
+        API.log('debug', `Updated feature state for ${featureId}:`, this.featureStates[featureId]);
+    }
+
+    /**
+     * Handle feature-specific toggle logic
+     * Override in subclasses or extend as needed
+     */
+    onFeatureToggle(featureId, isEnabled) {
+        // Default implementation - can be extended
+        API.log('debug', `Feature ${featureId} toggled to ${isEnabled ? 'enabled' : 'disabled'}`);
+    }
+
+    /**
+     * Get current feature states for dialog result
+     */
+    getFeatureStates() {
+        return this.featureStates || {};
+    }
+
+    /**
+     * Set feature states from dialog data
+     */
+    setFeatureStates(featureStates) {
+        this.featureStates = featureStates || {};
     }
 
     /**
@@ -167,8 +287,13 @@ export class GenericInputHandler {
         const targetRollToggle = this.dialogElement.querySelector('#target-roll-toggle');
 
         if (itemSelect) {
-            itemSelect.addEventListener('change', (event) => {
+            itemSelect.addEventListener('change', async (event) => {
                 this.selectedItem = event.target.value;
+                
+                // Update weapon-related rows when item selection changes
+                if (this.handler && this.handler.currentOptions && this.handler.currentOptions.actor) {
+                    await this.updateWeaponRows(this.handler.currentOptions.actor, this.selectedItem);
+                }
             });
         }
 
@@ -191,8 +316,13 @@ export class GenericInputHandler {
         }
 
         if (attributeSelect) {
-            attributeSelect.addEventListener('change', (event) => {
+            attributeSelect.addEventListener('change', async (event) => {
                 this.selectedAttribute = event.target.value;
+                
+                // Update the attribute modifier when selection changes
+                if (this.handler && this.handler.currentOptions && this.handler.currentOptions.actor) {
+                    await this.updateAttributeModifier(this.handler.currentOptions.actor, this.selectedAttribute);
+                }
             });
         }
 
@@ -551,5 +681,219 @@ export class GenericInputHandler {
                 }
             }
         });
+    }
+
+
+    /**
+     * Update attribute modifier when selection changes
+     */
+    async updateAttributeModifier(actor, ability) {
+        try {
+            const attributeRow = this.dialogElement.querySelector('.attribute-row');
+            if (!attributeRow) return;
+
+            const modifierElement = attributeRow.querySelector('.attribute-modifier');
+            if (!modifierElement) return;
+
+            const modifier = await getAbilityModifier(actor, ability);
+            modifierElement.textContent = modifier;
+        } catch (error) {
+            API.log('error', 'Failed to update attribute modifier', error);
+        }
+    }
+
+
+
+
+
+
+    /**
+     * Update weapon damage row
+     */
+    updateWeaponDamageRow(actor, itemID) {
+        try {
+            const weaponDamageData = getWeaponDamageData(actor, itemID);
+            const weaponDamageRow = this.dialogElement.querySelector('.weapon-damage-row');
+            
+            if (!weaponDamageRow) return;
+
+            const typeElement = weaponDamageRow.querySelector('.weapon-damage-type');
+            const modifierElement = weaponDamageRow.querySelector('.weapon-damage-modifier');
+            const toggle = weaponDamageRow.querySelector('.modifier-toggle');
+
+            if (typeElement) typeElement.textContent = weaponDamageData.type;
+            if (modifierElement) modifierElement.textContent = weaponDamageData.modifier;
+            if (toggle) toggle.checked = weaponDamageData.isEnabled;
+
+            // Update row state
+            this.toggleRowState(weaponDamageRow, weaponDamageData.isEnabled);
+        } catch (error) {
+            API.log('error', 'Failed to update weapon damage row', error);
+        }
+    }
+
+    /**
+     * Update proficiency row
+     */
+    async updateProficiencyRow(actor, itemID) {
+        try {
+            const isSmart = isSmartWeapon(actor, itemID);
+            const proficiencyBonus = await getProficiencyBonus(actor);
+            const proficiencyRow = this.dialogElement.querySelector('.proficiency-row');
+            
+            if (!proficiencyRow) return;
+
+            const descriptionElement = proficiencyRow.querySelector('.proficiency-description');
+            const modifierElement = proficiencyRow.querySelector('.proficiency-modifier');
+            const smartInput = proficiencyRow.querySelector('.smart-weapon-proficiency-input');
+
+            if (descriptionElement) {
+                descriptionElement.textContent = isSmart ? 'Smart Weapon' : '';
+            }
+
+            if (modifierElement) {
+                if (isSmart) {
+                    modifierElement.style.display = 'none';
+                    if (smartInput) {
+                        smartInput.style.display = 'inline-block';
+                        smartInput.value = proficiencyBonus;
+                    }
+                } else {
+                    modifierElement.style.display = 'inline-block';
+                    modifierElement.textContent = `+${proficiencyBonus}`;
+                    if (smartInput) {
+                        smartInput.style.display = 'none';
+                    }
+                }
+            }
+        } catch (error) {
+            API.log('error', 'Failed to update proficiency row', error);
+        }
+    }
+
+    /**
+     * Update attribute row for smart weapons
+     */
+    async updateAttributeRow(actor, itemID) {
+        try {
+            const isSmart = isSmartWeapon(actor, itemID);
+            const attributeRow = this.dialogElement.querySelector('.attribute-row');
+            
+            if (!attributeRow) return;
+
+            const attributeCell = attributeRow.querySelector('td:first-child');
+            const modifierCell = attributeRow.querySelector('td:nth-child(3)');
+            const toggle = attributeRow.querySelector('.modifier-toggle');
+
+            if (isSmart) {
+                const smartWeaponData = await getSmartWeaponData(actor, itemID);
+                if (smartWeaponData) {
+                    // Replace dropdown with smart weapon display
+                    attributeCell.innerHTML = `
+                        <span class="smart-weapon-attribute-description">Smart Weapon Dex: ${smartWeaponData.dex}</span>
+                    `;
+                    
+                    if (modifierCell) {
+                        modifierCell.innerHTML = `
+                            <span class="smart-weapon-attribute-modifier">${smartWeaponData.dexModifier >= 0 ? '+' : ''}${smartWeaponData.dexModifier}</span>
+                        `;
+                    }
+                }
+            } else {
+                // Get weapon ability and determine if attribute should be disabled
+                const weaponAbility = await getWeaponAbility(actor, itemID);
+                const attributeDisabled = weaponAbility === 'none';
+                
+                // Restore normal attribute dropdown
+                attributeCell.innerHTML = `
+                    <label class="attribute-label">${game.i18n.localize("SW5E-QOL.interface.attribute")}:</label>
+                    <select class="attribute-select" id="attribute-select">
+                        <option value="str" ${weaponAbility === 'str' ? 'selected' : ''}>${game.i18n.localize("SW5E-QOL.attributes.str")}</option>
+                        <option value="dex" ${weaponAbility === 'dex' ? 'selected' : ''}>${game.i18n.localize("SW5E-QOL.attributes.dex")}</option>
+                        <option value="con" ${weaponAbility === 'con' ? 'selected' : ''}>${game.i18n.localize("SW5E-QOL.attributes.con")}</option>
+                        <option value="int" ${weaponAbility === 'int' ? 'selected' : ''}>${game.i18n.localize("SW5E-QOL.attributes.int")}</option>
+                        <option value="wis" ${weaponAbility === 'wis' ? 'selected' : ''}>${game.i18n.localize("SW5E-QOL.attributes.wis")}</option>
+                        <option value="cha" ${weaponAbility === 'cha' ? 'selected' : ''}>${game.i18n.localize("SW5E-QOL.attributes.cha")}</option>
+                        <option value="none" ${weaponAbility === 'none' ? 'selected' : ''}>${game.i18n.localize("SW5E-QOL.attributes.none")}</option>
+                    </select>
+                `;
+                
+                if (modifierCell) {
+                    const abilityModifier = await getAbilityModifier(actor, weaponAbility);
+                    modifierCell.innerHTML = `<span class="attribute-modifier">${abilityModifier}</span>`;
+                }
+
+                // Update toggle state
+                if (toggle) {
+                    //toggle.disabled = attributeDisabled;
+                    toggle.checked = !attributeDisabled;
+                }
+
+                // Re-setup the attribute select event listener
+                this.setupAttributeSelect();
+            }
+        } catch (error) {
+            API.log('error', 'Failed to update attribute row', error);
+        }
+    }
+
+    /**
+     * Update all weapon-related rows when item selection changes
+     */
+    async updateWeaponRows(actor, itemID) {
+        try {
+            this.updateWeaponDamageRow(actor, itemID);
+            await this.updateProficiencyRow(actor, itemID);
+            await this.updateAttributeRow(actor, itemID);
+        } catch (error) {
+            API.log('error', 'Failed to update weapon rows', error);
+        }
+    }
+
+    /**
+     * Initialize weapon rows with default data
+     */
+    async initializeWeaponRows() {
+        try {
+            if (this.handler && this.handler.currentOptions && this.handler.currentOptions.actor) {
+                const actor = this.handler.currentOptions.actor;
+                let effectiveItemID = this.selectedItem || this.handler.currentOptions.itemID;
+                
+                // If no itemID provided, get the default selection from the dropdown
+                if (!effectiveItemID) {
+                    const itemSelect = this.dialogElement.querySelector('#item-select');
+                    if (itemSelect) {
+                        effectiveItemID = itemSelect.value || '';
+                    }
+                }
+                
+                await this.updateWeaponRows(actor, effectiveItemID);
+            }
+        } catch (error) {
+            API.log('error', 'Failed to initialize weapon rows', error);
+        }
+    }
+
+    /**
+     * Setup attribute select dropdown
+     */
+    setupAttributeSelect() {
+        const attributeSelect = this.dialogElement.querySelector('#attribute-select');
+        if (attributeSelect) {
+            // Remove existing listeners
+            attributeSelect.removeEventListener('change', this.handleAttributeChange);
+            
+            // Add new listener
+            this.handleAttributeChange = (event) => {
+                this.selectedAttribute = event.target.value;
+                
+                // Update the attribute modifier
+                if (this.handler && this.handler.currentOptions && this.handler.currentOptions.actor) {
+                    this.updateAttributeModifier(this.handler.currentOptions.actor, this.selectedAttribute);
+                }
+            };
+            
+            attributeSelect.addEventListener('change', this.handleAttributeChange);
+        }
     }
 }

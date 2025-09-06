@@ -1,5 +1,6 @@
 // sw5e-qol/scripts/api.js
 import { MODULE_ID, getSetting as getModuleSetting, isDebugEnabled as isModuleDebugEnabled } from './presets/setting.js';
+import { GenericRollHandler } from './ui/dialogs/generic-roll-handler.js';
 
 /**
  * SW5E QoL API - Main interface for module functionality
@@ -85,40 +86,6 @@ export const API = {
     },
 
     /**
-     * Open a minimal dialog with a single OK button.
-     * @param {Object} [opts]
-     * @param {string} [opts.title]   - Override dialog title
-     * @param {string} [opts.content] - Override HTML body
-     * @returns {Promise<boolean>} resolves true on OK, false on close
-     */
-    async openDialog(opts = {}) {
-        const token = canvas?.tokens?.controlled?.[0];
-        if (!token) {
-            ui.notifications.warn(this.localize("warn.selectAToken"));
-            return false;
-        }
-        
-        const title = opts.title ?? this.localize("dialogs.attack.title");
-        const content = opts.content ?? `<p>${this.localize("dialogs.attack.modifiers")}</p>`;
-        
-        return new Promise((resolve) => {
-            const dlg = new Dialog({
-                title,
-                content,
-                buttons: {
-                    ok: {
-                        label: this.localize("dialogs.attack.roll"),
-                        callback: () => resolve(true)
-                    }
-                },
-                default: "ok",
-                close: () => resolve(false)
-            }, { jQuery: true });
-            dlg.render(true);
-        });
-    },
-
-    /**
      * Create a notification with proper localization
      * @param {string} message - Localization key for message
      * @param {string} type - Notification type (info, warning, error)
@@ -157,5 +124,10 @@ export const API = {
             default:
                 console.log(...logData);
         }
-    }
+    },
+
+    /**
+     * Generic Roll Handler class for creating roll dialogs
+     */
+    GenericRollHandler
 };

@@ -1,6 +1,7 @@
 import { API } from '../../api.js';
 import { featureManager } from '../../features/feature-manager.js';
-import { buildItemSelectionList } from '../../actors/item-util.js';
+import { buildItemSelectionList, getWeaponDamageData, isSmartWeapon, getSmartWeaponData } from '../../actors/item-util.js';
+import { getAbilityModifier, getWeaponAbility, getProficiencyBonus } from '../../actors/actor-util.js';
 
 /**
  * Generic Roll Dialog Renderer
@@ -42,7 +43,7 @@ export class GenericRollRenderer {
 
             for (const section of sections) {
                 const template = await this.loadTemplate(section);
-                API.log('debug', `Loaded template for ${section}:`, template);
+               // API.log('debug', `Loaded template for ${section}:`, template);
                 this.sectionTemplates.set(section, template);
             }
         } catch (error) {
@@ -86,7 +87,7 @@ export class GenericRollRenderer {
             
             // Render base dialog
             const baseTemplate = await this.loadTemplate('generic-roll-base');
-            API.log('debug', 'Base template path:', baseTemplate);
+           // API.log('debug', 'Base template path:', baseTemplate);
             const baseHtml = await renderTemplate(baseTemplate, dialogData);
             
             // Create temporary container to parse HTML
@@ -137,7 +138,8 @@ export class GenericRollRenderer {
                 }
 
                 // Prepare section data
-                const sectionData = this.prepareSectionData(sectionName, dialogData);
+               // API.log('debug', `Preparing section data for ${sectionName}`, dialogData);
+                const sectionData = await this.prepareSectionData(sectionName, dialogData);
                 
                 // Check if FoundryVTT templates are available
                 if (typeof renderTemplate === 'undefined') {
@@ -145,6 +147,8 @@ export class GenericRollRenderer {
                 }
                 
                 // Render section
+               // API.log('debug', `Rendering section ${sectionName} with data:`, sectionData);
+               // API.log('debug', `Template path: ${template}`);
                 const sectionHtml = await renderTemplate(template, sectionData);
                 
                 // Insert section with divider
@@ -213,18 +217,20 @@ export class GenericRollRenderer {
     /**
      * Prepare section-specific data
      */
-    prepareSectionData(sectionName, dialogData) {
+    async prepareSectionData(sectionName, dialogData) {
         const baseData = {
             modifiers: dialogData.modifiers || [],
             modifierTypes: this.getModifierTypes(dialogData.type)
         };
-
+        const { actor, itemID } = dialogData;
+        
+        // Calculate selection data once for reuse across sections
+        const itemType = this.getItemTypeForDialog(dialogData.type);
+        const selectionData = actor ? buildItemSelectionList(actor, itemType, { itemID }) : null;
+        const effectiveItemID = itemID || selectionData?.defaultSelection || '';
+        
         switch (sectionName) {
             case 'item-selection':
-                const { actor, itemID } = dialogData;
-                const itemType = this.getItemTypeForDialog(dialogData.type);
-                const selectionData = actor ? buildItemSelectionList(actor, itemType, { itemID }) : null;
-                
                 return {
                     itemLabelKey: this.getItemLabelKey(dialogData.type),
                     items: this.getItemsForType(dialogData.type, dialogData),
@@ -233,8 +239,19 @@ export class GenericRollRenderer {
                     isLocked: selectionData?.isLocked || false,
                     defaultSelection: selectionData?.defaultSelection || ''
                 };
-            case 'modifiers-table':
-                return baseData;
+        case 'modifiers-table':
+            // Add weapon-related data for the template
+            // Use the effective item ID (either provided or default selection)
+           // API.log('debug', `Using effective itemID: ${effectiveItemID} (original: ${itemID}, default: ${selectionData?.defaultSelection})`);
+           // API.log('debug', `Preparing weapon data with itemID: ${effectiveItemID}`);
+            const weaponData = await this.prepareWeaponData({ ...dialogData, itemID: effectiveItemID });
+           // API.log('debug', 'Weapon data prepared:', weaponData);
+            const finalData = {
+                ...baseData,
+                ...weaponData
+            };
+           // API.log('debug', 'Final modifiers-table data:', finalData);
+            return finalData;
             case 'add-modifier-inputs':
                 return baseData;
             case 'advantage-radio':
@@ -343,7 +360,7 @@ export class GenericRollRenderer {
                     selected: option.selected
                 }));
 
-            API.log('debug', `Retrieved ${items.length} items for ${dialogType} dialog`);
+           // API.log('debug', `Retrieved ${items.length} items for ${dialogType} dialog`);
             return items;
 
         } catch (error) {
@@ -478,4 +495,89 @@ export class GenericRollRenderer {
         divider.className = 'section-divider';
         return divider;
     }
+
+    /**
+     * Prepare weapon data for the modifiers table template
+     */
+    async prepareWeaponData(dialogData) {
+        try {
+            const { actor, itemID, type: dialogType } = dialogData;
+           // API.log('debug', `prepareWeaponData called with itemID: ${itemID}, dialogType: ${dialogType}`);
+            
+            // Determine which rows to show based on dialog type
+            const isDamageDialog = dialogType?.toLowerCase() === 'damage';
+            const showProficiencyRow = dialogType?.toLowerCase() === 'attack' || dialogType?.toLowerCase() === 'save';
+            API.log('debug', `prepareWeaponData called with Actor:`, actor);
+            if (!actor) {
+                return {
+                    isDamageDialog,
+                    showProficiencyRow,
+                    weaponDamageType: 'None',
+                    weaponDamageModifier: '0',
+                    proficiencyDescription: '',
+                    proficiencyModifier: '+0',
+                    isSmartWeapon: false,
+                    smartWeaponDex: 0,
+                    smartWeaponDexModifier: 0,
+                    smartWeaponProficiency: 0,
+                    attributeModifier: '',
+                    selectedAttribute: 'none',
+                    attributeDisabled: false
+                };
+            }
+
+            const item = itemID ? actor.items.get(itemID) : null;
+           // API.log('debug', `Item found: ${item ? item.name : 'null'}`);
+            const isSmart = item && item.type === 'weapon' && isSmartWeapon(actor, itemID);
+            const weaponDamageData = getWeaponDamageData(actor, itemID);
+           // API.log('debug', 'Weapon damage data:', weaponDamageData);
+            const proficiencyBonus = await getProficiencyBonus(actor);
+            const smartWeaponData = isSmart ? await getSmartWeaponData(actor, itemID) : null;
+            
+            // Determine weapon ability and set attribute
+            const weaponAbility = await getWeaponAbility(actor, itemID);
+            const abilityModifier = await getAbilityModifier(actor, weaponAbility);
+            const attributeDisabled = weaponAbility === 'none';
+           // API.log('debug', `Weapon ability: ${weaponAbility}, ability modifier: ${abilityModifier}, disabled: ${attributeDisabled}`);
+
+            return {
+                isDamageDialog,
+                showProficiencyRow,
+                weaponDamageType: weaponDamageData.type,
+                weaponDamageModifier: weaponDamageData.modifier,
+                proficiencyDescription: isSmart ? 'Smart Weapon' : '',
+                proficiencyModifier: isSmart ? '' : `${proficiencyBonus}`,
+                isSmartWeapon: isSmart,
+                smartWeaponDex: smartWeaponData?.dex || 0,
+                smartWeaponDexModifier: smartWeaponData?.dexModifier || 0,
+                smartWeaponProficiency: smartWeaponData?.proficiency || proficiencyBonus,
+                abilityModifier,
+                selectedAttribute: weaponAbility,
+                attributeDisabled
+            };
+        } catch (error) {
+            API.log('error', 'Failed to prepare weapon data', error);
+            return {
+                isDamageDialog: false,
+                showProficiencyRow: true,
+                weaponDamageType: 'None',
+                weaponDamageModifier: '0',
+                proficiencyDescription: '',
+                proficiencyModifier: '+0',
+                isSmartWeapon: false,
+                smartWeaponDex: 0,
+                smartWeaponDexModifier: 0,
+                smartWeaponProficiency: 0,
+                abilityModifier: '',
+                selectedAttribute: 'none',
+                attributeDisabled: false
+            };
+        }
+    }
+
+
+
+
+
+
 }

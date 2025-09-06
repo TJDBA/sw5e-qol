@@ -68,7 +68,7 @@ export class GenericRollHandler {
 
             // Render dialog
             const dialogHtml = await this.renderer.renderDialog(options);
-
+            API.log('debug', `Dialog HTML: ${dialogHtml}`);
             // Create and show dialog
             const result = await this.showDialog(dialogHtml, options);
 

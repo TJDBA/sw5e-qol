@@ -9,24 +9,78 @@
             </tr>
         </thead>
         <tbody id="modifiers-tbody">
-            <tr class="modifier-row attribute-row">
+            <!-- Weapon Damage Row - Only for damage dialog types -->
+            {{#if isDamageDialog}}
+            <tr class="modifier-row weapon-damage-row" data-modifier-id="weapon-damage">
                 <td>
-                    <label class="attribute-label">{{localize "SW5E-QOL.interface.attribute"}}:</label>
-                    <select class="attribute-select" id="attribute-select">
-                        <option value="str">{{localize "SW5E-QOL.attributes.str"}}</option>
-                        <option value="dex">{{localize "SW5E-QOL.attributes.dex"}}</option>
-                        <option value="con">{{localize "SW5E-QOL.attributes.con"}}</option>
-                        <option value="int">{{localize "SW5E-QOL.attributes.int"}}</option>
-                        <option value="wis">{{localize "SW5E-QOL.attributes.wis"}}</option>
-                        <option value="cha">{{localize "SW5E-QOL.attributes.cha"}}</option>
-                        <option value="none" selected>{{localize "SW5E-QOL.attributes.none"}}</option>
-                    </select>
+                    <span class="weapon-damage-description">Base Weapon Damage</span>
                 </td>
-                <td>{{localize "SW5E-QOL.attribute"}}</td>
-                <td>{{modifier}}</td>
+                <td>
+                    <span class="weapon-damage-type">{{weaponDamageType}}</span>
+                </td>
+                <td>
+                    <span class="weapon-damage-modifier">{{weaponDamageModifier}}</span>
+                </td>
                 <td>
                     <div class="toggle-switch">
-                        <input type="checkbox" class="modifier-toggle" checked data-modifier-id="attribute">
+                        <input type="checkbox" class="modifier-toggle" checked data-modifier-id="weapon-damage">
+                        <span class="toggle-slider"></span>
+                    </div>
+                </td>
+            </tr>
+            {{/if}}
+            
+            <!-- Proficiency Row - Only for attack and save dialog types -->
+            {{#if showProficiencyRow}}
+            <tr class="modifier-row proficiency-row" data-modifier-id="proficiency">
+                <td>
+                    <span class="proficiency-description">{{proficiencyDescription}}</span>
+                </td>
+                <td>Proficiency</td>
+                <td>
+                    <span class="proficiency-modifier">{{proficiencyModifier}}</span>
+                    {{#if isSmartWeapon}}
+                    <input type="number" class="smart-weapon-proficiency-input" value="{{smartWeaponProficiency}}" style="display: none;">
+                    {{/if}}
+                </td>
+                <td>
+                    <div class="toggle-switch">
+                        <input type="checkbox" class="modifier-toggle" checked data-modifier-id="proficiency">
+                        <span class="toggle-slider"></span>
+                    </div>
+                </td>
+            </tr>
+            {{/if}}
+            
+            <!-- Attribute Row -->
+            <tr class="modifier-row attribute-row" data-modifier-id="attribute">
+                <td>
+                    {{#if isSmartWeapon}}
+                    <span class="smart-weapon-attribute-description">Smart Weapon Dex: {{smartWeaponDex}}</span>
+                    {{else}}
+                    <label class="attribute-label">{{localize "SW5E-QOL.interface.attribute"}}:</label>
+                    <select class="attribute-select" id="attribute-select">
+                        <option value="str" {{#if (eq selectedAttribute "str")}}selected{{/if}}>{{localize "SW5E-QOL.attributes.str"}}</option>
+                        <option value="dex" {{#if (eq selectedAttribute "dex")}}selected{{/if}}>{{localize "SW5E-QOL.attributes.dex"}}</option>
+                        <option value="con" {{#if (eq selectedAttribute "con")}}selected{{/if}}>{{localize "SW5E-QOL.attributes.con"}}</option>
+                        <option value="int" {{#if (eq selectedAttribute "int")}}selected{{/if}}>{{localize "SW5E-QOL.attributes.int"}}</option>
+                        <option value="wis" {{#if (eq selectedAttribute "wis")}}selected{{/if}}>{{localize "SW5E-QOL.attributes.wis"}}</option>
+                        <option value="cha" {{#if (eq selectedAttribute "cha")}}selected{{/if}}>{{localize "SW5E-QOL.attributes.cha"}}</option>
+                        <option value="none" {{#if (eq selectedAttribute "none")}}selected{{/if}}>{{localize "SW5E-QOL.attributes.none"}}</option>
+                    </select>
+                    {{/if}}
+                </td>
+                <td>{{localize "SW5E-QOL.attribute"}}</td>
+                <td>
+                    {{#if isSmartWeapon}}
+                    <span class="smart-weapon-attribute-modifier">{{smartWeaponDexModifier}}</span>
+                    {{else}}
+                    <span class="attribute-modifier">{{abilityModifier}}</span>
+                    {{/if}}
+                </td>
+                <td>
+                    <div class="toggle-switch">
+                        <input type="checkbox" class="modifier-toggle" {{#unless attributeDisabled}}checked{{/unless}} data-modifier-id="attribute">
                         <span class="toggle-slider"></span>
                     </div>
                 </td>
