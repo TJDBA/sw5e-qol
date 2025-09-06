@@ -1,10 +1,10 @@
 <div class="item-selection-section">
     <div class="item-selection-row">
         <label class="item-label">{{localize itemLabelKey}}</label>
-        <select class="item-select" id="item-select">
-            <option value="">--none--</option>
+        <select class="item-select" id="item-select" {{#if isLocked}}disabled{{/if}}>
+            <option value="">--None--</option>
             {{#each items}}
-            <option value="{{this.id}}">{{this.name}}</option>
+            <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
             {{/each}}
         </select>
     </div>

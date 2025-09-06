@@ -139,7 +139,7 @@ export class GenericRollHandler {
 
                 // Create Foundry dialog without default buttons
                 const dialog = new Dialog({
-                    title: String.(`${options.type}: ${options.title}`),
+                    title: (`${options.type}: ${options.title}`).capitalize(),
                     content: dialogContent.outerHTML,
                     buttons: {}, // No default buttons - we use our own roll button
                     close: () => {

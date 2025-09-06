@@ -1,5 +1,6 @@
 import { API } from '../../api.js';
 import { featureManager } from '../../features/feature-manager.js';
+import { buildItemSelectionList } from '../../actors/item-util.js';
 
 /**
  * Generic Roll Dialog Renderer
@@ -220,10 +221,17 @@ export class GenericRollRenderer {
 
         switch (sectionName) {
             case 'item-selection':
+                const { actor, itemID } = dialogData;
+                const itemType = this.getItemTypeForDialog(dialogData.type);
+                const selectionData = actor ? buildItemSelectionList(actor, itemType, { itemID }) : null;
+                
                 return {
                     itemLabelKey: this.getItemLabelKey(dialogData.type),
                     items: this.getItemsForType(dialogData.type, dialogData),
-                    presets: this.getPresetsForType(dialogData.type)
+                    presets: this.getPresetsForType(dialogData.type),
+                    selectionData: selectionData,
+                    isLocked: selectionData?.isLocked || false,
+                    defaultSelection: selectionData?.defaultSelection || ''
                 };
             case 'modifiers-table':
                 return baseData;
@@ -237,6 +245,22 @@ export class GenericRollRenderer {
                 return {};
             default:
                 return baseData;
+        }
+    }
+
+    /**
+     * Get item type for dialog type
+     */
+    getItemTypeForDialog(dialogType) {
+        switch (dialogType.toLowerCase()) {
+            case 'attack':
+            case 'damage':
+                return 'weapon';
+            case 'skill':
+            case 'save':
+                return 'weapon'; // These might use different types in the future
+            default:
+                return 'weapon';
         }
     }
 
@@ -275,13 +299,53 @@ export class GenericRollRenderer {
     }
 
     /**
-     * Get items for dialog type (placeholder - will be implemented later)
+     * Get items for dialog type using item selection functions
      */
     getItemsForType(dialogType, dialogData = {}) {
         try {
-            // For now, return empty array for all dialog types
-            // This can be extended later for specific functionality
-            return [];
+            const { actor, itemID } = dialogData;
+            
+            if (!actor) {
+                API.log('warning', 'No actor provided for item selection');
+                return [];
+            }
+
+            // Determine item type based on dialog type
+            let itemType = 'weapon'; // Default to weapon
+            switch (dialogType.toLowerCase()) {
+                case 'attack':
+                case 'damage':
+                    itemType = 'weapon';
+                    break;
+                case 'skill':
+                case 'save':
+                    // These might use different item types in the future
+                    itemType = 'weapon';
+                    break;
+                default:
+                    itemType = 'weapon';
+            }
+
+            // Build item selection list
+            const selectionData = buildItemSelectionList(actor, itemType, { itemID });
+            
+            if (!selectionData || !selectionData.options) {
+                API.log('warning', 'No item selection data returned');
+                return [];
+            }
+
+            // Convert to format expected by template
+            const items = selectionData.options
+                .filter(option => option.value !== '') // Exclude the "--None--" option
+                .map(option => ({
+                    id: option.value,
+                    name: option.text,
+                    selected: option.selected
+                }));
+
+            API.log('debug', `Retrieved ${items.length} items for ${dialogType} dialog`);
+            return items;
+
         } catch (error) {
             API.log('error', 'Failed to get items for dialog type', error);
             return [];

@@ -70,5 +70,22 @@
         "school": ".labels.school"
       }
     }
+  },
+  "ActorItem": {
+    "weapon": {
+      "basePath": "{Actor}.itemTypes.weapon",
+      "isArray": true,
+      "subpaths": {
+        "id": ".id",
+        "name": ".name",
+        "attackBonus": ".system.attackBonus",
+        "damage": ".system.damage[]",
+        "criticalThreshold": ".system.critical.threshold",
+        "properties": ".system.properties[]",
+        "save": ".system.save[]",
+        "ability": ".system.ability",
+        "ammo": ".system.ammo[]"
+      }
+    }
   }
 }

@@ -96,10 +96,12 @@ function getArrayFromPath(object, pathConfig, additionalFilter = null) {
     try {
         // Get the base array
         const basePath = resolveDataPath(pathConfig.basePath, 'object');
-        let array = getProperty(object, basePath.replace('object', ''));
+        // Remove the leading 'object.' from the path since we're passing the object directly
+        const cleanPath = basePath.startsWith('object.') ? basePath.substring(7) : basePath;
+        let array = getProperty(object, cleanPath);
 
         if (!Array.isArray(array)) {
-            API.log('warning', `Base path does not resolve to an array: ${basePath}`);
+            API.log('warning', `Base path does not resolve to an array: ${cleanPath}`);
             return [];
         }
 
