@@ -541,10 +541,12 @@ export class GenericInputHandler {
                     
                     if (isCollapsed) {
                         content.style.display = 'block';
-                        toggle.textContent = 'Collapse';
+                        toggle.textContent = '▼';
+                        toggle.style.transform = 'rotate(0deg)';
                     } else {
                         content.style.display = 'none';
-                        toggle.textContent = 'Expand';
+                        toggle.textContent = '▶';
+                        toggle.style.transform = 'rotate(0deg)';
                     }
                 }
             }

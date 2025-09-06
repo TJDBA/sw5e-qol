@@ -301,7 +301,7 @@ export class GenericRollRenderer {
      */
     async renderFeaturesSection(dialogData) {
         try {
-            const { actor, type: dialogType, themeName, featureState } = dialogData;
+            const { actor, type: dialogType, themeName, featureState, theme } = dialogData;
             
             // Get available features for this actor and dialog type
             const availableFeatures = featureManager.getAvailableFeatures(actor, dialogType);
@@ -311,44 +311,49 @@ export class GenericRollRenderer {
             }
 
             // Get theme name from dialog data or default to 'bendu'
-            const theme = themeName || 'bendu';
+            const appliedTheme = theme || themeName || 'bendu';
             
             let featuresHTML = `
                 <div class="features-section" style="
                     margin: 8px 0;
-                    border: 1px solid var(--${theme}-border, #666666);
+                    border: 1px solid var(--${appliedTheme}-border-dark, #666666);
                     border-radius: 4px;
-                    background: var(--${theme}-bg-secondary, #3a3a3a);
+                    background: var(--${appliedTheme}-bg-secondary, #3a3a3a);
                 ">
                     <div class="section-header" style="
                         display: flex;
-                        justify-content: space-between;
                         align-items: center;
                         padding: 8px 12px;
-                        background: var(--${theme}-bg-tertiary, #2a2a2a);
-                        border-bottom: 1px solid var(--${theme}-border, #666666);
+                        background: var(--${appliedTheme}-bg-tertiary, #2a2a2a);
+                        border: 1px solid var(--${appliedTheme}-border-light, #888888);
                         cursor: pointer;
                     " data-section="features">
+                        <button type="button" class="section-toggle" style="
+                            background: none;
+                            border: none;
+                            color: var(--${appliedTheme}-accent, #999999);
+                            cursor: pointer;
+                            padding: 4px;
+                            font-size: 12px;
+                            transition: transform 0.2s ease;
+                            width: 5%;
+                            display: flex;
+                            justify-content: flex-start;
+                        " data-target="features-content">
+                            ▼
+                        </button>
                         <h3 style="
                             margin: 0; 
-                            color: var(--${theme}-accent, #999999); 
+                            color: var(--${appliedTheme}-accent, #999999); 
+                            border-bottom: 1px solid var(--${appliedTheme}-border-light, #888888);
                             font-size: 1.1em;
                             font-weight: 600;
+                            width: 90%;
+                            text-align: center;
                         ">
                             Features
                         </h3>
-                        <button type="button" class="section-toggle" style="
-                            background: var(--${theme}-bg-secondary, #4a4a4a);
-                            color: var(--${theme}-text-primary, #f0f0f0);
-                            border: 1px solid var(--${theme}-border-light, #888888);
-                            padding: 4px 8px;
-                            border-radius: 3px;
-                            font-size: 0.85em;
-                            cursor: pointer;
-                            transition: all 0.2s ease;
-                        " data-target="features-content">
-                            Collapse
-                        </button>
+                        <div style="width: 5%;"></div>
                     </div>
                     <div class="features-content" style="
                         display: block;
@@ -375,7 +380,7 @@ export class GenericRollRenderer {
                         const featureHTML = await feature.htmlTemplate({
                             actor: actor,
                             dialogType: dialogType,
-                            themeName: theme,
+                            themeName: appliedTheme,
                             featureData: featureData
                         });
                         featuresHTML += featureHTML;

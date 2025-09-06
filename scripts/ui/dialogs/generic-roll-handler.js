@@ -63,6 +63,9 @@ export class GenericRollHandler {
             const appliedTheme = themeManager.setThemeForDialog(this.currentDialogId, options);
             API.log('info', `Applied theme: ${appliedTheme} for dialog type: ${options.type}`);
 
+            // Add the applied theme to options for the renderer
+            options.theme = appliedTheme;
+
             // Render dialog
             const dialogHtml = await this.renderer.renderDialog(options);
 
@@ -136,7 +139,7 @@ export class GenericRollHandler {
 
                 // Create Foundry dialog without default buttons
                 const dialog = new Dialog({
-                    title: `${options.type}: ${options.title}`,
+                    title: String.(`${options.type}: ${options.title}`),
                     content: dialogContent.outerHTML,
                     buttons: {}, // No default buttons - we use our own roll button
                     close: () => {
