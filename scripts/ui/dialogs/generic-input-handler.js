@@ -29,6 +29,7 @@ export class GenericInputHandler {
             this.setupAdvantageRadios();
             this.setupRollModeSelect();
             this.setupRollButton();
+            this.setupCollapsibleSections();
             this.updateRollButtonLabel();
         } catch (error) {
             API.log('error', 'Failed to setup event listeners', error);
@@ -521,5 +522,32 @@ export class GenericInputHandler {
      */
     deletePreset() {
         API.notify('Delete preset functionality will be implemented later', 'info');
+    }
+
+    /**
+     * Setup collapsible section functionality
+     */
+    setupCollapsibleSections() {
+        // Handle section header clicks
+        this.dialogElement.addEventListener('click', (event) => {
+            if (event.target.closest('.section-header')) {
+                const header = event.target.closest('.section-header');
+                const sectionName = header.dataset.section;
+                const content = this.dialogElement.querySelector(`[data-section="${sectionName}-content"]`);
+                const toggle = header.querySelector('.section-toggle');
+                
+                if (content && toggle) {
+                    const isCollapsed = content.style.display === 'none';
+                    
+                    if (isCollapsed) {
+                        content.style.display = 'block';
+                        toggle.textContent = 'Collapse';
+                    } else {
+                        content.style.display = 'none';
+                        toggle.textContent = 'Expand';
+                    }
+                }
+            }
+        });
     }
 }

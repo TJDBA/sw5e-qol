@@ -929,3 +929,25 @@ select:focus {
     color: #cccccc;
     opacity: 1;
 }
+
+/* Collapsible Sections */
+.generic-roll-dialog .section-header {
+    user-select: none;
+}
+
+.generic-roll-dialog .section-header:hover {
+    background: var(--dialog-bg-hover, rgba(255, 255, 255, 0.05)) !important;
+}
+
+.generic-roll-dialog .section-toggle:hover {
+    background: var(--dialog-bg-hover, rgba(255, 255, 255, 0.1)) !important;
+    border-color: var(--dialog-accent, #999999) !important;
+}
+
+.generic-roll-dialog .features-section {
+    transition: all 0.2s ease;
+}
+
+.generic-roll-dialog .features-content {
+    transition: all 0.2s ease;
+}

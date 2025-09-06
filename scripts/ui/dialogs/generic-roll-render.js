@@ -165,10 +165,29 @@ export class GenericRollRenderer {
     getSectionOrder(dialogType) {
         switch (dialogType.toLowerCase()) {
             case 'attack':
-            case 'skill':
-            case 'save':
                 return [
                     'item-selection',
+                    //'save-attack',
+                    'modifiers-table',
+                    'add-modifier-inputs',
+                    'features',
+                    'advantage-radio',
+                    'roll-mode-dropdown',
+                    'roll-button'
+                ];
+            case 'skill':
+                return [
+                    //'skill-check',
+                    'modifiers-table',
+                    'add-modifier-inputs',
+                    'features',
+                    'advantage-radio',
+                    'roll-mode-dropdown',
+                    'roll-button'
+                ];
+            case 'save':
+                return [
+                    //'save-type',
                     'modifiers-table',
                     'add-modifier-inputs',
                     'features',
@@ -278,7 +297,7 @@ export class GenericRollRenderer {
     }
 
     /**
-     * Render the features section
+     * Render the features section with collapsible functionality
      */
     async renderFeaturesSection(dialogData) {
         try {
@@ -295,31 +314,46 @@ export class GenericRollRenderer {
             const theme = themeName || 'bendu';
             
             let featuresHTML = `
-                <div class="features-section">
+                <div class="features-section" style="
+                    margin: 8px 0;
+                    border: 1px solid var(--${theme}-border, #666666);
+                    border-radius: 4px;
+                    background: var(--${theme}-bg-secondary, #3a3a3a);
+                ">
                     <div class="section-header" style="
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        margin-bottom: 8px;
-                        padding: 4px 0;
-                        border-bottom: 1px solid var(--${theme}-border-light, #888888);
-                    ">
-                        <h3 style="margin: 0; color: var(--${theme}-accent, #999999); font-size: 1.1em;">
+                        padding: 8px 12px;
+                        background: var(--${theme}-bg-tertiary, #2a2a2a);
+                        border-bottom: 1px solid var(--${theme}-border, #666666);
+                        cursor: pointer;
+                    " data-section="features">
+                        <h3 style="
+                            margin: 0; 
+                            color: var(--${theme}-accent, #999999); 
+                            font-size: 1.1em;
+                            font-weight: 600;
+                        ">
                             Features
                         </h3>
-                        <button type="button" class="toggle-features" style="
+                        <button type="button" class="section-toggle" style="
                             background: var(--${theme}-bg-secondary, #4a4a4a);
                             color: var(--${theme}-text-primary, #f0f0f0);
                             border: 1px solid var(--${theme}-border-light, #888888);
-                            padding: 2px 8px;
+                            padding: 4px 8px;
                             border-radius: 3px;
-                            font-size: 0.9em;
+                            font-size: 0.85em;
                             cursor: pointer;
-                        ">
+                            transition: all 0.2s ease;
+                        " data-target="features-content">
                             Collapse
                         </button>
                     </div>
-                    <div class="features-content" style="display: block;">
+                    <div class="features-content" style="
+                        display: block;
+                        padding: 8px;
+                    " data-section="features-content">
             `;
 
             // Loop through available features
@@ -327,7 +361,8 @@ export class GenericRollRenderer {
                 try {
                     // Get feature state from previous dialog or default
                     const featureData = featureState?.[feature.id] || {};
-                    
+                    featureData.actor = actor; // Pass actor for level calculations
+
                     // Validate feature
                     const validation = feature.validationLogic({
                         actor: actor,
@@ -336,8 +371,8 @@ export class GenericRollRenderer {
                     });
                     
                     if (validation === true) {
-                        // Render feature HTML
-                        const featureHTML = feature.htmlTemplate({
+                        // Render feature HTML (handle async)
+                        const featureHTML = await feature.htmlTemplate({
                             actor: actor,
                             dialogType: dialogType,
                             themeName: theme,
@@ -349,9 +384,7 @@ export class GenericRollRenderer {
                         API.log('warning', `Feature ${feature.name} validation failed: ${validation}`);
                     }
                 } catch (error) {
-                    // Log error and render error HTML
-                    API.log('error', `Failed to render feature ${feature.name}:`, error);
-                    featuresHTML += feature.renderErrorHTML(theme, error);
+                    API.log('error', `Error rendering feature ${feature.name}:`, error);
                 }
             }
 
