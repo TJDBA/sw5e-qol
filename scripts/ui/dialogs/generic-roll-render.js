@@ -1,6 +1,6 @@
 import { API } from '../../api.js';
 import { featureManager } from '../../features/feature-manager.js';
-import { buildItemSelectionList, getWeaponDamageData, isSmartWeapon, getSmartWeaponData } from '../../actors/item-util.js';
+import { buildItemSelectionList, getWeaponDamageData, getAllWeaponDamageParts, isSmartWeapon, getSmartWeaponData } from '../../actors/item-util.js';
 import { getAbilityModifier, getWeaponAbility, getProficiencyBonus } from '../../actors/actor-util.js';
 
 /**
@@ -514,6 +514,7 @@ export class GenericRollRenderer {
                     showProficiencyRow,
                     weaponDamageType: 'None',
                     weaponDamageModifier: '0',
+                    additionalDamageParts: [],
                     proficiencyDescription: '',
                     proficiencyModifier: '+0',
                     isSmartWeapon: false,
@@ -530,7 +531,9 @@ export class GenericRollRenderer {
            // // API.log('debug', `Item found: ${item ? item.name : 'null'}`);
             const isSmart = item && item.type === 'weapon' && isSmartWeapon(actor, itemID);
             const weaponDamageData = getWeaponDamageData(actor, itemID);
+            const additionalDamageParts = isDamageDialog ? getAllWeaponDamageParts(actor, itemID).filter(part => !part.isBaseDamage) : [];
            // // API.log('debug', 'Weapon damage data:', weaponDamageData);
+           // // API.log('debug', 'Additional damage parts:', additionalDamageParts);
             const proficiencyBonus = await getProficiencyBonus(actor);
             const smartWeaponData = isSmart ? await getSmartWeaponData(actor, itemID) : null;
             
@@ -545,6 +548,7 @@ export class GenericRollRenderer {
                 showProficiencyRow,
                 weaponDamageType: weaponDamageData.type,
                 weaponDamageModifier: weaponDamageData.modifier,
+                additionalDamageParts: additionalDamageParts,
                 proficiencyDescription: isSmart ? 'Smart Weapon' : '',
                 proficiencyModifier: isSmart ? '' : `${proficiencyBonus}`,
                 isSmartWeapon: isSmart,
@@ -562,6 +566,7 @@ export class GenericRollRenderer {
                 showProficiencyRow: true,
                 weaponDamageType: 'None',
                 weaponDamageModifier: '0',
+                additionalDamageParts: [],
                 proficiencyDescription: '',
                 proficiencyModifier: '+0',
                 isSmartWeapon: false,

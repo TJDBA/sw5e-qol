@@ -85,6 +85,30 @@
                     </div>
                 </td>
             </tr>
+            
+            <!-- Additional Weapon Damage Parts - Only for damage dialog types -->
+            {{#if isDamageDialog}}
+            {{#each additionalDamageParts}}
+            <tr class="modifier-row additional-damage-row" data-modifier-id="additional-damage-{{index}}">
+                <td>
+                    <span class="additional-damage-description">Additional Weapon Damage ({{type}})</span>
+                </td>
+                <td>
+                    <span class="additional-damage-type">{{type}}</span>
+                </td>
+                <td>
+                    <span class="additional-damage-modifier">{{modifier}}</span>
+                </td>
+                <td>
+                    <div class="toggle-switch">
+                        <input type="checkbox" class="modifier-toggle" checked data-modifier-id="additional-damage-{{index}}">
+                        <span class="toggle-slider"></span>
+                    </div>
+                </td>
+            </tr>
+            {{/each}}
+            {{/if}}
+            
             {{#each modifiers}}
             <tr data-modifier-id="{{@index}}" class="modifier-row">
                 <td>{{name}}</td>

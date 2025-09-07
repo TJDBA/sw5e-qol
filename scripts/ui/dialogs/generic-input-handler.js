@@ -1,5 +1,5 @@
 import { API } from '../../api.js';
-import { getWeaponDamageData, isSmartWeapon, getSmartWeaponData } from '../../actors/item-util.js';
+import { getWeaponDamageData, getAllWeaponDamageParts, isSmartWeapon, getSmartWeaponData } from '../../actors/item-util.js';
 import { getAbilityModifier, getWeaponAbility, getProficiencyBonus } from '../../actors/actor-util.js';
 
 /**
@@ -150,6 +150,15 @@ export class GenericInputHandler {
             if (modifierId === 'proficiency') {
                 // For proficiency row, we don't have a modifier object, just update the row state
                 // API.log('debug', 'Handling proficiency row toggle');
+                this.toggleRowState(row, isChecked);
+                this.updateRollButtonLabel();
+                return;
+            }
+
+            // Handle special case for weapon damage row
+            if (modifierId === 'weapon-damage') {
+                // For weapon damage row, we don't have a modifier object, just update the row state
+                // API.log('debug', 'Handling weapon damage row toggle');
                 this.toggleRowState(row, isChecked);
                 this.updateRollButtonLabel();
                 return;
@@ -639,6 +648,16 @@ export class GenericInputHandler {
                 };
             }
             
+            // Handle additional damage parts
+            if (modifierId && modifierId.startsWith('additional-damage-')) {
+                const modifierElement = row.querySelector('.additional-damage-modifier');
+                const typeElement = row.querySelector('.additional-damage-type');
+                return {
+                    modifier: modifierElement?.textContent?.trim() || '',
+                    modifierType: typeElement?.textContent?.trim() || 'kinetic'
+                };
+            }
+            
             if (modifierId === 'proficiency') {
                 const modifierElement = row.querySelector('.proficiency-modifier');
                 const smartInput = row.querySelector('.smart-weapon-proficiency-input');
@@ -817,9 +836,7 @@ export class GenericInputHandler {
             combined += combinedDice;
         }
         
-        if (numberSum > 0) {
-            combined += `+${numberSum}`;
-        } else if (numberSum < 0) {
+        if (numberSum !== 0) {
             combined += `${numberSum}`;
         }
         
@@ -1045,6 +1062,58 @@ export class GenericInputHandler {
     }
 
     /**
+     * Update additional damage parts rows
+     */
+    updateAdditionalDamageParts(actor, itemID) {
+        try {
+            const additionalDamageParts = getAllWeaponDamageParts(actor, itemID).filter(part => !part.isBaseDamage);
+            const tbody = this.dialogElement.querySelector('#modifiers-tbody');
+            
+            if (!tbody) return;
+
+            // Remove existing additional damage rows
+            const existingRows = tbody.querySelectorAll('.additional-damage-row');
+            existingRows.forEach(row => row.remove());
+
+            // Find the position after the attribute row
+            const attributeRow = tbody.querySelector('.attribute-row');
+            if (!attributeRow) return;
+
+            // Insert new additional damage rows after the attribute row
+            additionalDamageParts.forEach((part, index) => {
+                const row = document.createElement('tr');
+                row.className = 'modifier-row additional-damage-row';
+                row.dataset.modifierId = `additional-damage-${part.index}`;
+
+                row.innerHTML = `
+                    <td>
+                        <span class="additional-damage-description">Additional Weapon Damage (${part.type})</span>
+                    </td>
+                    <td>
+                        <span class="additional-damage-type">${part.type}</span>
+                    </td>
+                    <td>
+                        <span class="additional-damage-modifier">${part.modifier}</span>
+                    </td>
+                    <td>
+                        <div class="toggle-switch">
+                            <input type="checkbox" class="modifier-toggle" checked data-modifier-id="additional-damage-${part.index}">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </td>
+                `;
+
+                // Insert after the attribute row
+                attributeRow.insertAdjacentElement('afterend', row);
+            });
+
+            API.log('debug', `Updated ${additionalDamageParts.length} additional damage parts`);
+        } catch (error) {
+            API.log('error', 'Failed to update additional damage parts', error);
+        }
+    }
+
+    /**
      * Update proficiency row
      */
     async updateProficiencyRow(actor, itemID) {
@@ -1155,6 +1224,7 @@ export class GenericInputHandler {
     async updateWeaponRows(actor, itemID) {
         try {
             this.updateWeaponDamageRow(actor, itemID);
+            this.updateAdditionalDamageParts(actor, itemID);
             await this.updateProficiencyRow(actor, itemID);
             await this.updateAttributeRow(actor, itemID);
         } catch (error) {

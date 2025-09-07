@@ -373,6 +373,56 @@ export function getWeaponDamageData(actor, itemID) {
 }
 
 /**
+ * Get all weapon damage parts for the selected item
+ * @param {Object} actor - The actor object
+ * @param {string} itemID - The weapon item ID
+ * @returns {Array} Array of damage part objects
+ */
+export function getAllWeaponDamageParts(actor, itemID) {
+    try {
+        if (!actor || !itemID) {
+            return [];
+        }
+
+        const item = actor.items.get(itemID);
+        if (!item || item.type !== 'weapon') {
+            return [];
+        }
+
+        const damage = item.system?.damage;
+        if (!damage || !damage.parts || damage.parts.length === 0) {
+            return [];
+        }
+
+        // Process all damage parts
+        const damageParts = damage.parts.map((part, index) => {
+            const damageType = part[1] || 'Untyped';
+            let damageFormula = part[0] || '0';
+            
+            // Check if damage formula contains "+@mod" and remove it if it does
+            if (damageFormula.includes('@mod')) {
+                damageFormula = damageFormula.replace(/\s*\+\s*@mod\s*/g, '');
+                damageFormula = damageFormula.replace(' ', '');
+            }
+
+            return {
+                index: index,
+                type: damageType,
+                modifier: damageFormula,
+                isEnabled: true,
+                isBaseDamage: index === 0
+            };
+        });
+
+        API.log('debug', `Retrieved ${damageParts.length} damage parts:`, damageParts);
+        return damageParts;
+    } catch (error) {
+        API.log('error', 'Failed to get all weapon damage parts', error);
+        return [];
+    }
+}
+
+/**
  * Check if weapon is a smart weapon
  * @param {Object} actor - The actor object
  * @param {string} itemID - The weapon item ID
