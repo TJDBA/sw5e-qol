@@ -127,7 +127,7 @@ export const API = {
     },
 
     /**
-     * Generic Roll Handler class for creating roll dialogs
+     * Generic Roll Handler class for creating roll dialogs (legacy)
      */
     GenericRollHandler
 };

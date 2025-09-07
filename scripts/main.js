@@ -6,7 +6,7 @@
 console.log('SW5E QoL Module: main.js is loading...');
 
 // Don't import anything during the import phase - wait for FoundryVTT to be ready
-let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, themeManager, CardHandler, CardRenderer;
+let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, GenericRollDialog, themeManager, CardHandler, CardRenderer;
 
 /**
  * Initialize the module
@@ -48,6 +48,14 @@ Hooks.once('init', async function() {
             console.log('SW5E QoL Module: GenericInputHandler imported successfully');
         } catch (error) {
             console.error('SW5E QoL Module: Failed to import GenericInputHandler', error);
+        }
+        
+        try {
+            const dialogModule = await import('./ui/dialogs/generic-roll-dialog.js');
+            GenericRollDialog = dialogModule.GenericRollDialog;
+            console.log('SW5E QoL Module: GenericRollDialog imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import GenericRollDialog', error);
         }
         
         try {
@@ -106,6 +114,7 @@ Hooks.once('init', async function() {
                 ...(GenericRollHandler && { GenericRollHandler }),
                 ...(GenericRollRenderer && { GenericRollRenderer }),
                 ...(GenericInputHandler && { GenericInputHandler }),
+                ...(GenericRollDialog && { GenericRollDialog }),
                 ...(themeManager && { themeManager }),
                 ...(CardHandler && { CardHandler }),
                 ...(CardRenderer && { CardRenderer }),
@@ -120,6 +129,7 @@ Hooks.once('init', async function() {
                         GenericRollHandler: !!GenericRollHandler,
                         GenericRollRenderer: !!GenericRollRenderer,
                         GenericInputHandler: !!GenericInputHandler,
+                        GenericRollDialog: !!GenericRollDialog,
                         themeManager: !!themeManager,
                         CardHandler: !!CardHandler,
                         CardRenderer: !!CardRenderer
