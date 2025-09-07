@@ -43,7 +43,7 @@ export class GenericRollRenderer {
 
             for (const section of sections) {
                 const template = await this.loadTemplate(section);
-               // API.log('debug', `Loaded template for ${section}:`, template);
+               // // API.log('debug', `Loaded template for ${section}:`, template);
                 this.sectionTemplates.set(section, template);
             }
         } catch (error) {
@@ -87,7 +87,7 @@ export class GenericRollRenderer {
             
             // Render base dialog
             const baseTemplate = await this.loadTemplate('generic-roll-base');
-           // API.log('debug', 'Base template path:', baseTemplate);
+           // // API.log('debug', 'Base template path:', baseTemplate);
             const baseHtml = await renderTemplate(baseTemplate, dialogData);
             
             // Create temporary container to parse HTML
@@ -138,7 +138,7 @@ export class GenericRollRenderer {
                 }
 
                 // Prepare section data
-               // API.log('debug', `Preparing section data for ${sectionName}`, dialogData);
+               // // API.log('debug', `Preparing section data for ${sectionName}`, dialogData);
                 const sectionData = await this.prepareSectionData(sectionName, dialogData);
                 
                 // Check if FoundryVTT templates are available
@@ -147,8 +147,8 @@ export class GenericRollRenderer {
                 }
                 
                 // Render section
-               // API.log('debug', `Rendering section ${sectionName} with data:`, sectionData);
-               // API.log('debug', `Template path: ${template}`);
+               // // API.log('debug', `Rendering section ${sectionName} with data:`, sectionData);
+               // // API.log('debug', `Template path: ${template}`);
                 const sectionHtml = await renderTemplate(template, sectionData);
                 
                 // Insert section with divider
@@ -242,15 +242,15 @@ export class GenericRollRenderer {
         case 'modifiers-table':
             // Add weapon-related data for the template
             // Use the effective item ID (either provided or default selection)
-           // API.log('debug', `Using effective itemID: ${effectiveItemID} (original: ${itemID}, default: ${selectionData?.defaultSelection})`);
-           // API.log('debug', `Preparing weapon data with itemID: ${effectiveItemID}`);
+           // // API.log('debug', `Using effective itemID: ${effectiveItemID} (original: ${itemID}, default: ${selectionData?.defaultSelection})`);
+           // // API.log('debug', `Preparing weapon data with itemID: ${effectiveItemID}`);
             const weaponData = await this.prepareWeaponData({ ...dialogData, itemID: effectiveItemID });
-           // API.log('debug', 'Weapon data prepared:', weaponData);
+           // // API.log('debug', 'Weapon data prepared:', weaponData);
             const finalData = {
                 ...baseData,
                 ...weaponData
             };
-           // API.log('debug', 'Final modifiers-table data:', finalData);
+           // // API.log('debug', 'Final modifiers-table data:', finalData);
             return finalData;
             case 'add-modifier-inputs':
                 return baseData;
@@ -360,7 +360,7 @@ export class GenericRollRenderer {
                     selected: option.selected
                 }));
 
-           // API.log('debug', `Retrieved ${items.length} items for ${dialogType} dialog`);
+           // // API.log('debug', `Retrieved ${items.length} items for ${dialogType} dialog`);
             return items;
 
         } catch (error) {
@@ -502,12 +502,12 @@ export class GenericRollRenderer {
     async prepareWeaponData(dialogData) {
         try {
             const { actor, itemID, type: dialogType } = dialogData;
-           // API.log('debug', `prepareWeaponData called with itemID: ${itemID}, dialogType: ${dialogType}`);
+           // // API.log('debug', `prepareWeaponData called with itemID: ${itemID}, dialogType: ${dialogType}`);
             
             // Determine which rows to show based on dialog type
             const isDamageDialog = dialogType?.toLowerCase() === 'damage';
             const showProficiencyRow = dialogType?.toLowerCase() === 'attack' || dialogType?.toLowerCase() === 'save';
-            API.log('debug', `prepareWeaponData called with Actor:`, actor);
+            // API.log('debug', `prepareWeaponData called with Actor:`, actor);
             if (!actor) {
                 return {
                     isDamageDialog,
@@ -527,10 +527,10 @@ export class GenericRollRenderer {
             }
 
             const item = itemID ? actor.items.get(itemID) : null;
-           // API.log('debug', `Item found: ${item ? item.name : 'null'}`);
+           // // API.log('debug', `Item found: ${item ? item.name : 'null'}`);
             const isSmart = item && item.type === 'weapon' && isSmartWeapon(actor, itemID);
             const weaponDamageData = getWeaponDamageData(actor, itemID);
-           // API.log('debug', 'Weapon damage data:', weaponDamageData);
+           // // API.log('debug', 'Weapon damage data:', weaponDamageData);
             const proficiencyBonus = await getProficiencyBonus(actor);
             const smartWeaponData = isSmart ? await getSmartWeaponData(actor, itemID) : null;
             
@@ -538,7 +538,7 @@ export class GenericRollRenderer {
             const weaponAbility = await getWeaponAbility(actor, itemID);
             const abilityModifier = await getAbilityModifier(actor, weaponAbility);
             const attributeDisabled = weaponAbility === 'none';
-           // API.log('debug', `Weapon ability: ${weaponAbility}, ability modifier: ${abilityModifier}, disabled: ${attributeDisabled}`);
+           // // API.log('debug', `Weapon ability: ${weaponAbility}, ability modifier: ${abilityModifier}, disabled: ${attributeDisabled}`);
 
             return {
                 isDamageDialog,

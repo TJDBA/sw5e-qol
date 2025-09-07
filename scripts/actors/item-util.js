@@ -351,8 +351,9 @@ export function getWeaponDamageData(actor, itemID) {
         API.log('debug', `Original damage formula: "${damageFormula}"`);
 
         // Check if damage formula contains "+@mod" and remove it if it does
-        if (damageFormula.includes('+@mod')) {
+        if (damageFormula.includes('@mod')) {
             damageFormula = damageFormula.replace(/\s*\+\s*@mod\s*/g, '');
+            damageFormula = damageFormula.replace(' ', '');
             API.log('debug', `After removing +@mod: "${damageFormula}"`);
         }
 

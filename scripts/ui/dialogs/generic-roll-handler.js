@@ -68,7 +68,7 @@ export class GenericRollHandler {
 
             // Render dialog
             const dialogHtml = await this.renderer.renderDialog(options);
-            API.log('debug', `Dialog HTML: ${dialogHtml}`);
+            // API.log('debug', `Dialog HTML: ${dialogHtml}`);
             // Create and show dialog
             const result = await this.showDialog(dialogHtml, options);
 
@@ -191,7 +191,7 @@ export class GenericRollHandler {
                         const themeName = themeManager.activeDialogs.get(this.currentDialogId);
                         if (themeName) {
                             themeManager.applyThemeToDialog(dialogElement, themeName);
-                            API.log('debug', `Applied theme ${themeName} to dialog element:`, dialogElement);
+                            // API.log('debug', `Applied theme ${themeName} to dialog element:`, dialogElement);
                         } else {
                             API.log('warning', `No theme found for dialog ${this.currentDialogId}`);
                         }
@@ -213,7 +213,7 @@ export class GenericRollHandler {
             if (this.currentDialog && this.currentDialog.element && this.currentDialog.element.length > 0) {
                 const dialogContent = this.currentDialog.element.find('.window-content');
                 if (dialogContent.length > 0) {
-                    API.log('debug', 'Dialog is ready, setting up input handler');
+                    // API.log('debug', 'Dialog is ready, setting up input handler');
                     this.setupInputHandler(null, options);
                     return;
                 }
@@ -235,15 +235,16 @@ export class GenericRollHandler {
             // Find the actual dialog content element in the DOM
             // When using jQuery: true, the dialog content is in .window-content
             const actualDialogElement = this.currentDialog?.element?.find('.window-content')?.[0];
+            // API.log('debug', 'Actual dialog element:', actualDialogElement);
 
             if (!actualDialogElement) {
                 API.log('warning', 'Could not find dialog content element');
-                API.log('debug', 'Dialog reference:', this.currentDialog);
-                API.log('debug', 'Dialog element:', this.currentDialog?.element);
+                // API.log('debug', 'Dialog reference:', this.currentDialog);
+                // API.log('debug', 'Dialog element:', this.currentDialog?.element);
                 return;
             }
 
-            API.log('debug', 'Found dialog content element:', actualDialogElement);
+            // API.log('debug', 'Found dialog content element:', actualDialogElement);
 
             // Create input handler with the actual DOM element
             this.inputHandler = new GenericInputHandler(actualDialogElement, this);

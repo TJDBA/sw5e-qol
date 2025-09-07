@@ -62,14 +62,14 @@ export class GenericInputHandler {
     
         // Create delegated click handler for toggle sliders and checkboxes
         const clickHandler = (event) => {
-            API.log('debug', 'Click event detected on:', event.target);
-            API.log('debug', 'Target classes:', event.target.className);
+            // API.log('debug', 'Click event detected on:', event.target);
+            // API.log('debug', 'Target classes:', event.target.className);
             
             // If clicked on the toggle-switch div, find the checkbox inside
             if (event.target.classList.contains('toggle-switch')) {
                 const checkbox = event.target.querySelector('.modifier-toggle');
                 if (checkbox) {
-                    API.log('debug', 'Toggling checkbox via toggle-switch click');
+                    // API.log('debug', 'Toggling checkbox via toggle-switch click');
                     checkbox.checked = !checkbox.checked;
                     checkbox.dispatchEvent(new Event('change', { bubbles: true }));
                 }
@@ -78,14 +78,14 @@ export class GenericInputHandler {
             else if (event.target.classList.contains('toggle-slider')) {
                 const checkbox = event.target.previousElementSibling;
                 if (checkbox && checkbox.classList.contains('modifier-toggle')) {
-                    API.log('debug', 'Toggling checkbox via slider click');
+                    // API.log('debug', 'Toggling checkbox via slider click');
                     checkbox.checked = !checkbox.checked;
                     checkbox.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             }
             // If clicked directly on a modifier-toggle checkbox, let the change event handle it
             else if (event.target.classList.contains('modifier-toggle')) {
-                API.log('debug', 'Direct checkbox click detected');
+                // API.log('debug', 'Direct checkbox click detected');
                 // The change event will be triggered automatically
                 return;
             }
@@ -93,9 +93,9 @@ export class GenericInputHandler {
     
         // Create delegated change handler for checkboxes
         const changeHandler = (event) => {
-            API.log('debug', 'Change event detected on:', event.target);
-            API.log('debug', 'Target classes:', event.target.className);
-            API.log('debug', 'Target dataset:', event.target.dataset);
+            // API.log('debug', 'Change event detected on:', event.target);
+            // API.log('debug', 'Target classes:', event.target.className);
+            // API.log('debug', 'Target dataset:', event.target.dataset);
             
             if (event.target.classList.contains('modifier-toggle')) {
                 this.handleToggleChange(event);
@@ -119,8 +119,8 @@ export class GenericInputHandler {
         const featureId = event.target.dataset.featureId;
         const isChecked = event.target.checked;
         
-        API.log('debug', 'Toggle switch change event detected');
-        API.log('debug', `Toggle changed - Modifier ID: ${modifierId}, Feature ID: ${featureId}, Checked: ${isChecked}`);
+        // API.log('debug', 'Toggle switch change event detected');
+        // API.log('debug', `Toggle changed - Modifier ID: ${modifierId}, Feature ID: ${featureId}, Checked: ${isChecked}`);
         
         // Handle feature toggles
         if (featureId) {
@@ -140,7 +140,16 @@ export class GenericInputHandler {
             // Handle special case for attribute row
             if (modifierId === 'attribute') {
                 // For attribute row, we don't have a modifier object, just update the row state
-                API.log('debug', 'Handling attribute row toggle');
+                // API.log('debug', 'Handling attribute row toggle');
+                this.toggleRowState(row, isChecked);
+                this.updateRollButtonLabel();
+                return;
+            }
+
+            // Handle special case for proficiency row
+            if (modifierId === 'proficiency') {
+                // For proficiency row, we don't have a modifier object, just update the row state
+                // API.log('debug', 'Handling proficiency row toggle');
                 this.toggleRowState(row, isChecked);
                 this.updateRollButtonLabel();
                 return;
@@ -149,7 +158,7 @@ export class GenericInputHandler {
             // Handle regular modifier rows
             const modifierIndex = parseInt(modifierId);
             if (modifierIndex >= 0 && modifierIndex < this.modifiers.length) {
-                API.log('debug', `Handling modifier ${modifierIndex} toggle`);
+                // API.log('debug', `Handling modifier ${modifierIndex} toggle`);
                 this.modifiers[modifierIndex].isEnabled = isChecked;
                 this.toggleRowState(row, isChecked);
                 this.updateRollButtonLabel();
@@ -177,7 +186,7 @@ export class GenericInputHandler {
      */
     handleFeatureToggle(featureId, isChecked, event) {
         try {
-            API.log('debug', `Handling feature toggle - ID: ${featureId}, Checked: ${isChecked}`);
+            // API.log('debug', `Handling feature toggle - ID: ${featureId}, Checked: ${isChecked}`);
             
             // Find the row containing this toggle - try multiple selectors
             let row = event.target.closest('.modifier-row');
@@ -225,7 +234,7 @@ export class GenericInputHandler {
             timestamp: Date.now()
         };
         
-        API.log('debug', `Updated feature state for ${featureId}:`, this.featureStates[featureId]);
+        // API.log('debug', `Updated feature state for ${featureId}:`, this.featureStates[featureId]);
     }
 
     /**
@@ -234,7 +243,7 @@ export class GenericInputHandler {
      */
     onFeatureToggle(featureId, isEnabled) {
         // Default implementation - can be extended
-        API.log('debug', `Feature ${featureId} toggled to ${isEnabled ? 'enabled' : 'disabled'}`);
+        // API.log('debug', `Feature ${featureId} toggled to ${isEnabled ? 'enabled' : 'disabled'}`);
     }
 
     /**
@@ -293,6 +302,8 @@ export class GenericInputHandler {
                 // Update weapon-related rows when item selection changes
                 if (this.handler && this.handler.currentOptions && this.handler.currentOptions.actor) {
                     await this.updateWeaponRows(this.handler.currentOptions.actor, this.selectedItem);
+                    // Update roll button label after weapon change
+                    this.updateRollButtonLabel();
                 }
             });
         }
@@ -418,7 +429,7 @@ export class GenericInputHandler {
                 isDice = true;
             } else if (valueInput && valueInput.value) {
                 // This is a number modifier row
-                modifier = parseInt(valueInput.value) >= 0 ? `+${valueInput.value}` : valueInput.value;
+                modifier = parseInt(valueInput.value) >= 0 ? `${valueInput.value}` : valueInput.value;
                 isDice = false;
             } else {
                 API.notify('Please enter a modifier value or select dice quantity and type', 'warning');
@@ -541,6 +552,338 @@ export class GenericInputHandler {
     }
 
     /**
+     * Get the current dialog type from the handler
+     */
+    getDialogType() {
+        try {
+            // API.log('debug', 'Handler current options:', this.handler?.currentOptions);
+            return this.handler?.currentOptions?.dialogType || 'attack';
+        } catch (error) {
+            API.log('error', 'Failed to get dialog type', error);
+            return 'attack';
+        }
+    }
+
+    /**
+     * Get damage type icon placeholder
+     */
+    getDamageTypeIcon(damageType) {
+        const iconMap = {
+            'kinetic': '[K]',
+            'energy': '[E]',
+            'ion': '[I]',
+            'acid': '[A]',
+            'cold': '[C]',
+            'fire': '[F]',
+            'force': '[F]',
+            'lightning': '[L]',
+            'necrotic': '[N]',
+            'poison': '[P]',
+            'psychic': '[Y]',
+            'sonic': '[S]',
+            'true': '[T]'
+        };
+        return iconMap[damageType?.toLowerCase()] || '[?]';
+    }
+
+    /**
+     * Collect modifiers from table rows and features
+     */
+    collectAllModifiers() {
+        const modifiers = [];
+        
+        // Collect from modifier table rows
+        const modifierRows = this.dialogElement.querySelectorAll('.modifier-row');
+        modifierRows.forEach(row => {
+            const toggle = row.querySelector('.modifier-toggle');
+            if (toggle && toggle.checked) {
+                const modifierId = toggle.dataset.modifierId;
+                const modifierData = this.getModifierDataFromRow(row, modifierId);
+                if (modifierData) {
+                    modifiers.push(modifierData);
+                }
+            }
+        });
+        
+        // Collect from features table rows
+        const featureRows = this.dialogElement.querySelectorAll('.feature-row');
+        featureRows.forEach(row => {
+            const toggle = row.querySelector('.modifier-toggle');
+            if (toggle && toggle.checked) {
+                const featureId = toggle.dataset.featureId;
+                const modifierData = this.getFeatureModifierData(row, featureId);
+                if (modifierData) {
+                    modifiers.push(modifierData);
+                }
+            }
+        });
+        
+        // Note: Custom modifiers are already included in the modifier table rows
+        // so we don't need to add them again here
+        
+        return modifiers;
+    }
+
+    /**
+     * Get modifier data from a modifier table row
+     */
+    getModifierDataFromRow(row, modifierId) {
+        try {
+            // Handle special cases
+            if (modifierId === 'weapon-damage') {
+                const modifierElement = row.querySelector('.weapon-damage-modifier');
+                const typeElement = row.querySelector('.weapon-damage-type');
+                return {
+                    modifier: modifierElement?.textContent?.trim() || '',
+                    modifierType: typeElement?.textContent?.trim() || 'kinetic'
+                };
+            }
+            
+            if (modifierId === 'proficiency') {
+                const modifierElement = row.querySelector('.proficiency-modifier');
+                const smartInput = row.querySelector('.smart-weapon-proficiency-input');
+                
+                let modifier = '';
+                if (smartInput && smartInput.style.display !== 'none') {
+                    const value = smartInput.value || '0';
+                    modifier = value.startsWith('+') ? value : `+${value}`;
+                } else {
+                    const text = modifierElement?.textContent?.trim() || '';
+                    modifier = text.startsWith('+') ? text : `+${text}`;
+                }
+                
+                return {
+                    modifier: modifier,
+                    modifierType: 'Untyped'
+                };
+            }
+            
+            if (modifierId === 'attribute') {
+                const modifierElement = row.querySelector('.attribute-modifier, .smart-weapon-attribute-modifier');
+                const text = modifierElement?.textContent?.trim() || '';
+                const modifier = text.startsWith('+') ? text : `+${text}`;
+                
+                return {
+                    modifier: modifier,
+                    modifierType: 'Untyped'
+                };
+            }
+            
+            // Handle custom modifier rows
+            const modifierCell = row.querySelector('td:nth-child(3)');
+            const typeCell = row.querySelector('td:nth-child(2)');
+            
+            return {
+                modifier: modifierCell?.textContent?.trim() || '',
+                modifierType: typeCell?.textContent?.trim() || 'Untyped'
+            };
+            
+        } catch (error) {
+            API.log('error', 'Failed to get modifier data from row', error);
+            return null;
+        }
+    }
+
+    /**
+     * Get feature modifier data from a feature row
+     */
+    getFeatureModifierData(row, featureId) {
+        try {
+            // Look for modifier element in the feature row
+            const modifierElement = row.querySelector('.modifier-element, .feature-modifier');
+            if (!modifierElement) {
+                return null; // Skip if no modifier element
+            }
+            
+            const modifier = modifierElement.textContent?.trim() || '';
+            const modifierType = modifierElement.dataset.type || 'Untyped';
+            const isDice = modifierElement.dataset.isDice === 'true';
+            
+            return {
+                modifier: modifier,
+                modifierType: modifierType,
+                isDice: isDice
+            };
+            
+        } catch (error) {
+            API.log('error', 'Failed to get feature modifier data', error);
+            return null;
+        }
+    }
+
+    /**
+     * Group modifiers by type and combine them
+     */
+    groupAndCombineModifiers(modifiers, dialogType) {
+        const isDamageDialog = dialogType?.toLowerCase() === 'damage';
+        const groups = {};
+        
+        // Get base weapon damage type for damage dialogs
+        let baseDamageType = 'kinetic';
+        if (isDamageDialog) {
+            const baseWeaponRow = this.dialogElement.querySelector('.weapon-damage-row');
+            if (baseWeaponRow) {
+                const typeElement = baseWeaponRow.querySelector('.weapon-damage-type');
+                baseDamageType = typeElement?.textContent?.trim() || 'kinetic';
+            }
+        }
+        
+        // Group modifiers
+        modifiers.forEach(mod => {
+            if (!mod.modifier || mod.modifier.trim() === '') return;
+            
+            let groupType;
+            if (isDamageDialog) {
+                // For damage dialogs, use the modifier type or default to base damage type
+                groupType = mod.modifierType || baseDamageType;
+            } else {
+                // For non-damage dialogs, group all together
+                groupType = 'main';
+            }
+            
+            if (!groups[groupType]) {
+                groups[groupType] = [];
+            }
+            
+            groups[groupType].push(mod);
+        });
+        
+        // Combine each group
+        const combinedGroups = [];
+        
+        if (isDamageDialog) {
+            // For damage dialogs, process base damage type first, then others alphabetically
+            const sortedTypes = Object.keys(groups).sort((a, b) => {
+                if (a === baseDamageType) return -1;
+                if (b === baseDamageType) return 1;
+                return a.localeCompare(b);
+            });
+            
+            sortedTypes.forEach(type => {
+                const combined = this.combineModifierGroup(groups[type]);
+                if (combined) {
+                    combinedGroups.push({
+                        modifier: combined,
+                        modifierType: type
+                    });
+                }
+            });
+        } else {
+            // For non-damage dialogs, combine all into one group
+            const allModifiers = Object.values(groups).flat();
+            const combined = this.combineModifierGroup(allModifiers);
+            if (combined) {
+                combinedGroups.push({
+                    modifier: combined,
+                    modifierType: ''
+                });
+            }
+        }
+        
+        return combinedGroups;
+    }
+
+    /**
+     * Combine a group of modifiers
+     */
+    combineModifierGroup(modifiers) {
+        if (!modifiers || modifiers.length === 0) return '';
+        
+        // Separate dice and number modifiers
+        const diceModifiers = [];
+        const numberModifiers = [];
+        
+        modifiers.forEach(mod => {
+            if (mod.isDice || mod.modifier.includes('d')) {
+                diceModifiers.push(mod.modifier);
+            } else {
+                numberModifiers.push(mod.modifier);
+            }
+        });
+        
+        // Combine dice modifiers
+        const combinedDice = this.combineDiceModifiers(diceModifiers);
+        
+        // Sum number modifiers
+        const numberSum = numberModifiers.reduce((sum, mod) => {
+            const value = parseInt(mod) || 0;  // Parse directly, preserving sign
+            return sum + value;
+        }, 0);
+        
+        // Build combined string
+        let combined = '';
+        
+        if (combinedDice) {
+            combined += combinedDice;
+        }
+        
+        if (numberSum > 0) {
+            combined += `+${numberSum}`;
+        } else if (numberSum < 0) {
+            combined += `${numberSum}`;
+        }
+        
+        return combined;
+    }
+
+    /**
+     * Build the final roll button label
+     */
+    buildRollButtonLabel() {
+        try {
+            const dialogType = this.getDialogType();
+            const isDamageDialog = dialogType?.toLowerCase() === 'damage';
+            
+            // Collect all modifiers
+            const allModifiers = this.collectAllModifiers();
+            
+            // Add base dice for non-damage dialogs
+            if (!isDamageDialog) {
+                allModifiers.unshift({
+                    modifier: '1d20',
+                    modifierType: ''
+                });
+            }
+            
+            // Group and combine modifiers
+            const combinedGroups = this.groupAndCombineModifiers(allModifiers, dialogType);
+            // API.log('debug', 'Combined groups', combinedGroups);
+            // Build final string
+            let label = `${API.localize('interface.roll_button')}: `;
+            
+            if (combinedGroups.length === 0) {
+                if (isDamageDialog) {
+                    label += '0';
+                } else {
+                    label += '1d20';
+                }
+            } else {
+                const parts = combinedGroups.map(group => {
+                    let part = group.modifier;
+                    if (isDamageDialog && group.modifierType) {
+                        part += this.getDamageTypeIcon(group.modifierType);
+                    }
+                    return part;
+                });
+                
+                label += parts.join('+');
+            }
+            
+            // Remove all spaces
+            label = label.replace(/\s/g, '');
+            
+            // Debug logging
+            // API.log('debug', `Building roll button label - Dialog type: ${dialogType}, Modifiers: ${allModifiers.length}, Groups: ${combinedGroups.length}, Label: ${label}`);
+            
+            return label;
+            
+        } catch (error) {
+            API.log('error', 'Failed to build roll button label', error);
+            return `${API.localize('interface.roll_button')}: 1d20`;
+        }
+    }
+
+    /**
      * Update the roll button label with current modifiers
      */
     updateRollButtonLabel() {
@@ -548,41 +891,7 @@ export class GenericInputHandler {
             const rollButton = this.dialogElement.querySelector('#roll-button');
             if (!rollButton) return;
 
-            const enabledModifiers = this.modifiers.filter(m => m.isEnabled);
-            if (enabledModifiers.length === 0) {
-                rollButton.textContent = `${API.localize('interface.roll_button')}: 1d20`;
-                return;
-            }
-
-            const diceModifiers = enabledModifiers.filter(m => m.isDice);
-            const numberModifiers = enabledModifiers.filter(m => !m.isDice);
-
-            // Use helper function to combine dice modifiers
-            const diceArray = diceModifiers.map(m => m.modifier);
-            const combinedDice = this.combineDiceModifiers(diceArray);
-
-            // Sum number modifiers
-            const numberSum = numberModifiers.reduce((sum, m) => {
-                return sum + parseInt(m.modifier.replace(/[+-]/g, ''));
-            }, 0);
-
-            // Build label
-            let label = `${API.localize('interface.roll_button')}: 1d20`;
-            
-            // Add combined dice
-            if (combinedDice) {
-                label += `+${combinedDice}`;
-            }
-
-            // Add numbers
-            if (numberSum > 0) {
-                label += `+${numberSum}`;
-            } else if (numberSum < 0) {
-                label += `${numberSum}`;
-            } else if (numberSum === 0 && (diceModifiers.length > 0 || numberModifiers.length > 0)) {
-                label += `+0`;
-            }
-
+            const label = this.buildRollButtonLabel();
             rollButton.textContent = label;
 
         } catch (error) {
@@ -697,6 +1006,9 @@ export class GenericInputHandler {
 
             const modifier = await getAbilityModifier(actor, ability);
             modifierElement.textContent = modifier;
+            
+            // Update roll button label after attribute change
+            this.updateRollButtonLabel();
         } catch (error) {
             API.log('error', 'Failed to update attribute modifier', error);
         }
