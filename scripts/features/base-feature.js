@@ -1,5 +1,6 @@
 import { API } from '../api.js';
 import { getDataPaths } from '../core/utils/reference/data-lookup.js';
+import { multiclassImproveCheck } from './feature-manager.js';
 
 /**
  * Base Feature Class
@@ -280,5 +281,29 @@ export class BaseFeature {
      */
     getModifierDisplay() {
         return this.description;
+    }
+
+    /**
+     * Check if character has Multiclass Improvement feat and return level adjustment
+     * 
+     * This method can be used by any feature that extends BaseFeature to check for
+     * multiclass improvement level adjustments. It returns the level of the highest
+     * eligible class (level > 3, excluding the passed-in class), with array order
+     * as tie-breaker for classes with the same level.
+     * 
+     * @param {Object} actor - The actor object
+     * @param {string} className - The class name to exclude from the calculation
+     * @returns {number} Level adjustment from the next highest class, or 0 if not applicable
+     * 
+     * @example
+     * // In any feature class that extends BaseFeature:
+     * const levelAdjustment = this.checkMulticlassImprovement(actor, "Sentinel");
+     * if (levelAdjustment > 0) {
+     *     // Use the level adjustment for calculations
+     *     const effectiveLevel = baseLevel + levelAdjustment;
+     * }
+     */
+    checkMulticlassImprovement(actor, className) {
+        return multiclassImproveCheck(actor, className);
     }
 }

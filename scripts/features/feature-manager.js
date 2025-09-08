@@ -126,6 +126,73 @@ export class FeatureManager {
     }
 
     /**
+     * Check if character has Multiclass Improvement feat and return level adjustment
+     * @param {Object} actor - The actor object
+     * @param {string} class - The class name to exclude from the calculation
+     * @returns {number} Level adjustment from the next highest class, or 0 if not applicable
+     */
+     multiclassImproveCheck(actor, className) {
+        try {
+            // Check if character has the "Multiclass Improvement" feat
+            if (!actor.itemTypes?.feat || !Array.isArray(actor.itemTypes.feat)) {
+                return 0;
+            }
+
+            const hasMulticlassImprovement = actor.itemTypes.feat.some(feat => 
+                feat.name === "Multiclass Improvement"
+            );
+
+            if (!hasMulticlassImprovement) {
+                return 0;
+            }
+
+            // Get all classes from the actor
+            if (!actor.itemTypes?.class || !Array.isArray(actor.itemTypes.class)) {
+                return 0;
+            }
+
+            const classes = actor.itemTypes.class;
+            
+            // Filter out the passed-in class and get classes with levels > 3
+            const eligibleClasses = classes
+                .filter(cls => cls.name !== className && cls.system?.levels > 3)
+                .map(cls => ({
+                    name: cls.name,
+                    levels: cls.system.levels,
+                    originalIndex: classes.indexOf(cls)
+                }));
+
+            // If there isn't at least 1 class with level > 3, return 0
+            if (eligibleClasses.length < 1) {
+                return 0;
+            }
+
+            // If there is at least 1 eligible class, return the highest level class or the first one if there are multiple with the same level
+            if (eligibleClasses.length >= 1) {
+                // Sort by level (highest first), then by original index (first in array wins tie)
+                eligibleClasses.sort((a, b) => {
+                    if (b.levels !== a.levels) {
+                        return b.levels - a.levels; // Higher level first
+                    }
+                    return a.originalIndex - b.originalIndex; // Lower index first (tie-breaker)
+                });
+                
+                const highestClass = eligibleClasses[0];
+                const levelAdjustment = highestClass.levels;
+                API.log('debug', `Multiclass Improvement: Found highest eligible class ${highestClass.name} with ${levelAdjustment} levels for actor ${actor.name}`);
+                return levelAdjustment;
+            }
+
+            // No eligible classes found
+            return 0;
+
+        } catch (error) {
+            API.log('error', `Error checking multiclass improvement for actor ${actor.name}:`, error);
+            return 0;
+        }
+    }
+
+    /**
      * Clear actor feature cache (call when actor changes)
      */
     clearActorCache(actorId) {
@@ -199,3 +266,8 @@ export class FeatureManager {
 
 // Create singleton instance
 export const featureManager = new FeatureManager();
+
+// Export the multiclass improvement check function as a standalone utility
+export function multiclassImproveCheck(actor, className) {
+    return featureManager.multiclassImproveCheck(actor, className);
+}

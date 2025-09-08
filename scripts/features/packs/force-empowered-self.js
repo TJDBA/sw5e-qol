@@ -54,43 +54,9 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
                     sentinel = classArray.find(cls => cls && cls[nameKey] && typeof cls[nameKey] === "string");
                 }
 
-                // Find the class level (sentinel.system.levels)
-                let classLevel = 0;
-                if (sentinel && sentinel.system && typeof sentinel.system.levels === "number") {
-                    classLevel = sentinel.system.levels;
-                }
-
-                // Find the Kinetic Combat advancement in the sentinel.system.advancement array
-                let kineticAdvancement = null;
-                if (sentinel && sentinel.system && Array.isArray(sentinel.system.advancement)) {
-                    kineticAdvancement = sentinel.system.advancement.find(
-                        adv => adv && adv.title === "Kinetic Combat" && adv.type === "ScaleValue"
-                    );
-                }
-
-                // Look up the kinetic die combo from the scale object using classLevel
-                let kineticDie = null;
-                if (kineticAdvancement && kineticAdvancement.scale && typeof classLevel === "number") {
-                    // The keys in scale are the levels at which the die changes
-                    // Find the highest key <= classLevel
-                    const scaleKeys = Object.keys(kineticAdvancement.scale)
-                        .map(k => parseInt(k, 10))
-                        .filter(k => !isNaN(k))
-                        .sort((a, b) => a - b);
-
-                    let bestKey = null;
-                    for (let k of scaleKeys) {
-                        if (classLevel >= k) bestKey = k;
-                    }
-                    if (bestKey !== null && kineticAdvancement.scale[bestKey]) {
-                        kineticDie = kineticAdvancement.scale[bestKey];
-                        // kineticDie should have .number and .faces
-                        // Optionally, update this.damageAmount to match
-                        if (kineticDie.number && kineticDie.faces) {
-                            this.damageAmount = `${kineticDie.number}d${kineticDie.faces}`;
-                        }
-                    }
-                }
+                // Calculate the kinetic die based on class level and multiclass improvement
+                const calculatedDamage = this.calculateKineticDie(actor);
+                this.damageAmount = calculatedDamage;
                 
                 return this.renderResourceFeatureHTML(
                     themeName, 
@@ -130,19 +96,87 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
     /**
      * Get modifier display text for the feature
      */
-    getModifierDisplay() {
-        return `+${this.damageAmount} ${this.damageType}`;
+    getModifierDisplay(actor) {
+        const calculatedDamage = this.calculateKineticDie(actor);
+        return `+${calculatedDamage} ${this.damageType}`;
+    }
+
+    /**
+     * Calculate the kinetic die based on class level and multiclass improvement
+     * @param {Object} actor - The actor object
+     * @returns {string} The calculated damage amount (e.g., "1d6")
+     */
+    calculateKineticDie(actor) {
+        try {
+            // Use foundry.utils.getProperty directly
+            const getProperty = foundry.utils.getProperty;
+            const dataPaths = getDataPaths("actor", "class");
+
+            // Get the class array from the actor using the basePath in dataPaths
+            const classArray = getProperty(actor, dataPaths.basePath.replace("{Actor}", "system").replace(/^system\./, ""));
+            
+            // Find the sentinel object (e.g., the class with a specific name or property)
+            let sentinel = null;
+            if (Array.isArray(classArray) && dataPaths.subpaths && dataPaths.subpaths.name) {
+                const nameKey = dataPaths.subpaths.name.replace(/^\[\]\.?/, '').replace(/^\./, '');
+                sentinel = classArray.find(cls => cls && cls[nameKey] && typeof cls[nameKey] === "string");
+            }
+
+            // Find the class level (sentinel.system.levels)
+            let classLevel = 0;
+            if (sentinel && sentinel.system && typeof sentinel.system.levels === "number") {
+                classLevel = sentinel.system.levels;
+                // Add the multiclass improvement level to the class level
+                const multiclassAdjustment = this.checkMulticlassImprovement(actor, sentinel.name);
+                classLevel += multiclassAdjustment;
+            }
+
+            // Find the Kinetic Combat advancement in the sentinel.system.advancement array
+            let kineticAdvancement = null;
+            if (sentinel && sentinel.system && Array.isArray(sentinel.system.advancement)) {
+                kineticAdvancement = sentinel.system.advancement.find(
+                    adv => adv && adv.title === "Kinetic Combat" && adv.type === "ScaleValue"
+                );
+            }
+
+            // Look up the kinetic die combo from the scale object using classLevel
+            if (kineticAdvancement?.configuration?.scale && typeof classLevel === "number") {
+                const scaleKeys = Object.keys(kineticAdvancement.configuration.scale)
+                    .map(k => parseInt(k, 10))
+                    .filter(k => !isNaN(k))
+                    .sort((a, b) => a - b);
+
+                let bestKey = null;
+                for (let k of scaleKeys) {
+                    if (classLevel >= k) bestKey = k;
+                }
+                
+                if (bestKey !== null && kineticAdvancement.configuration.scale[bestKey]) {
+                    const kineticDie = kineticAdvancement.configuration.scale[bestKey];
+                    if (kineticDie.number && kineticDie.faces) {
+                        return `${kineticDie.number}d${kineticDie.faces}`;
+                    }
+                }
+            }
+
+            // Fallback to default
+            return this.damageAmount;
+        } catch (error) {
+            API.log('error', `Failed to calculate kinetic die:`, error);
+            return this.damageAmount;
+        }
     }
 
     /**
      * Damage modifiers
      */
     getDamageModifiers(actor, dialogState, featureData) {
+        const calculatedDamage = this.calculateKineticDie(actor);
         return [
             this.createModifier(
                 `${this.name}`,
                 this.damageType,
-                this.damageAmount,
+                calculatedDamage,
                 true,
                 true
             )
