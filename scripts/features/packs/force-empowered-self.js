@@ -47,7 +47,7 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
                     resourceCost: this.resourceCost,
                     damageAmount: calculatedDamage,
                     damageType: this.damageType,
-                    modifierName: this.name,
+                    modifierName: 'Double Strike',
                     // Store the calculated damage in the instance for consistency
                     _calculatedDamage: calculatedDamage
                 };
