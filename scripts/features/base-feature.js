@@ -134,10 +134,21 @@ export class BaseFeature {
     /**
      * Render default HTML - simple checkbox feature
      * Matches modifiers table styling
+     * @param {string} themeName - Theme name for styling
+     * @param {Object} featureData - Feature data including enabled state and any additional data
      */
     renderDefaultHTML(themeName, featureData = {}) {
         const theme = this.getThemeVariables(themeName);
         const checked = featureData.enabled ? 'checked' : '';
+        
+        // Validate featureData structure
+        const validatedData = this.validateFeatureData(featureData);
+        if (!validatedData) {
+            return this.renderErrorHTML(themeName, new Error('Invalid featureData structure'));
+        }
+        
+        // Store featureData as JSON in data attribute for easy access
+        const featureDataJson = JSON.stringify(validatedData);
         
         return `
             <div class="feature-component" style="
@@ -150,7 +161,9 @@ export class BaseFeature {
             ">
                 <table class="modifiers-table" style="width: 100%; border-collapse: collapse;">
                     <tbody>
-                        <tr class="modifier-row feature-row" data-feature-id="${this.id}">
+                        <tr class="modifier-row feature-row" 
+                            data-feature-id="${this.id}" 
+                            data-feature-data='${featureDataJson}'>
                             <td style="padding: 4px 8px; border: none;">
                                 <span class="feature-name" 
                                       title="${this.description}"
@@ -162,7 +175,7 @@ export class BaseFeature {
                                 -
                             </td>
                             <td style="padding: 4px 8px; border: none; color: ${theme.muted}; font-size: 0.9em;">
-                                ${this.getModifierDisplay()}
+                                ${this.getModifierDisplay(validatedData)}
                             </td>
                             <td style="padding: 4px 8px; border: none; text-align: right;">
                                 <div class="toggle-switch">
@@ -227,10 +240,25 @@ export class BaseFeature {
      * Render generic resource feature HTML
      * For simple yes/no features with resource costs
      * Matches modifiers table styling
+     * @param {string} themeName - Theme name for styling
+     * @param {Object} featureData - Feature data including enabled state, resource info, and additional data
      */
-    renderResourceFeatureHTML(themeName, featureData = {}, resourceName = "Force Points", resourceCost = 1) {
+    renderResourceFeatureHTML(themeName, featureData = {}) {
         const theme = this.getThemeVariables(themeName);
         const checked = featureData.enabled ? 'checked' : '';
+        
+        // Validate featureData structure
+        const validatedData = this.validateFeatureData(featureData);
+        if (!validatedData) {
+            return this.renderErrorHTML(themeName, new Error('Invalid featureData structure'));
+        }
+        
+        // Extract resource info from featureData with defaults
+        const resourceName = validatedData.resourceName || "Force Points";
+        const resourceCost = validatedData.resourceCost || 1;
+        
+        // Store featureData as JSON in data attribute for easy access
+        const featureDataJson = JSON.stringify(validatedData);
         
         return `
             <div class="feature-component resource-feature" style="
@@ -243,7 +271,9 @@ export class BaseFeature {
             ">
                 <table class="modifiers-table" style="width: 100%; border-collapse: collapse;">
                     <tbody>
-                        <tr class="modifier-row feature-row" data-feature-id="${this.id}">
+                        <tr class="modifier-row feature-row" 
+                            data-feature-id="${this.id}" 
+                            data-feature-data='${featureDataJson}'>
                             <td style="padding: 4px 8px; border: none;">
                                 <span class="feature-name" 
                                       title="${this.description}"
@@ -255,7 +285,7 @@ export class BaseFeature {
                                 ${resourceCost} ${resourceName}
                             </td>
                             <td style="padding: 4px 8px; border: none; color: ${theme.muted}; font-size: 0.9em;">
-                                ${this.getModifierDisplay()}
+                                ${this.getModifierDisplay(validatedData)}
                             </td>
                             <td style="padding: 4px 8px; border: none; text-align: right;">
                                 <div class="toggle-switch">
@@ -278,9 +308,59 @@ export class BaseFeature {
     /**
      * Get modifier display text for the feature
      * Override in subclasses for custom display
+     * @param {Object} featureData - Feature data for dynamic display
      */
-    getModifierDisplay() {
+    getModifierDisplay(featureData = {}) {
         return this.description;
+    }
+
+    /**
+     * Validate and normalize featureData structure
+     * @param {Object} featureData - Raw feature data to validate
+     * @returns {Object|null} Validated and normalized featureData, or null if invalid
+     */
+    validateFeatureData(featureData) {
+        try {
+            if (!featureData || typeof featureData !== 'object') {
+                API.log('warning', `Invalid featureData for ${this.name}:`, featureData);
+                return null;
+            }
+
+            // Create validated data with core properties and preserve existing values
+            const validatedData = {
+                enabled: Boolean(featureData.enabled),
+                featureName: this.name
+            };
+
+            // Preserve only specific properties that are safe to store in HTML
+            // Exclude large objects like actor, dialogType, themeName, etc.
+            const safeProperties = [
+                'resourceName', 'resourceCost', 'damageAmount', 'damageType', 'modifierName',
+                'customData', 'classLevel', 'multiclassAdjustment', '_calculatedDamage'
+            ];
+            
+            safeProperties.forEach(prop => {
+                if (featureData[prop] !== undefined) {
+                    validatedData[prop] = featureData[prop];
+                }
+            });
+
+            // Validate required fields
+            if (typeof validatedData.enabled !== 'boolean') {
+                API.log('warning', `Invalid enabled field for ${this.name}:`, featureData);
+                return null;
+            }
+
+            if (typeof validatedData.resourceCost !== 'number' || validatedData.resourceCost < 0) {
+                API.log('warning', `Invalid resourceCost for ${this.name}:`, featureData);
+                return null;
+            }
+
+            return validatedData;
+        } catch (error) {
+            API.log('error', `Error validating featureData for ${this.name}:`, error);
+            return null;
+        }
     }
 
     /**

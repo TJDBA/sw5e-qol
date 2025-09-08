@@ -36,34 +36,26 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
         
         try {
             if (dialogType === "damage") {
-                
-                // Use foundry.utils.getProperty directly
-                const getProperty = foundry.utils.getProperty;
-                
-                const dataPaths = getDataPaths("actor", "class");
-
-                // Get the class array from the actor using the basePath in dataPaths
-                const classArray = getProperty(actor, dataPaths.basePath.replace("{Actor}", "system").replace(/^system\./, ""));
-                // Find the sentinel object (e.g., the class with a specific name or property)
-                // Find the class object (sentinel) by matching the name subpath
-                let sentinel = null;
-                if (Array.isArray(classArray) && dataPaths.subpaths && dataPaths.subpaths.name) {
-                    // Get the name subpath, e.g., "[].name" or ".name"
-                    const nameKey = dataPaths.subpaths.name.replace(/^\[\]\.?/, '').replace(/^\./, '');
-                    // Example: nameKey = "name"
-                    sentinel = classArray.find(cls => cls && cls[nameKey] && typeof cls[nameKey] === "string");
-                }
-
                 // Calculate the kinetic die based on class level and multiclass improvement
                 const calculatedDamage = this.calculateKineticDie(actor);
+                
+                // Build comprehensive featureData object
+                const enhancedFeatureData = {
+                    ...featureData, // Preserve existing data
+                    enabled: featureData.enabled || false,
+                    resourceName: this.resourceName,
+                    resourceCost: this.resourceCost,
+                    damageAmount: calculatedDamage,
+                    damageType: this.damageType,
+                    modifierName: this.name,
+                    // Store the calculated damage in the instance for consistency
+                    _calculatedDamage: calculatedDamage
+                };
+                
+                // Update instance variable for consistency
                 this.damageAmount = calculatedDamage;
                 
-                return this.renderResourceFeatureHTML(
-                    themeName, 
-                    featureData, 
-                    this.resourceName, 
-                    this.resourceCost
-                );
+                return this.renderResourceFeatureHTML(themeName, enhancedFeatureData);
             } else {
                 // Not applicable to other dialog types
                 return '';
@@ -95,10 +87,11 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
 
     /**
      * Get modifier display text for the feature
+     * @param {Object} featureData - Feature data containing damage information
      */
-    getModifierDisplay(actor) {
-        const calculatedDamage = this.calculateKineticDie(actor);
-        return `+${calculatedDamage} ${this.damageType}`;
+    getModifierDisplay(featureData = {}) {
+        const damageAmount = featureData.damageAmount || this.damageAmount;
+        return `+${damageAmount} ${this.damageType}`;
     }
 
     /**
@@ -169,14 +162,17 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
 
     /**
      * Damage modifiers
+     * @param {Object} actor - The actor object
+     * @param {Object} dialogState - Current dialog state
+     * @param {Object} featureData - Feature data containing damage information
      */
     getDamageModifiers(actor, dialogState, featureData) {
-        const calculatedDamage = this.calculateKineticDie(actor);
+        const damageAmount = featureData.damageAmount || this.damageAmount;
         return [
             this.createModifier(
                 `${this.name}`,
                 this.damageType,
-                calculatedDamage,
+                damageAmount,
                 true,
                 true
             )
