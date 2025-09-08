@@ -164,6 +164,15 @@ export class GenericInputHandler {
                 return;
             }
 
+            // Handle special case for additional damage parts
+            if (modifierId && modifierId.startsWith('additional-damage-')) {
+                // For additional damage parts, we don't have a modifier object, just update the row state
+                // API.log('debug', 'Handling additional damage part toggle');
+                this.toggleRowState(row, isChecked);
+                this.updateRollButtonLabel();
+                return;
+            }
+
             // Handle regular modifier rows
             const modifierIndex = parseInt(modifierId);
             if (modifierIndex >= 0 && modifierIndex < this.modifiers.length) {
@@ -753,8 +762,16 @@ export class GenericInputHandler {
             
             let groupType;
             if (isDamageDialog) {
-                // For damage dialogs, use the modifier type or default to base damage type
-                groupType = mod.modifierType || baseDamageType;
+                // For damage dialogs, validate modifier type against legitimate damage types
+                const legitimateDamageTypes = ['kinetic','energy','ion','acid','cold','fire','force','lightning','necrotic','poison','psychic','sonic','true'];
+                const modifierType = mod.modifierType || '';
+                
+                if (legitimateDamageTypes.includes(modifierType.toLowerCase())) {
+                    groupType = modifierType.toLowerCase();
+                } else {
+                    // Default to base weapon damage type or kinetic if not a legitimate damage type
+                    groupType = baseDamageType || 'kinetic';
+                }
             } else {
                 // For non-damage dialogs, group all together
                 groupType = 'main';
@@ -837,7 +854,13 @@ export class GenericInputHandler {
         }
         
         if (numberSum !== 0) {
-            combined += `${numberSum}`;
+            if (combined) {
+                // Add + or - sign based on the number sum
+                combined += numberSum >= 0 ? `+${numberSum}` : `${numberSum}`;
+            } else {
+                // If no dice, just add the number
+                combined += `${numberSum}`;
+            }
         }
         
         return combined;
@@ -1079,25 +1102,28 @@ export class GenericInputHandler {
             const attributeRow = tbody.querySelector('.attribute-row');
             if (!attributeRow) return;
 
+            // Combine damage parts by type
+            const combinedDamageParts = this.combineAdditionalDamageParts(additionalDamageParts);
+
             // Insert new additional damage rows after the attribute row
-            additionalDamageParts.forEach((part, index) => {
+            combinedDamageParts.forEach((combinedPart, index) => {
                 const row = document.createElement('tr');
                 row.className = 'modifier-row additional-damage-row';
-                row.dataset.modifierId = `additional-damage-${part.index}`;
+                row.dataset.modifierId = `additional-damage-${index}`;
 
                 row.innerHTML = `
                     <td>
-                        <span class="additional-damage-description">Additional Weapon Damage (${part.type})</span>
+                        <span class="additional-damage-description">Additional Weapon Damage (${combinedPart.type})</span>
                     </td>
                     <td>
-                        <span class="additional-damage-type">${part.type}</span>
+                        <span class="additional-damage-type">${combinedPart.type}</span>
                     </td>
                     <td>
-                        <span class="additional-damage-modifier">${part.modifier}</span>
+                        <span class="additional-damage-modifier">${combinedPart.modifier}</span>
                     </td>
                     <td>
                         <div class="toggle-switch">
-                            <input type="checkbox" class="modifier-toggle" checked data-modifier-id="additional-damage-${part.index}">
+                            <input type="checkbox" class="modifier-toggle" checked data-modifier-id="additional-damage-${index}">
                             <span class="toggle-slider"></span>
                         </div>
                     </td>
@@ -1107,9 +1133,52 @@ export class GenericInputHandler {
                 attributeRow.insertAdjacentElement('afterend', row);
             });
 
-            API.log('debug', `Updated ${additionalDamageParts.length} additional damage parts`);
+            API.log('debug', `Updated ${combinedDamageParts.length} combined additional damage parts`);
         } catch (error) {
             API.log('error', 'Failed to update additional damage parts', error);
+        }
+    }
+
+    /**
+     * Combine additional damage parts by type
+     */
+    combineAdditionalDamageParts(damageParts) {
+        try {
+            if (!damageParts || damageParts.length === 0) {
+                return [];
+            }
+
+            // Group damage parts by type
+            const groups = {};
+            damageParts.forEach(part => {
+                const type = part.type || 'Untyped';
+                if (!groups[type]) {
+                    groups[type] = [];
+                }
+                groups[type].push(part);
+            });
+
+            // Combine each group
+            const combinedParts = [];
+            Object.keys(groups).forEach(type => {
+                const parts = groups[type];
+                const combined = this.combineModifierGroup(parts.map(part => ({
+                    modifier: part.modifier,
+                    isDice: part.modifier.includes('d')
+                })));
+                
+                if (combined && combined.trim() !== '') {
+                    combinedParts.push({
+                        type: type,
+                        modifier: combined
+                    });
+                }
+            });
+
+            return combinedParts;
+        } catch (error) {
+            API.log('error', 'Failed to combine additional damage parts', error);
+            return [];
         }
     }
 
