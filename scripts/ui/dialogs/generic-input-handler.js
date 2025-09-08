@@ -713,24 +713,28 @@ export class GenericInputHandler {
     }
 
     /**
-     * Get feature modifier data from a feature row
+     * Get feature modifier data from a feature row using stored featureData
      */
     getFeatureModifierData(row, featureId) {
         try {
-            // Look for modifier element in the feature row
-            const modifierElement = row.querySelector('.modifier-element, .feature-modifier');
-            if (!modifierElement) {
-                return null; // Skip if no modifier element
+            // Get feature data from the stored JSON
+            const featureDataJson = row.dataset.featureData;
+            if (!featureDataJson) {
+                return null; // Skip if no feature data
             }
             
-            const modifier = modifierElement.textContent?.trim() || '';
-            const modifierType = modifierElement.dataset.type || 'Untyped';
-            const isDice = modifierElement.dataset.isDice === 'true';
+            const featureData = JSON.parse(featureDataJson);
+            
+            // Only include features that have damage modifiers
+            if (!featureData.damageAmount || !featureData.damageType) {
+                return null; // Skip features without damage data
+            }
             
             return {
-                modifier: modifier,
-                modifierType: modifierType,
-                isDice: isDice
+                modifier: featureData.damageAmount,
+                modifierType: featureData.damageType,
+                isDice: true, // Assume damage amounts are dice
+                featureName: featureData.featureName || featureId
             };
             
         } catch (error) {
