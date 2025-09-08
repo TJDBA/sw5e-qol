@@ -647,11 +647,16 @@ export class GenericInputHandler {
      */
     getModifierDataFromRow(row, modifierId) {
         try {
+            // Get the modifier name from the first column
+            const nameCell = row.querySelector('td:nth-child(1)');
+            const modifierName = nameCell?.textContent?.trim() || 'Unknown';
+            
             // Handle special cases
             if (modifierId === 'weapon-damage') {
                 const modifierElement = row.querySelector('.weapon-damage-modifier');
                 const typeElement = row.querySelector('.weapon-damage-type');
                 return {
+                    name: modifierName,
                     modifier: modifierElement?.textContent?.trim() || '',
                     modifierType: typeElement?.textContent?.trim() || 'kinetic'
                 };
@@ -662,6 +667,7 @@ export class GenericInputHandler {
                 const modifierElement = row.querySelector('.additional-damage-modifier');
                 const typeElement = row.querySelector('.additional-damage-type');
                 return {
+                    name: modifierName,
                     modifier: modifierElement?.textContent?.trim() || '',
                     modifierType: typeElement?.textContent?.trim() || 'kinetic'
                 };
@@ -681,6 +687,7 @@ export class GenericInputHandler {
                 }
                 
                 return {
+                    name: modifierName,
                     modifier: modifier,
                     modifierType: 'Untyped'
                 };
@@ -692,6 +699,7 @@ export class GenericInputHandler {
                 const modifier = text.startsWith('+') ? text : `+${text}`;
                 
                 return {
+                    name: modifierName,
                     modifier: modifier,
                     modifierType: 'Untyped'
                 };
@@ -702,6 +710,7 @@ export class GenericInputHandler {
             const typeCell = row.querySelector('td:nth-child(2)');
             
             return {
+                name: modifierName,
                 modifier: modifierCell?.textContent?.trim() || '',
                 modifierType: typeCell?.textContent?.trim() || 'Untyped'
             };
@@ -725,15 +734,15 @@ export class GenericInputHandler {
             
             const featureData = JSON.parse(featureDataJson);
             
-            // Only include features that have damage modifiers
-            if (!featureData.damageAmount || !featureData.damageType) {
-                return null; // Skip features without damage data
+            // Only include features that have modifiers
+            if (!featureData.modifier || !featureData.modifierType) {
+                return null; // Skip features without modifier data
             }
             
             return {
-                modifier: featureData.damageAmount,
-                modifierType: featureData.damageType,
-                isDice: true, // Assume damage amounts are dice
+                modifier: featureData.modifier,
+                modifierType: featureData.modifierType,
+                isDice: featureData.isDice || true, // Use stored isDice or default to true
                 featureName: featureData.featureName || featureId
             };
             
@@ -944,14 +953,176 @@ export class GenericInputHandler {
     }
 
     /**
-     * Get current dialog state
+     * Get current dialog state with comprehensive output object
      */
     getDialogState() {
-        return {
-            rollMode: this.rollMode,
-            rollType: this.advantageType,
-            modifiers: this.modifiers.filter(m => m.isEnabled)
-        };
+        try {
+            const dialogType = this.getDialogType();
+            const actor = this.handler?.currentOptions?.actor;
+            const itemID = this.handler?.currentOptions?.itemID || this.selectedItem || 'none';
+            
+            return {
+                ownerID: this.handler?.currentOptions?.ownerID || 'unknown',
+                dialogType: dialogType,
+                itemID: itemID,
+                rollMode: this.rollMode,
+                advantageSelection: this.advantageType || 'Normal',
+                rollSeparate: this.getRollSeparateSetting(),
+                saveObj: {}, // Placeholder for later
+                skillObj: {}, // Placeholder for later
+                modifiers: this.collectAllEnabledModifiers(),
+                resourceCosts: this.collectResourceCosts(),
+                enabledFeatures: this.collectEnabledFeatures(),
+                targetIDs: this.collectTargetIDs()
+            };
+        } catch (error) {
+            API.log('error', 'Failed to get dialog state', error);
+            return {
+                ownerID: 'unknown',
+                dialogType: 'attack',
+                itemID: 'none',
+                rollMode: 'publicroll',
+                advantageSelection: 'Normal',
+                rollSeparate: false,
+                saveObj: {},
+                skillObj: {},
+                modifiers: [],
+                resourceCosts: [],
+                enabledFeatures: [],
+                targetIDs: []
+            };
+        }
+    }
+
+    /**
+     * Get roll separate setting (placeholder for future implementation)
+     */
+    getRollSeparateSetting() {
+        // TODO: Implement roll separate logic
+        return false;
+    }
+
+    /**
+     * Collect all enabled modifiers with comprehensive data
+     */
+    collectAllEnabledModifiers() {
+        const modifiers = [];
+        
+        // Collect from regular modifier table rows (non-feature modifiers)
+        const modifierRows = this.dialogElement.querySelectorAll('.modifier-row:not(.feature-row)');
+        modifierRows.forEach(row => {
+            const toggle = row.querySelector('.modifier-toggle');
+            if (toggle && toggle.checked) {
+                const modifierId = toggle.dataset.modifierId;
+                const modifierData = this.getModifierDataFromRow(row, modifierId);
+                if (modifierData) {
+                    modifiers.push({
+                        modifierName: modifierData.name || 'Unknown',
+                        modifier: modifierData.modifier,
+                        modifierType: modifierData.modifierType,
+                        // No featureName for regular modifiers
+                    });
+                }
+            }
+        });
+        
+        // Collect from features table rows (feature-specific modifiers)
+        const featureRows = this.dialogElement.querySelectorAll('.feature-row');
+        featureRows.forEach(row => {
+            const toggle = row.querySelector('.modifier-toggle');
+            if (toggle && toggle.checked) {
+                const featureId = toggle.dataset.featureId;
+                const modifierData = this.getFeatureModifierData(row, featureId);
+                if (modifierData) {
+                    modifiers.push({
+                        modifierName: modifierData.featureName || featureId,
+                        modifier: modifierData.modifier,
+                        modifierType: modifierData.modifierType,
+                        featureName: modifierData.featureName
+                    });
+                }
+            }
+        });
+        
+        return modifiers;
+    }
+
+    /**
+     * Collect resource costs by type
+     */
+    collectResourceCosts() {
+        const resourceCosts = {};
+        
+        // Collect from enabled features
+        const featureRows = this.dialogElement.querySelectorAll('.feature-row');
+        featureRows.forEach(row => {
+            const toggle = row.querySelector('.modifier-toggle');
+            if (toggle && toggle.checked) {
+                const featureDataJson = row.dataset.featureData;
+                if (featureDataJson) {
+                    try {
+                        const featureData = JSON.parse(featureDataJson);
+                        if (featureData.resourceName && featureData.resourceCost) {
+                            const resourceType = featureData.resourceName;
+                            resourceCosts[resourceType] = (resourceCosts[resourceType] || 0) + featureData.resourceCost;
+                        }
+                    } catch (error) {
+                        API.log('error', 'Failed to parse feature data for resource costs', error);
+                    }
+                }
+            }
+        });
+        
+        // Convert to array format
+        return Object.entries(resourceCosts).map(([type, sumCost]) => ({
+            type,
+            sumCost
+        }));
+    }
+
+    /**
+     * Collect all enabled features
+     */
+    collectEnabledFeatures() {
+        const enabledFeatures = [];
+        
+        const featureRows = this.dialogElement.querySelectorAll('.feature-row');
+        featureRows.forEach(row => {
+            const toggle = row.querySelector('.modifier-toggle');
+            if (toggle && toggle.checked) {
+                const featureDataJson = row.dataset.featureData;
+                if (featureDataJson) {
+                    try {
+                        const featureData = JSON.parse(featureDataJson);
+                        enabledFeatures.push({
+                            featureId: row.dataset.featureId,
+                            featureName: featureData.featureName,
+                            enabled: featureData.enabled,
+                            resourceCost: featureData.resourceCost,
+                            resourceName: featureData.resourceName
+                        });
+                    } catch (error) {
+                        API.log('error', 'Failed to parse feature data for enabled features', error);
+                    }
+                }
+            }
+        });
+        
+        return enabledFeatures;
+    }
+
+    /**
+     * Collect all selected target IDs on canvas
+     */
+    collectTargetIDs() {
+        try {
+            // Get all selected tokens on the canvas
+            const selectedTokens = canvas.tokens.controlled;
+            return selectedTokens.map(token => token.id);
+        } catch (error) {
+            API.log('error', 'Failed to collect target IDs', error);
+            return [];
+        }
     }
 
     /**

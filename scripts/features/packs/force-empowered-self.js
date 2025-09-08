@@ -24,8 +24,8 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
         // Feature-specific properties
         this.resourceName = "Force Points";
         this.resourceCost = 1;
-        this.damageType = "kinetic";
-        this.damageAmount = "1d4";
+        this.modifierType = "kinetic";
+        this.modifier = "1d4";
     }
 
     /**
@@ -45,15 +45,13 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
                     enabled: featureData.enabled || false,
                     resourceName: this.resourceName,
                     resourceCost: this.resourceCost,
-                    damageAmount: calculatedDamage,
-                    damageType: this.damageType,
-                    modifierName: 'Double Strike',
-                    // Store the calculated damage in the instance for consistency
-                    _calculatedDamage: calculatedDamage
+                    modifier: calculatedDamage,
+                    modifierType: this.modifierType,
+                    modifierName: 'Double Strike'
                 };
                 
                 // Update instance variable for consistency
-                this.damageAmount = calculatedDamage;
+                this.modifier = calculatedDamage;
                 
                 return this.renderResourceFeatureHTML(themeName, enhancedFeatureData);
             } else {
@@ -90,8 +88,8 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
      * @param {Object} featureData - Feature data containing damage information
      */
     getModifierDisplay(featureData = {}) {
-        const damageAmount = featureData.damageAmount || this.damageAmount;
-        return `+${damageAmount} ${this.damageType}`;
+        const modifier = featureData.modifier || this.modifier;
+        return `+${modifier} ${featureData.modifierType || this.modifierType}`;
     }
 
     /**
@@ -153,10 +151,10 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
             }
 
             // Fallback to default
-            return this.damageAmount;
+            return this.modifier;
         } catch (error) {
             API.log('error', `Failed to calculate kinetic die:`, error);
-            return this.damageAmount;
+            return this.modifier;
         }
     }
 
@@ -167,12 +165,13 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
      * @param {Object} featureData - Feature data containing damage information
      */
     getDamageModifiers(actor, dialogState, featureData) {
-        const damageAmount = featureData.damageAmount || this.damageAmount;
+        const modifier = featureData.modifier || this.modifier;
+        const modifierType = featureData.modifierType || this.modifierType;
         return [
             this.createModifier(
                 `${this.name}`,
-                this.damageType,
-                damageAmount,
+                modifierType,
+                modifier,
                 true,
                 true
             )

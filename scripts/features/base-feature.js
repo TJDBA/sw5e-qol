@@ -335,8 +335,8 @@ export class BaseFeature {
             // Preserve only specific properties that are safe to store in HTML
             // Exclude large objects like actor, dialogType, themeName, etc.
             const safeProperties = [
-                'resourceName', 'resourceCost', 'damageAmount', 'damageType', 'modifierName',
-                'customData', 'classLevel', 'multiclassAdjustment', '_calculatedDamage'
+                'resourceName', 'resourceCost', 'modifier', 'modifierType', 'modifierName', 'isDice',
+                'customData', 'classLevel', 'multiclassAdjustment'
             ];
             
             safeProperties.forEach(prop => {
