@@ -6,6 +6,9 @@ import { CardRenderer } from './card-renderer.js';
  * Manages card creation, updates, and interactions
  */
 export class CardHandler {
+    /**
+     * Create a new CardHandler instance
+     */
     constructor() {
         this.renderer = new CardRenderer();
         this.setupHooks();

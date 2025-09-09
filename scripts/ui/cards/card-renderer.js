@@ -5,6 +5,9 @@ import { API } from '../../api.js';
  * Handles template rendering and dynamic component assembly for chat cards
  */
 export class CardRenderer {
+    /**
+     * Create a new CardRenderer instance
+     */
     constructor() {
         this.componentTemplates = new Map();
         this.initialized = false;

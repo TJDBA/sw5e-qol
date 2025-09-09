@@ -8,6 +8,9 @@ import { getAbilityModifier, getWeaponAbility, getProficiencyBonus } from '../..
  * Handles template rendering and dynamic section assembly
  */
 export class GenericRollRenderer {
+    /**
+     * Create a new GenericRollRenderer instance
+     */
     constructor() {
         this.sectionTemplates = new Map();
         this.initialized = false;

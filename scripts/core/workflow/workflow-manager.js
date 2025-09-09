@@ -12,6 +12,9 @@ import { API } from '../../api.js';
  * Simple state tracking and step management for FoundryVTT module
  */
 export class WorkflowManager {
+    /**
+     * Create a new WorkflowManager instance
+     */
     constructor() {
         this.workflows = getAllWorkflowConfigs();
         this.currentWorkflowId = null;

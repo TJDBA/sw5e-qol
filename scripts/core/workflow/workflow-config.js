@@ -14,17 +14,17 @@ export const WORKFLOW_CONFIG = {
                 description: "Set up attack parameters and context",
                 validationProperties: [
                     "actorId",
-                    "itemId", 
-                    "targetId"
+                    "itemId"
                 ]
             },
             "attack": {
                 name: "Execute Attack Roll",
                 description: "Perform the attack roll calculation and display result",
                 validationProperties: [
-                    "attackRoll",
-                    "attackResult",
-                    "hitStatus"
+                    "attackRoll"
+                    //,
+                    //"attackResult",
+                    //"hitStatus"
                 ]
             },
             "complete": {

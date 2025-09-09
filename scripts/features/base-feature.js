@@ -7,6 +7,18 @@ import { multiclassImproveCheck } from './feature-manager.js';
  * Provides shared functionality for all feature packs
  */
 export class BaseFeature {
+    /**
+     * Create a new BaseFeature instance
+     * @param {Object} config - Feature configuration object
+     * @param {string} config.id - Unique feature identifier
+     * @param {string} config.name - Feature display name
+     * @param {string} config.description - Feature description
+     * @param {Array} [config.affects=[]] - Array of what this feature affects
+     * @param {string} [config.section='features'] - Section where this feature appears
+     * @param {boolean} [config.isReactive=false] - Whether this feature is reactive
+     * @param {boolean} [config.isActive=true] - Whether this feature is active
+     * @param {Object} [config.injectionType] - Injection type per dialog type
+     */
     constructor(config) {
         // Basic metadata
         this.id = config.id;

@@ -5,6 +5,9 @@ import { API } from '../api.js';
  * Handles discovery, loading, and caching of feature packs
  */
 export class FeatureManager {
+    /**
+     * Create a new FeatureManager instance
+     */
     constructor() {
         this.loadedFeatures = new Map();
         this.actorFeatureCache = new Map(); // Cache features per actor

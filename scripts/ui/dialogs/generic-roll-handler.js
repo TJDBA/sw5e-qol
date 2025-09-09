@@ -9,6 +9,9 @@ import { featureManager } from '../../features/feature-manager.js';
  * Manages dialog logic and coordinates with renderer and input handler
  */
 export class GenericRollHandler {
+    /**
+     * Create a new GenericRollHandler instance
+     */
     constructor() {
         this.renderer = new GenericRollRenderer();
         this.inputHandler = null;
@@ -17,8 +20,8 @@ export class GenericRollHandler {
 
     /**
      * Open a generic roll dialog
-     * @param {string} ownerID - The ID of the actor/token making the checkn     
-     * @param {string} dialogType - The type of dialog to open (attack, skill, save, damage, ability)n     
+     * @param {string} ownerID - The ID of the actor/token making the check
+     * @param {string} dialogType - The type of dialog to open (attack, skill, save, damage, ability)
      * @param {Object} options - Optional dialog configuration (will be created if not provided)
      * @returns {Promise<Object|null>} Dialog result or null on error
      */

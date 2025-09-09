@@ -7,6 +7,11 @@ import { getAbilityModifier, getWeaponAbility, getProficiencyBonus } from '../..
  * Handles all component interactions that can be reused across different dialogs
  */
 export class GenericInputHandler {
+    /**
+     * Create a new GenericInputHandler instance
+     * @param {HTMLElement} dialogElement - The dialog DOM element
+     * @param {Object} [handler=null] - The dialog handler instance
+     */
     constructor(dialogElement, handler = null) {
         this.dialogElement = dialogElement;
         this.handler = handler;

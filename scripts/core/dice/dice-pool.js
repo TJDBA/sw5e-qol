@@ -12,6 +12,14 @@ const DIE_RE = /(\d+)d(\d+)(?:\s*min\s*(\d+))?/gi;
 const MIN_BY_FACES = { 4: 2, 6: 2, 8: 3, 10: 4, 12: 5, 20: 8 };
 
 export class DicePool {
+    /**
+     * Create a new DicePool instance
+     * @param {string} tokenID - The token ID for the roll
+     * @param {string} rollType - The type of roll (damage, ability, save, skill, other)
+     * @param {Array} [initialPool=[]] - Initial dice pool array
+     * @param {Object} [target=null] - Target object for the roll
+     * @param {Object} [options={}] - Additional options for the roll
+     */
     constructor(tokenID, rollType, initialPool, target = null, options = {}) {
         this.tokenID = tokenID;
         this.rollType = rollType.toLowerCase();

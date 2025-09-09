@@ -5,6 +5,9 @@ import { API } from '../api.js';
  * Handles dynamic theme loading and switching
  */
 export class ThemeManager {
+    /**
+     * Create a new ThemeManager instance
+     */
     constructor() {
         this.currentTheme = 'bendu';
         this.originalTheme = 'bendu'; // Store original theme before any dialogs
