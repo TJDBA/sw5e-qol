@@ -15,7 +15,7 @@ export class GenericInputHandler {
         this.rollMode = 'public';
         this.selectedItem = '';
         this.selectedPreset = '';
-        this.selectedAttribute = 'dexterity';
+        this.selectedAttribute = 'dex';
         this.rollForEachTarget = false;
         this.featureStates = {}; // Initialize feature states
         this.setupEventListeners();
@@ -393,9 +393,9 @@ export class GenericInputHandler {
     setupRollButton() {
         const rollButton = this.dialogElement.querySelector('#roll-button');
         if (rollButton) {
-            rollButton.addEventListener('click', () => {
+            rollButton.addEventListener('click', async () => {
                 // Get the result and close the dialog
-                const result = this.getDialogState();
+                const result = await this.getDialogState();
                 
                 // Log the returned object for debugging
                 API.log('info', 'Roll button clicked - Dialog result:', result);
@@ -605,6 +605,22 @@ export class GenericInputHandler {
     }
 
     /**
+     * Get ability display name from ability key
+     */
+    getAbilityDisplayName(ability) {
+        const abilityMap = {
+            'str': game.i18n.localize('SW5E-QOL.attributes.str'),
+            'dex': game.i18n.localize('SW5E-QOL.attributes.dex'),
+            'con': game.i18n.localize('SW5E-QOL.attributes.con'),
+            'int': game.i18n.localize('SW5E-QOL.attributes.int'),
+            'wis': game.i18n.localize('SW5E-QOL.attributes.wis'),
+            'cha': game.i18n.localize('SW5E-QOL.attributes.cha'),
+            'none': game.i18n.localize('SW5E-QOL.attributes.none')
+        };
+        return abilityMap[ability?.toLowerCase()] || 'Unknown';
+    }
+
+    /**
      * Collect modifiers from table rows and features
      */
     collectAllModifiers() {
@@ -698,8 +714,13 @@ export class GenericInputHandler {
                 const text = modifierElement?.textContent?.trim() || '';
                 const modifier = text.startsWith('+') ? text : `+${text}`;
                 
+                // Use the selected ability display name instead of generic modifier name
+                const attributeSelect = this.dialogElement?.querySelector('#attribute-select');
+                const currentAbility = attributeSelect?.value || this.selectedAttribute || 'dex';
+                const abilityDisplayName = this.getAbilityDisplayName(currentAbility);
+                
                 return {
-                    name: modifierName,
+                    name: abilityDisplayName,
                     modifier: modifier,
                     modifierType: 'Untyped'
                 };
@@ -955,11 +976,19 @@ export class GenericInputHandler {
     /**
      * Get current dialog state with comprehensive output object
      */
-    getDialogState() {
+    async getDialogState() {
         try {
             const dialogType = this.getDialogType();
             const actor = this.handler?.currentOptions?.actor;
-            const itemID = this.handler?.currentOptions?.itemID || this.selectedItem || 'none';
+            // Get current item ID from dropdown or fallback to stored/default values
+            const itemSelect = this.dialogElement?.querySelector('#item-select');
+            const itemID = this.handler?.currentOptions?.itemID || itemSelect?.value || this.selectedItem || 'none';
+            
+            // Get selected ability and its modifier from the current dropdown value
+            const attributeSelect = this.dialogElement?.querySelector('#attribute-select');
+            const selectedAbility = attributeSelect?.value || this.selectedAttribute || 'dex';
+            const abilityModifier = actor ? await getAbilityModifier(actor, selectedAbility) : '+0';
+            const abilityDisplayName = this.getAbilityDisplayName(selectedAbility);
             
             return {
                 ownerID: this.handler?.currentOptions?.ownerID || 'unknown',
@@ -968,6 +997,9 @@ export class GenericInputHandler {
                 rollMode: this.rollMode,
                 advantageSelection: this.advantageType || 'Normal',
                 rollSeparate: this.getRollSeparateSetting(),
+                selectedAbility: selectedAbility,
+                abilityModifier: abilityModifier,
+                abilityDisplayName: abilityDisplayName,
                 saveObj: {}, // Placeholder for later
                 skillObj: {}, // Placeholder for later
                 modifiers: this.collectAllEnabledModifiers(),
@@ -995,11 +1027,16 @@ export class GenericInputHandler {
     }
 
     /**
-     * Get roll separate setting (placeholder for future implementation)
+     * Get roll separate setting from the target roll toggle
      */
     getRollSeparateSetting() {
-        // TODO: Implement roll separate logic
-        return false;
+        try {
+            const targetRollToggle = this.dialogElement?.querySelector('#target-roll-toggle');
+            return targetRollToggle ? targetRollToggle.checked : false;
+        } catch (error) {
+            API.log('error', 'Failed to get roll separate setting', error);
+            return false;
+        }
     }
 
     /**
@@ -1007,6 +1044,8 @@ export class GenericInputHandler {
      */
     collectAllEnabledModifiers() {
         const modifiers = [];
+        const dialogType = this.getDialogType();
+        const isDamageDialog = dialogType?.toLowerCase() === 'damage';
         
         // Collect from regular modifier table rows (non-feature modifiers)
         const modifierRows = this.dialogElement.querySelectorAll('.modifier-row:not(.feature-row)');
@@ -1014,6 +1053,12 @@ export class GenericInputHandler {
             const toggle = row.querySelector('.modifier-toggle');
             if (toggle && toggle.checked) {
                 const modifierId = toggle.dataset.modifierId;
+                
+                // Skip additional damage parts for non-damage dialogs
+                if (!isDamageDialog && modifierId && modifierId.startsWith('additional-damage-')) {
+                    return;
+                }
+                
                 const modifierData = this.getModifierDataFromRow(row, modifierId);
                 if (modifierData) {
                     modifiers.push({
@@ -1112,13 +1157,25 @@ export class GenericInputHandler {
     }
 
     /**
-     * Collect all selected target IDs on canvas
+     * Collect all targeted tokens by the user
      */
     collectTargetIDs() {
         try {
-            // Get all selected tokens on the canvas
-            const selectedTokens = canvas.tokens.controlled;
-            return selectedTokens.map(token => token.id);
+            // Get all targeted tokens by the user
+            const targets = Array.from(game.user?.targets ?? []);
+            
+            // Return empty array if no targets are selected
+            if (targets.length === 0) {
+                return [];
+            }
+            
+            return targets.map(target => ({
+                sceneId: target.document?.parent?.id ?? canvas.scene?.id ?? "",
+                tokenId: target.id,
+                actorID: target.actor.id,
+                name: target.document?.name ?? target.name ?? "UnknownTarget",
+                img: target.document?.texture?.src ?? target.document?.img ?? target.actor?.img ?? ""
+            }));
         } catch (error) {
             API.log('error', 'Failed to collect target IDs', error);
             return [];
@@ -1468,7 +1525,13 @@ export class GenericInputHandler {
     async updateWeaponRows(actor, itemID) {
         try {
             this.updateWeaponDamageRow(actor, itemID);
-            this.updateAdditionalDamageParts(actor, itemID);
+            
+            // Only update additional damage parts for damage dialogs
+            const dialogType = this.getDialogType();
+            if (dialogType?.toLowerCase() === 'damage') {
+                this.updateAdditionalDamageParts(actor, itemID);
+            }
+            
             await this.updateProficiencyRow(actor, itemID);
             await this.updateAttributeRow(actor, itemID);
         } catch (error) {
