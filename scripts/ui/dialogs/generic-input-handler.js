@@ -399,17 +399,57 @@ export class GenericInputHandler {
         const rollButton = this.dialogElement.querySelector('#roll-button');
         if (rollButton) {
             rollButton.addEventListener('click', async () => {
-                // Get the result and close the dialog
-                const result = await this.getDialogState();
-                
-                // Log the returned object for debugging
-                API.log('info', 'Roll button clicked - Dialog result:', result);
-                
-                if (this.handler && this.handler.resolveDialog) {
-                    this.handler.currentDialog = null; // Clean up dialog reference
-                    this.handler.resolveDialog(result);
+                try {
+                    // Get the dialog state
+                    const dialogState = await this.getDialogState();
+                    
+                    // Log the dialog state for debugging
+                    console.log('=== WORKFLOW START ===');
+                    console.log('Dialog State:', dialogState);
+                    
+                    // Close the dialog
+                    if (this.handler && this.handler.resolveDialog) {
+                        this.handler.currentDialog = null; // Clean up dialog reference
+                        this.handler.resolveDialog(dialogState);
+                    }
+                    
+                    // Launch workflow system
+                    await this.launchWorkflow(dialogState);
+                    
+                } catch (error) {
+                    API.log('error', 'Failed to launch workflow from dialog', error);
+                    console.error('Workflow launch error:', error);
                 }
             });
+        }
+    }
+
+    /**
+     * Launch workflow system with dialog state
+     */
+    async launchWorkflow(dialogState) {
+        try {
+            // Get workflow executor from module API
+            const module = game.modules.get('sw5e-qol');
+            const WorkflowExecutor = module?.api?.WorkflowExecutor;
+            
+            if (!WorkflowExecutor) {
+                throw new Error('WorkflowExecutor not available. Make sure the module is fully loaded.');
+            }
+            
+            // Create workflow executor instance
+            const executor = new WorkflowExecutor();
+            
+            // Launch attack workflow
+            const result = await executor.executeWorkflow('attack', dialogState);
+            
+            // Log the final result
+            console.log('=== WORKFLOW END ===');
+            console.log('Final Result:', result);
+            
+        } catch (error) {
+            API.log('error', 'Failed to execute workflow', error);
+            console.error('Workflow execution error:', error);
         }
     }
 

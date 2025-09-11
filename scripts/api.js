@@ -1,6 +1,5 @@
 // sw5e-qol/scripts/api.js
 import { MODULE_ID, getSetting as getModuleSetting, isDebugEnabled as isModuleDebugEnabled } from './presets/setting.js';
-import { GenericRollHandler } from './ui/dialogs/generic-roll-handler.js';
 
 /**
  * SW5E QoL API - Main interface for module functionality
@@ -126,8 +125,4 @@ export const API = {
         }
     },
 
-    /**
-     * Generic Roll Handler class for creating roll dialogs
-     */
-    GenericRollHandler
 };

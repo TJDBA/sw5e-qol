@@ -6,7 +6,7 @@
 console.log('SW5E QoL Module: main.js is loading...');
 
 // Don't import anything during the import phase - wait for FoundryVTT to be ready
-let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, themeManager, CardHandler, CardRenderer;
+let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, themeManager, CardHandler, CardRenderer, WorkflowExecutor;
 
 /**
  * Initialize the module
@@ -83,7 +83,16 @@ Hooks.once('init', async function() {
             console.error('SW5E QoL Module: Failed to import feature system', error);
         }
 
-        
+        // Import workflow system
+        try {
+            console.log('SW5E QoL Module: WorkflowExecutor import starting...');
+            const workflowModule = await import('./core/workflow/workflow-executor.js');
+            WorkflowExecutor = workflowModule.WorkflowExecutor;
+            console.log('SW5E QoL Module: WorkflowExecutor imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import WorkflowExecutor', error);
+        }
+
         console.log('SW5E QoL Module: All imports completed');
         
         // Register module settings first (after imports)
@@ -109,6 +118,7 @@ Hooks.once('init', async function() {
                 ...(themeManager && { themeManager }),
                 ...(CardHandler && { CardHandler }),
                 ...(CardRenderer && { CardRenderer }),
+                ...(WorkflowExecutor && { WorkflowExecutor }),
                 
                 // Utility functions (only if imported successfully)
                 ...(API && { API }),
@@ -122,7 +132,8 @@ Hooks.once('init', async function() {
                         GenericInputHandler: !!GenericInputHandler,
                         themeManager: !!themeManager,
                         CardHandler: !!CardHandler,
-                        CardRenderer: !!CardRenderer
+                        CardRenderer: !!CardRenderer,
+                        WorkflowExecutor: !!WorkflowExecutor
                     }
                 }
             };

@@ -32,9 +32,10 @@ export class GenericRollHandler {
             if (ownerType === 'invalid') {                
                 ui.notifications.warn('Please select a valid actor or token to make this roll.');                
                 API.log('warning', `Invalid ownerID provided: ${ownerID}`);                
-                return null; n }            
+                return null;
+            }
                 
-                if (!this.validateDialogType(dialogType)) {
+            if (!this.validateDialogType(dialogType)) {
                     ui.notifications.warn(`Invalid dialog type: ${dialogType}. Must be one of: attack, skill, save, damage, ability`);                
                     API.log('warning', `Invalid dialogType provided: ${dialogType}`);                
                     return null;  

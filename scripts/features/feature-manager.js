@@ -265,6 +265,21 @@ export class FeatureManager {
         return Array.from(this.loadedFeatures.values())
             .filter(feature => feature.isActive);
     }
+
+    /**
+     * Get features that affect a specific workflow step
+     * @param {string} stepId - The workflow step ID to check
+     * @returns {Array} Array of features that affect this step
+     */
+    getFeaturesForStep(stepId) {
+        if (!this.initialized) {
+            API.log('warning', 'Feature Manager not initialized');
+            return [];
+        }
+
+        return Array.from(this.loadedFeatures.values())
+            .filter(feature => feature.affectsWorkflowStep && feature.affectsWorkflowStep(stepId));
+    }
 }
 
 // Create singleton instance

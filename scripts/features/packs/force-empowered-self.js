@@ -13,6 +13,7 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
             name: "Force-Empowered Self", 
             description: "Channel the Force to enhance your physical strikes with kinetic energy",
             affects: ["damage"],
+            workflowSteps: [],
             section: "features",
             isReactive: false,
             isActive: true,

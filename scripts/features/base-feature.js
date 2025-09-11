@@ -27,6 +27,7 @@ export class BaseFeature {
         
         // Feature configuration
         this.affects = config.affects || [];
+        this.workflowSteps = config.workflowSteps || []; // New property for workflow step support
         this.section = config.section || "features";
         this.isReactive = config.isReactive || false;
         this.isActive = config.isActive || true;
@@ -226,6 +227,15 @@ export class BaseFeature {
      */
     affectsDialogType(dialogType) {
         return this.affects.includes(dialogType);
+    }
+
+    /**
+     * Check if feature affects a specific workflow step
+     * @param {string} stepId - Workflow step ID
+     * @returns {boolean} True if feature affects this step
+     */
+    affectsWorkflowStep(stepId) {
+        return this.workflowSteps.includes(stepId);
     }
 
     /**
