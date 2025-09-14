@@ -126,3 +126,20 @@ export async function getProficiencyBonus(actor) {
         return 0;
     }
 }
+
+/**
+ * Get actor from token ID
+ * @param {string} tokenID - The token ID
+ * @returns {Object} The actor object
+ */
+export async function getActorFromTokenID(tokenID) {
+    let actor = game.actors.get(tokenID);
+    if (!actor) {
+        actor = game.canvas.tokens.get(tokenID).actor;
+        if (!actor) {
+            API.log('warning', `Actor not found for token ${tokenID}`);
+            return null;
+        }
+    }
+    return actor;
+}

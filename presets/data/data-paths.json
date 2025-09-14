@@ -98,5 +98,15 @@
         "ammo": ".system.ammo"
       }
     }
+  },
+  "token": {
+    "token": {
+      "basePath": "{token}",
+      "isArray":false,
+      "subpaths":{
+        "actor": ".actor"
+      }
+    }
+    
   }
 }

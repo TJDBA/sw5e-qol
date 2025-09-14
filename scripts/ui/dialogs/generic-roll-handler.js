@@ -3,6 +3,7 @@ import { GenericRollRenderer } from './generic-roll-render.js';
 import { GenericInputHandler } from './generic-input-handler.js';
 import { themeManager } from '../theme-manager.js';
 import { featureManager } from '../../features/feature-manager.js';
+import { getActorFromTokenID } from '../../actors/actor-util.js';
 
 /**
  * Generic Roll Dialog Handler
@@ -54,10 +55,10 @@ export class GenericRollHandler {
                 }
 
                 // Get actor for feature discovery
-                const actor = this.getActorFromOwnerID(ownerID, ownerType);
+                const actor = await getActorFromTokenID(ownerID);
                 if (actor) {
                     // Get available features for this actor and dialog type
-                    options.availableFeatures = featureManager.getAvailableFeatures(actor, dialogType);
+                    options.availableFeatures = await featureManager.getFeaturesByActorAndDialog(actor, dialogType);
                     options.actor = actor;
                 }
             this.currentDialogId = `dialog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -69,6 +70,8 @@ export class GenericRollHandler {
 
             // Add the applied theme to options for the renderer
             options.theme = appliedTheme;
+
+            API.log('debug', `Options:`, options);
 
             // Render dialog
             const dialogHtml = await this.renderer.renderDialog(options);
@@ -327,24 +330,6 @@ export class GenericRollHandler {
         } catch (error) {
             API.log('error', 'Failed to collect feature data', error);
             return {};
-        }
-    }
-
-    /**
-     * Get actor from owner ID and type
-     */
-    getActorFromOwnerID(ownerID, ownerType) {
-        try {
-            if (ownerType === 'actor') {
-                return game.actors.get(ownerID);
-            } else if (ownerType === 'token') {
-                const token = canvas.tokens.get(ownerID);
-                return token?.actor;
-            }
-            return null;
-        } catch (error) {
-            API.log('error', 'Failed to get actor from owner ID', error);
-            return null;
         }
     }
 

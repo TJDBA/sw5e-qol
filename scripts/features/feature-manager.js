@@ -1,41 +1,43 @@
 import { API } from '../api.js';
+import { getDataPaths } from '../core/utils/reference/data-lookup.js';
+
+const logThisFile = true;
 
 /**
  * Feature Manager
- * Handles discovery, loading, and caching of feature packs
+ * Simplified feature management with cached feature data
  */
 export class FeatureManager {
     /**
      * Create a new FeatureManager instance
      */
     constructor() {
-        this.loadedFeatures = new Map();
-        this.actorFeatureCache = new Map(); // Cache features per actor
+        this.featureCache = new Map(); // Cached feature data: {id, affects[], workflowSteps[], section, isReactive}
         this.initialized = false;
     }
 
     /**
-     * Initialize the feature manager
+     * Initialize the feature manager and cache all features
      */
     async init() {
         try {
             if (this.initialized) return;
             
-            API.log('info', 'Initializing Feature Manager...');
-            await this.loadFeaturePacks();
+            if (logThisFile) API.log('info', 'Initializing Feature Manager...');
+            await this.loadAndCacheFeatures();
             this.initialized = true;
-            API.log('info', `Feature Manager initialized with ${this.loadedFeatures.size} features`);
+            if (logThisFile) API.log('info', `Feature Manager initialized with ${this.featureCache.size} features`);
         } catch (error) {
             API.log('error', 'Failed to initialize Feature Manager', error);
         }
     }
 
     /**
-     * Load all feature packs using simplified direct imports
+     * Load and cache all feature data
      */
-    async loadFeaturePacks() {
+    async loadAndCacheFeatures() {
         try {
-            // Import all feature classes directly - future-proof and maintainable
+            // Import all feature classes
             const featureModules = [
                 await import('./packs/force-empowered-self.js'),
                 // Future features just add here:
@@ -43,249 +45,186 @@ export class FeatureManager {
                 // await import('./packs/sneak-attack.js'),
             ];
 
-            // Instantiate and register
+            // Cache feature data
             for (const module of featureModules) {
                 try {
                     const feature = new module.default();
-                    this.loadedFeatures.set(feature.id, feature);
-                    API.log('debug', `Loaded feature pack: ${feature.name} (${feature.id})`);
+                    this.featureCache.set(feature.id, feature);
+                    if (logThisFile) API.log('debug', `Cached feature: ${feature.name} (${feature.id})`);
                 } catch (error) {
-                    API.log('error', `Failed to instantiate feature from module:`, error);
+                    API.log('error', `Failed to cache feature from module:`, error);
                 }
             }
         } catch (error) {
-            API.log('error', 'Failed to load feature packs', error);
+            API.log('error', 'Failed to load and cache features', error);
         }
     }
 
     /**
-     * Get available features for actor and dialog type
+     * Get actor from tokenID using data lookup utility
+     * @param {string} tokenId - The token ID
+     * @returns {Object|null} The actor object or null if not found
      */
-    getAvailableFeatures(actor, dialogType) {
+    async getActorFromTokenId(tokenId) {
+        try {
+            const tokenPathConfig = getDataPaths('token', 'token');
+            if (!tokenPathConfig) {
+                API.log('error', 'Token data path configuration not found');
+                return null;
+            }
+
+            const token = canvas.tokens.get(tokenId);
+            if (!token) {
+                if (logThisFile) API.log('warning', `Token with ID ${tokenId} not found in current scene`);
+                return null;
+            }
+
+            const actorPath = tokenPathConfig.subpaths.actor;
+            const actor = getProperty(token, actorPath);
+            
+            if (!actor) {
+                if (logThisFile) API.log('warning', `Actor not found for token ${tokenId}`);
+                return null;
+            }
+
+            return actor;
+        } catch (error) {
+            API.log('error', `Error getting actor from token ID ${tokenId}:`, error);
+            return null;
+        }
+    }
+
+    /**
+     * Get features by actor and dialog type
+     * @param {Object|string} actorOrTokenId - Actor object or token ID string
+     * @param {string} dialogType - The dialog type
+     * @returns {Array} Array of available features
+     */
+    async getFeaturesByActorAndDialog(actorOrTokenId, dialogType) {
+        
         if (!this.initialized) {
-            API.log('warning', 'Feature Manager not initialized');
+            if (logThisFile) API.log('warning', 'Feature Manager not initialized');
             return [];
         }
 
-        const actorId = actor.id;
+        let actor;
         
-        // Check cache first
-        if (this.actorFeatureCache.has(actorId)) {
-            const cachedFeatures = this.actorFeatureCache.get(actorId);
-            return cachedFeatures.filter(f => f.affectsDialogType(dialogType));
-        }
-
-        // Discover features for this actor
-        const availableFeatures = [];
-        
-        for (const [featureId, feature] of this.loadedFeatures) {
-            if (this.isFeatureAvailable(actor, feature)) {
-                availableFeatures.push(feature);
+        // Handle both actor object and token ID
+        if (typeof actorOrTokenId === 'string') {
+            actor = await this.getActorFromTokenId(actorOrTokenId);
+            if (!actor) {
+                return [];
             }
+        } else {
+            actor = actorOrTokenId;
         }
 
-        // Cache the results
-        this.actorFeatureCache.set(actorId, availableFeatures);
+        // Get all features that affect this dialog type
+        const allFeatures = Array.from(this.featureCache.values());
+        console.warn('allFeatures', allFeatures);
+        const dialogFeatures = allFeatures.filter(feature => feature.affectsDialogType(dialogType));
+        console.warn('dialogFeatures', dialogFeatures);
+        // Filter by actor availability
+        const availableFeatures = dialogFeatures.filter(feature => this.isFeatureAvailable(actor, feature.id));
         
-        return availableFeatures.filter(f => f.affectsDialogType(dialogType));
+        if (logThisFile) {
+            API.log('debug', `Found ${availableFeatures.length} available features for actor ${actor.name} and dialog type ${dialogType}`);
+        }
+        
+        return availableFeatures;
     }
 
     /**
      * Check if feature is available to actor
+     * @param {Object} actor - The actor object
+     * @param {string} featureId - The feature ID
+     * @returns {boolean} True if feature is available
      */
-    isFeatureAvailable(actor, feature) {
+    isFeatureAvailable(actor, featureId) {
         try {
+            // Get the feature from cache to get its name
+            const feature = this.featureCache.get(featureId);
+            if (!feature) {
+                if (logThisFile) API.log('debug', `Feature ${featureId} not found in cache`);
+                return false;
+            }
+            
+            const featureName = feature.name;
+            
             // Check feats - exact name match
-            const hasFeat = actor.itemTypes.feat.some(feat => 
-                feat.name === feature.name
-            );
             if (actor.itemTypes?.feat && Array.isArray(actor.itemTypes.feat)) {
                 const hasFeat = actor.itemTypes.feat.some(feat => 
-                    feat.name === feature.name
+                    feat.name === featureName
                 );
                 if (hasFeat) {
-                    API.log('debug', `Feature ${feature.name} found in feats for actor ${actor.name}`);
+                    if (logThisFile) API.log('debug', `Feature ${featureId} found in feats for actor ${actor.name}`);
                     return true;
+                } else {
+                    if (logThisFile) API.log('debug', `Feature ${featureId} not found in feats for actor ${actor.name}`);
                 }
             }
 
-            // Check equipment properties (with safety check)
+            // Check equipment properties
             if (actor.itemTypes?.equipment && Array.isArray(actor.itemTypes.equipment)) {
                 const hasEquipment = actor.itemTypes.equipment.some(item => 
                     item.system?.properties && 
-                    item.system.properties[feature.name] === true
+                    item.system.properties[featureId] === true
                 );
                 if (hasEquipment) {
-                    API.log('debug', `Feature ${feature.name} found in equipment for actor ${actor.name}`);
+                    if (logThisFile) API.log('debug', `Feature ${featureId} found in equipment for actor ${actor.name}`);
                     return true;
                 }
             }
 
             return false;
         } catch (error) {
-            API.log('error', `Error checking feature availability for ${feature.name}:`, error);
+            API.log('error', `Error checking feature availability for ${featureId}:`, error);
             return false;
         }
     }
 
     /**
-     * Check if character has Multiclass Improvement feat and return level adjustment
-     * @param {Object} actor - The actor object
-     * @param {string} class - The class name to exclude from the calculation
-     * @returns {number} Level adjustment from the next highest class, or 0 if not applicable
-     */
-     multiclassImproveCheck(actor, className) {
-        try {
-            // Check if character has the "Multiclass Improvement" feat
-            if (!actor.itemTypes?.feat || !Array.isArray(actor.itemTypes.feat)) {
-                return 0;
-            }
-
-            const hasMulticlassImprovement = actor.itemTypes.feat.some(feat => 
-                feat.name === "Multiclass Improvement"
-            );
-
-            if (!hasMulticlassImprovement) {
-                return 0;
-            }
-
-            // Get all classes from the actor
-            if (!actor.itemTypes?.class || !Array.isArray(actor.itemTypes.class)) {
-                return 0;
-            }
-
-            const classes = actor.itemTypes.class;
-            
-            // Filter out the passed-in class and get classes with levels > 3
-            const eligibleClasses = classes
-                .filter(cls => cls.name !== className && cls.system?.levels > 3)
-                .map(cls => ({
-                    name: cls.name,
-                    levels: cls.system.levels,
-                    originalIndex: classes.indexOf(cls)
-                }));
-
-            // If there isn't at least 1 class with level > 3, return 0
-            if (eligibleClasses.length < 1) {
-                return 0;
-            }
-
-            // If there is at least 1 eligible class, return the highest level class or the first one if there are multiple with the same level
-            if (eligibleClasses.length >= 1) {
-                // Sort by level (highest first), then by original index (first in array wins tie)
-                eligibleClasses.sort((a, b) => {
-                    if (b.levels !== a.levels) {
-                        return b.levels - a.levels; // Higher level first
-                    }
-                    return a.originalIndex - b.originalIndex; // Lower index first (tie-breaker)
-                });
-                
-                const highestClass = eligibleClasses[0];
-                const levelAdjustment = highestClass.levels;
-                API.log('debug', `Multiclass Improvement: Found highest eligible class ${highestClass.name} with ${levelAdjustment} levels for actor ${actor.name}`);
-                return levelAdjustment;
-            }
-
-            // No eligible classes found
-            return 0;
-
-        } catch (error) {
-            API.log('error', `Error checking multiclass improvement for actor ${actor.name}:`, error);
-            return 0;
-        }
-    }
-
-    /**
-     * Clear actor feature cache (call when actor changes)
-     */
-    clearActorCache(actorId) {
-        if (actorId) {
-            this.actorFeatureCache.delete(actorId);
-        } else {
-            this.actorFeatureCache.clear();
-        }
-        API.log('debug', `Cleared feature cache for actor: ${actorId || 'all'}`);
-    }
-
-    /**
-     * Get all loaded features
-     */
-    getAllFeatures() {
-        return Array.from(this.loadedFeatures.values());
-    }
-
-    /**
-     * Get feature by ID
-     */
-    getFeature(featureId) {
-        return this.loadedFeatures.get(featureId);
-    }
-
-    /**
-     * Register a feature manually (for testing or dynamic features)
-     */
-    registerFeature(feature) {
-        this.loadedFeatures.set(feature.id, feature);
-        API.log('debug', `Registered feature: ${feature.name} (${feature.id})`);
-    }
-
-    /**
-     * Unregister a feature
-     */
-    unregisterFeature(featureId) {
-        const removed = this.loadedFeatures.delete(featureId);
-        if (removed) {
-            API.log('debug', `Unregistered feature: ${featureId}`);
-            // Clear cache since available features may have changed
-            this.clearActorCache();
-        }
-        return removed;
-    }
-
-    /**
-     * Get features by dialog type
-     */
-    getFeaturesByDialogType(dialogType) {
-        return Array.from(this.loadedFeatures.values())
-            .filter(feature => feature.affectsDialogType(dialogType));
-    }
-
-    /**
-     * Get reactive features (affect rolls against the owner)
+     * Get all reactive features
+     * @returns {Array} Array of reactive features
      */
     getReactiveFeatures() {
-        return Array.from(this.loadedFeatures.values())
+        if (!this.initialized) {
+            if (logThisFile) API.log('warning', 'Feature Manager not initialized');
+            return [];
+        }
+
+        return Array.from(this.featureCache.values())
             .filter(feature => feature.isReactive);
     }
 
     /**
-     * Get active features (affect rolls the owner makes)
+     * Get all workflow steps for a given feature
+     * @param {string} featureId - The feature ID
+     * @returns {Array} Array of workflow steps
      */
-    getActiveFeatures() {
-        return Array.from(this.loadedFeatures.values())
-            .filter(feature => feature.isActive);
+    getWorkflowStepsForFeature(featureId) {
+        const feature = this.featureCache.get(featureId);
+        return feature ? feature.workflowSteps : [];
     }
 
     /**
-     * Get features that affect a specific workflow step
-     * @param {string} stepId - The workflow step ID to check
+     * Get all features for a given workflow step
+     * @param {string} stepId - The workflow step ID
      * @returns {Array} Array of features that affect this step
      */
-    getFeaturesForStep(stepId) {
+    getFeaturesForWorkflowStep(stepId) {
         if (!this.initialized) {
-            API.log('warning', 'Feature Manager not initialized');
+            if (logThisFile) API.log('warning', 'Feature Manager not initialized');
             return [];
         }
 
-        return Array.from(this.loadedFeatures.values())
-            .filter(feature => feature.affectsWorkflowStep && feature.affectsWorkflowStep(stepId));
+        return Array.from(this.featureCache.values())
+            .filter(feature => feature.workflowSteps.includes(stepId));
     }
+
 }
 
 // Create singleton instance
 export const featureManager = new FeatureManager();
 
-// Export the multiclass improvement check function as a standalone utility
-export function multiclassImproveCheck(actor, className) {
-    return featureManager.multiclassImproveCheck(actor, className);
-}
+

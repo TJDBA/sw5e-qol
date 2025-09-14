@@ -4,7 +4,7 @@
  * Location: scripts/core/dice/d20-processor.js
  */
 
-import { API } from '../../../api.js';
+import { API } from '../../api.js';
 
 /**
  * D20 Processor Class

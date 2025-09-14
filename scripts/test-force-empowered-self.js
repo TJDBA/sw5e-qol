@@ -47,7 +47,7 @@ export class ForceEmpoweredSelfTest {
             API.log('info', 'Testing Force-Empowered Self discovery...');
             
             // Test damage features
-            const damageFeatures = featureManager.getAvailableFeatures(this.testActor, 'damage');
+            const damageFeatures = await featureManager.getFeaturesByActorAndDialog(this.testActor, 'damage');
             const forceFeature = damageFeatures.find(f => f.id === 'force-empowered-self');
             
             if (forceFeature) {
@@ -72,7 +72,7 @@ export class ForceEmpoweredSelfTest {
         try {
             API.log('info', 'Testing Force-Empowered Self rendering...');
             
-            const damageFeatures = featureManager.getAvailableFeatures(this.testActor, 'damage');
+            const damageFeatures = await featureManager.getFeaturesByActorAndDialog(this.testActor, 'damage');
             const forceFeature = damageFeatures.find(f => f.id === 'force-empowered-self');
             
             if (!forceFeature) {

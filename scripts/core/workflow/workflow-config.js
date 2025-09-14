@@ -1,14 +1,14 @@
 /**
- * Workflow Configuration - Defines workflows, steps, and validation properties
- * This config file contains workflow definitions with step validation properties
+ * Workflow Configuration - Defines workflows, actions, and validation properties
+ * This config file contains workflow definitions with action validation properties
  * for chained workflow data passing and null checks
  */
 
 export const WORKFLOW_CONFIG = {
     // Attack workflow - basic attack roll
     "attack": {
-        workflowSteps: ["start", "attack", "complete"],
-        steps: {
+        workflowActions: ["start", "attack", "complete"],
+        actions: {
             "start": {
                 name: "Initialize Attack",
                 description: "Set up attack parameters and context",
@@ -40,8 +40,8 @@ export const WORKFLOW_CONFIG = {
 
     // Attack-Damage workflow - attack followed by damage
     "attack-damage": {
-        workflowSteps: ["start", "attack", "damage", "complete"],
-        steps: {
+        workflowActions: ["start", "attack", "damage", "complete"],
+        actions: {
             "start": {
                 name: "Initialize Attack-Damage",
                 description: "Set up attack and damage parameters",
@@ -84,8 +84,8 @@ export const WORKFLOW_CONFIG = {
 
     // Attack-Save workflow - attack followed by saving throw
     "attack-save": {
-        workflowSteps: ["start", "attack", "save", "complete"],
-        steps: {
+        workflowActions: ["start", "attack", "save", "complete"],
+        actions: {
             "start": {
                 name: "Initialize Attack-Save",
                 description: "Set up attack and save parameters",
@@ -128,8 +128,8 @@ export const WORKFLOW_CONFIG = {
 
     // Damage-Save-ApplyDamage workflow - damage, save, then apply
     "damage-save-applyDamage": {
-        workflowSteps: ["start", "damage", "save", "applyDamage", "complete"],
-        steps: {
+        workflowActions: ["start", "damage", "save", "applyDamage", "complete"],
+        actions: {
             "start": {
                 name: "Initialize Damage-Save",
                 description: "Set up damage and save parameters",
@@ -199,36 +199,36 @@ export function getAllWorkflowConfigs() {
 }
 
 /**
- * Get step configuration for a specific workflow and step
+ * Get action configuration for a specific workflow and action
  * @param {string} workflowId - The workflow identifier
- * @param {string} stepId - The step identifier
- * @returns {Object|null} Step configuration or null if not found
+ * @param {string} actionId - The action identifier
+ * @returns {Object|null} Action configuration or null if not found
  */
-export function getStepConfig(workflowId, stepId) {
+export function getActionConfig(workflowId, actionId) {
     const workflow = WORKFLOW_CONFIG[workflowId];
-    return workflow && workflow.steps[stepId] ? workflow.steps[stepId] : null;
+    return workflow && workflow.actions[actionId] ? workflow.actions[actionId] : null;
 }
 
 /**
- * Get validation properties for a specific workflow step
+ * Get validation properties for a specific workflow action
  * @param {string} workflowId - The workflow identifier
- * @param {string} stepId - The step identifier
+ * @param {string} actionId - The action identifier
  * @returns {Array} Array of validation property names
  */
-export function getStepValidationProperties(workflowId, stepId) {
-    const stepConfig = getStepConfig(workflowId, stepId);
-    return stepConfig ? stepConfig.validationProperties : [];
+export function getActionValidationProperties(workflowId, actionId) {
+    const actionConfig = getActionConfig(workflowId, actionId);
+    return actionConfig ? actionConfig.validationProperties : [];
 }
 
 /**
- * Validate state object against step requirements
+ * Validate state object against action requirements
  * @param {string} workflowId - The workflow identifier
- * @param {string} stepId - The step identifier
+ * @param {string} actionId - The action identifier
  * @param {Object} state - State object to validate
  * @returns {Object} Validation result with isValid and missingProperties
  */
-export function validateStepState(workflowId, stepId, state) {
-    const requiredProperties = getStepValidationProperties(workflowId, stepId);
+export function validateActionState(workflowId, actionId, state) {
+    const requiredProperties = getActionValidationProperties(workflowId, actionId);
     const missingProperties = [];
     
     requiredProperties.forEach(prop => {

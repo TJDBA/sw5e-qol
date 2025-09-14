@@ -6,7 +6,7 @@
 console.log('SW5E QoL Module: main.js is loading...');
 
 // Don't import anything during the import phase - wait for FoundryVTT to be ready
-let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, themeManager, CardHandler, CardRenderer, WorkflowExecutor;
+let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, themeManager, CardHandler, CardRenderer, WorkflowManager, featureManager;
 
 /**
  * Initialize the module
@@ -75,22 +75,28 @@ Hooks.once('init', async function() {
             console.error('SW5E QoL Module: Failed to import CardRenderer', error);
         }
         
-        // Import feature system
+        // Import workflow system BEFORE feature system
         try {
-            await import('./features/init.js');
-            console.log('SW5E QoL Module: Feature system imported successfully');
+            console.log('SW5E QoL Module: WorkflowManager import starting...');
+            const workflowModule = await import('./core/workflow/workflow-manager.js');
+            WorkflowManager = workflowModule.WorkflowManager;
+            console.log('SW5E QoL Module: WorkflowManager imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import WorkflowManager', error);
+            console.error('WorkflowManager import error details:', error.stack);
+        }
+        
+        // Import feature system AFTER workflow (since it might depend on it)
+        try {
+            console.log('SW5E QoL Module: Feature system import starting...');
+            // Don't await the feature system if it's doing async initialization
+            import('./features/init.js').then(() => {
+                console.log('SW5E QoL Module: Feature system imported successfully');
+            }).catch(error => {
+                console.error('SW5E QoL Module: Failed to import feature system', error);
+            });
         } catch (error) {
             console.error('SW5E QoL Module: Failed to import feature system', error);
-        }
-
-        // Import workflow system
-        try {
-            console.log('SW5E QoL Module: WorkflowExecutor import starting...');
-            const workflowModule = await import('./core/workflow/workflow-executor.js');
-            WorkflowExecutor = workflowModule.WorkflowExecutor;
-            console.log('SW5E QoL Module: WorkflowExecutor imported successfully');
-        } catch (error) {
-            console.error('SW5E QoL Module: Failed to import WorkflowExecutor', error);
         }
 
         console.log('SW5E QoL Module: All imports completed');
@@ -118,7 +124,7 @@ Hooks.once('init', async function() {
                 ...(themeManager && { themeManager }),
                 ...(CardHandler && { CardHandler }),
                 ...(CardRenderer && { CardRenderer }),
-                ...(WorkflowExecutor && { WorkflowExecutor }),
+                ...(WorkflowManager && { WorkflowManager }),
                 
                 // Utility functions (only if imported successfully)
                 ...(API && { API }),
@@ -133,7 +139,7 @@ Hooks.once('init', async function() {
                         themeManager: !!themeManager,
                         CardHandler: !!CardHandler,
                         CardRenderer: !!CardRenderer,
-                        WorkflowExecutor: !!WorkflowExecutor
+                        WorkflowManager: !!WorkflowManager
                     }
                 }
             };
@@ -161,6 +167,14 @@ Hooks.once('ready', async function() {
             console.log('Available API functions:', Object.keys(module.api));
             console.log('✅ SW5E QoL Module is ready!');
             console.log('Core components available:', module.api.debug.imports);
+            
+            // Log specifically about WorkflowManager
+            if (module.api.WorkflowManager) {
+                console.log('✅ WorkflowManager is available and ready to use!');
+            } else {
+                console.warn('⚠️ WorkflowManager is NOT available');
+            }
+           
         }
         
     } catch (error) {
@@ -179,7 +193,7 @@ Hooks.once('disable', function() {
     }
 });
 
-// Corrected test function - copy and paste this into the console
+// Test function for the card system - can be run from console
 async function testCardSystemConsole() {
     try {
         console.log('Starting card system test...');
@@ -291,5 +305,58 @@ async function testCardSystemConsole() {
     }
 }
 
-// Run the test
-testCardSystemConsole();
+// Test function for the workflow system - can be run from console
+async function testWorkflowConsole() {
+    try {
+        console.log('Starting workflow system test...');
+        
+        // Get the module and check if WorkflowManager is available
+        const module = game.modules.get('sw5e-qol');
+        if (!module || !module.api || !module.api.WorkflowManager) {
+            console.error('WorkflowManager not available. Make sure the module is loaded and the workflow system is imported.');
+            console.log('Available API functions:', module?.api ? Object.keys(module.api) : 'No API available');
+            console.log('Import status:', module?.api?.debug?.imports);
+            return;
+        }
+        
+        // Create an instance of WorkflowManager
+        const executor = new module.api.WorkflowManager();
+        console.log('WorkflowManager instance created');
+        
+        // Create a test dialog state
+        const testDialogState = {
+            ownerID: game.user.character?.id || 'test-actor',
+            dialogType: 'attack',
+            itemID: 'test-item',
+            rollMode: 'publicroll',
+            advantageSelection: 'Normal',
+            rollSeparate: false,
+            selectedAbility: 'dex',
+            abilityModifier: '+3',
+            abilityDisplayName: 'Dexterity',
+            saveObj: {},
+            skillObj: {},
+            modifiers: [],
+            resourceCosts: [],
+            enabledFeatures: [],
+            targetIDs: []
+        };
+        
+        console.log('Test dialog state:', testDialogState);
+        
+        // Execute the workflow
+        console.log('Executing attack workflow...');
+        const result = await executor.executeWorkflow('attack', testDialogState);
+        
+        console.log('✅ Workflow completed successfully!');
+        console.log('Result:', result);
+        
+    } catch (error) {
+        console.error('❌ Workflow test failed:', error);
+        console.error('Error details:', error.stack);
+    }
+}
+
+// To run tests, use the browser console after the module loads:
+// testCardSystemConsole()
+// testWorkflowConsole()

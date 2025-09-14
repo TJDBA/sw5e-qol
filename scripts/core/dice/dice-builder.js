@@ -4,8 +4,10 @@
  * Location: scripts/core/dice/dice-builder.js
  */
 
-import { API } from '../../../api.js';
-import { getDataPaths } from '../utils/reference/data-lookup.js';
+import { API } from '../../api.js';
+import { getDataPaths } from '../../core/utils/reference/data-lookup.js';
+import { getActorFromTokenID } from '../../actors/actor-util.js';
+import { featureManager } from '../../features/feature-manager.js';
 
 /**
  * Dice Builder Class
@@ -13,7 +15,8 @@ import { getDataPaths } from '../utils/reference/data-lookup.js';
  */
 export class DiceBuilder {
     constructor() {
-        this.dataPaths = getDataPaths();
+        //this.dataPaths = getDataPaths();
+        
     }
 
     /**
@@ -23,42 +26,36 @@ export class DiceBuilder {
      */
     async buildAttackPool(state) {
         try {
-            const { dialogState, targets } = state;
-            const actor = game.actors.get(dialogState.ownerID);
-            const item = actor?.items.get(dialogState.itemID);
+            const { dialogState } = state;
+            const actor = getActorFromTokenID(dialogState.ownerID);
+            //const item = actor?.items.get(dialogState.itemID);
             
-            if (!actor || !item) {
+            if (actor == null) {
                 throw new Error('Actor or item not found');
             }
 
-            // Step 1: Build base dice pool from modifiers array
-            const basePool = this.buildBaseDicePool(dialogState.modifiers || []);
-            
+            // Step 1: Add base d20 and build base dice pool from modifiers array
+            dialogState.modifiers.unshift({modifierName: 'Attack Die', modifier: '1d20', modifierType: 'Untyped'});
+            const basePool = this.buildBaseDicePool(dialogState.modifiers);
+            console.log('DiceBuilder: Base pool:', basePool);
+
             // Step 2: Apply features and options
             const modifiedPool = await this.applyFeaturesAndOptions(basePool, state, 'attack');
             
             // Step 3: Build pool formula
             const poolFormula = this.buildPoolFormula(modifiedPool, 'attack');
-            
-            // Step 4: Create crit pool (placeholder for now)
-            const critPool = null; // Will be implemented when crit logic is added
-            
-            // Step 5: Apply pool level modifiers (advantage/disadvantage)
-            const advantageType = dialogState.advantageSelection || 'Normal';
-            const advantage = advantageType === 'Advantage';
-            const disadvantage = advantageType === 'Disadvantage';
+            console.log('DiceBuilder: Pool formula:', poolFormula);
             
             // Step 6: Create Roll objects
-            const baseRoll = await this.createRollObject(poolFormula, advantage, disadvantage, 'attack');
+            //const baseRoll = await this.createRollObject(poolFormula, advantage, disadvantage, 'attack');
             const critRoll = null; // Placeholder for crit rolls
             
             API.log('debug', 'DiceBuilder: Built attack dice configuration');
             return {
-                basePool: baseRoll,
-                critPool: critRoll,
-                formula: poolFormula,
-                advantage: advantage,
-                disadvantage: disadvantage
+                basePool: basePool,
+                formula: poolFormula
+                //advantage: advantage,
+                //disadvantage: disadvantage
             };
         } catch (error) {
             API.log('error', 'DiceBuilder: Error building attack pool:', error);
@@ -74,25 +71,29 @@ export class DiceBuilder {
     async buildDamagePool(state) {
         try {
             const { dialogState, targets } = state;
-            const actor = game.actors.get(dialogState.ownerID);
+            const actor = getActorFromTokenID(dialogState.ownerID);
             const item = actor?.items.get(dialogState.itemID);
             
-            if (!actor || !item) {
+            if (actor == null) {
                 throw new Error('Actor or item not found');
             }
 
             // Step 1: Build base dice pool from modifiers array
-            const basePool = this.buildBaseDicePool(dialogState.modifiers || []);
+            const basePool = this.buildBaseDicePool(dialogState.modifiers);
+            console.log('DiceBuilder: Base pool:', basePool);
             
             // Step 2: Apply features and options
             const modifiedPool = await this.applyFeaturesAndOptions(basePool, state, 'damage');
-            
+            console.log('DiceBuilder: Modified pool:', modifiedPool);
+
             // Step 3: Build pool formula (grouped by type for damage)
             const poolFormula = this.buildPoolFormula(modifiedPool, 'damage');
-            
+            console.log('DiceBuilder: Pool formula:', poolFormula);
+
             // Step 4: Create crit pool (placeholder for now)
             const critPool = null; // Will be implemented when crit logic is added
-            
+            console.log('DiceBuilder: Crit pool:', critPool);
+
             // Step 5: Apply pool level modifiers (advantage/disadvantage)
             const advantageType = dialogState.advantageSelection || 'Normal';
             const advantage = advantageType === 'Advantage';
@@ -123,6 +124,7 @@ export class DiceBuilder {
      */
     buildBaseDicePool(modifiers) {
         const dicePool = [];
+        let elementType = '';
         
         modifiers.forEach(modifier => {
             if (!modifier.modifier || modifier.modifier.trim() === '') return;
@@ -144,8 +146,13 @@ export class DiceBuilder {
                     if (element === '') return; // Skip empty elements
                     if (element === '0') return; // Skip zero values
                     
+                    // Determine if the element is a dice or a number
+                    if (isNaN(element)) elementType = 'dice';
+                    else elementType = 'number';
+                    
                     dicePool.push({
                         element: element,
+                        elementType: elementType,
                         modifierType: modifier.modifierType || '',
                         modifierName: modifier.modifierName || 'Unknown',
                         featureName: modifier.featureName || null
@@ -198,7 +205,28 @@ export class DiceBuilder {
         // Placeholder for feature application
         // This will be implemented when feature system integration is complete
         API.log('debug', `DiceBuilder: Applying features and options for ${actionType}`);
+
         
+
+        const featureWorkflowStep = "base-dice-pool-features-"+actionType;
+        console.log('DiceBuilder: Feature workflow step:', featureWorkflowStep);
+        
+        const features = await featureManager.getFeaturesForWorkflowStep(featureWorkflowStep);
+        console.log('DiceBuilder: Features:', features);
+        features.forEach(feature => {
+            dicePool = feature.apply(dicePool, state, featureWorkflowStep);
+        });
+
+
+        if (actionType === 'attack') {
+            const advantageType = state.dialogState.advantageSelection || 'Normal';
+            
+            if (advantageType === 'Advantage') {
+                dicePool[0].modifier = 'max(1d20, 1d20)';
+            } else if (advantageType === 'Disadvantage') {
+                dicePool[0].modifier = 'min(1d20, 1d20)';
+            }
+        }
         // For now, return the pool as-is
         return dicePool;
     }

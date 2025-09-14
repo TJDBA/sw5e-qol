@@ -1,200 +1,114 @@
-import { 
-    getAllWorkflowConfigs, 
-    getWorkflowConfig, 
-    getStepConfig, 
-    getStepValidationProperties, 
-    validateStepState 
-} from './workflow-config.js';
+/**
+ * Workflow Manager
+ * Central system for executing workflows
+ * Location: scripts/core/workflow/workflow-manager.js
+ */
+
 import { API } from '../../api.js';
+import { getWorkflowConfig, getActionConfig, getActionValidationProperties } from './workflow-config.js';
+
+const logThisFile = true;
 
 /**
- * WorkflowManager - Handles sequential step-based workflows for game actions
- * Simple state tracking and step management for FoundryVTT module
+ * Workflow Manager Class
+ * Manages the execution of different workflow types
  */
 export class WorkflowManager {
-    /**
-     * Create a new WorkflowManager instance
-     */
     constructor() {
-        this.workflows = getAllWorkflowConfigs();
-        this.currentWorkflowId = null;
-        this.currentStepIndex = 0;
+        if (logThisFile) API.log('debug', 'WorkflowManager: Constructor called');
     }
 
     /**
-     * Get all workflow definitions
-     * @returns {Object} All workflow configurations
+     * Execute a workflow
+     * @param {string} workflowType - Type of workflow to execute
+     * @param {Object} dialogState - Dialog state from the input handler
+     * @returns {Object} Workflow execution result
      */
-    getAllWorkflows() {
-        return this.workflows;
-    }
+    async executeWorkflow(workflowType, dialogState) {
+        try {
+            if (logThisFile) {
+                API.log('debug', `WorkflowManager: Starting ${workflowType} workflow`);
+                API.log('info', '🎯 WorkflowManager called by roll button!');
+                API.log('info', 'Workflow Type:', workflowType);
+                API.log('info', 'Dialog State:', dialogState);
+            }
+            
+            // Get workflow configuration
+            const workflow = getWorkflowConfig(workflowType);
+            if (!workflow) {
+                throw new Error(`Workflow configuration not found for type: ${workflowType}`);
+            }
+            
+            if (logThisFile) API.log('debug', `WorkflowManager: Workflow Config:`, workflow);
 
-    /**
-     * Get specific workflow definition by ID
-     * @param {string} id - Workflow ID
-     * @returns {Object|null} Workflow configuration or null if not found
-     */
-    getWorkflow(id) {
-        return getWorkflowConfig(id);
-    }
+            // Initialize workflow state
+            let workflowState = {
+                workflowType: workflowType,
+                dialogState: dialogState,
+                startTime: Date.now(),
+                currentAction: null,
+                completedActions: [],
+                errors: [],
+                results: {}
+            };
 
-    /**
-     * Set active workflow and reset to start step
-     * @param {string} id - Workflow ID
-     * @returns {boolean} True if workflow was set successfully, false if not found
-     */
-    setWorkflow(id) {
-        const workflow = getWorkflowConfig(id);
-        if (!workflow) {
-            API.log('warning', `WorkflowManager: Workflow "${id}" not found`);
-            return false;
+            // Loop through workflow actions
+            for (const actionName of workflow.workflowActions) {
+                try {
+                    if (logThisFile) API.log('debug', `WorkflowManager: Processing action: ${actionName}`);
+                    
+                    // Get action configuration
+                    const actionConfig = getActionConfig(workflowType, actionName);
+                    if (logThisFile) API.log('debug', `WorkflowManager: Action Config:`, actionConfig);
+                    
+                    // Update current action in state
+                    workflowState.currentAction = actionName;
+                    
+                    // Dynamically import and execute the action
+                    const actionModule = await import(`./actions/${actionName}-action.js`);
+                    const ActionClass = actionModule[`${actionName.charAt(0).toUpperCase() + actionName.slice(1)}Action`];
+                    
+                    if (!ActionClass) {
+                        throw new Error(`Action class not found: ${actionName.charAt(0).toUpperCase() + actionName.slice(1)}Action`);
+                    }
+                    
+                    // Create action instance and execute
+                    const actionInstance = new ActionClass();
+                    workflowState = await actionInstance.execute(workflowState);
+                    
+                    // Mark action as completed
+                    workflowState.completedActions.push(actionName);
+                    
+                    if (logThisFile) API.log('debug', `WorkflowManager: Action ${actionName} completed successfully`);
+                    
+                } catch (error) {
+                    API.log('error', `WorkflowManager: Failed to execute action ${actionName}:`, error);
+                    workflowState.errors.push({
+                        action: actionName,
+                        error: error.message,
+                        timestamp: Date.now()
+                    });
+                }
+            }
+            
+            // Prepare result response
+            const result = {
+                success: workflowState.errors.length === 0,
+                workflowType: workflowType,
+                message: `WorkflowManager successfully executed ${workflowType} workflow`,
+                timestamp: Date.now(),
+                dialogState: dialogState,
+                workflowState: workflowState,
+                completedActions: workflowState.completedActions,
+                errors: workflowState.errors
+            };
+            
+            if (logThisFile) API.log('debug', `WorkflowManager: Completed ${workflowType} workflow`);
+            return result;
+            
+        } catch (error) {
+            API.log('error', 'WorkflowManager: Failed to execute workflow:', error);
+            throw error;
         }
-
-        this.currentWorkflowId = id;
-        this.currentStepIndex = 0; // Reset to start step
-        return true;
-    }
-
-    /**
-     * Get current step index
-     * @returns {number} Current step index (0 = start, length-1 = complete)
-     */
-    getCurrentStep() {
-        return this.currentStepIndex;
-    }
-
-    /**
-     * Get current step name
-     * @returns {string|null} Current step name or null if no active workflow
-     */
-    getCurrentStepName() {
-        if (!this.currentWorkflowId) return null;
-        const workflow = getWorkflowConfig(this.currentWorkflowId);
-        return workflow ? workflow.workflowSteps[this.currentStepIndex] : null;
-    }
-
-    /**
-     * Advance to next step in workflow
-     * @returns {string|null} Next step name or null if at end of workflow
-     */
-    getNextStep() {
-        if (!this.currentWorkflowId) return null;
-        
-        const workflow = getWorkflowConfig(this.currentWorkflowId);
-        if (!workflow) return null;
-
-        // Check if we can advance
-        if (this.currentStepIndex < workflow.workflowSteps.length - 1) {
-            this.currentStepIndex++;
-            return workflow.workflowSteps[this.currentStepIndex];
-        }
-
-        return null; // Already at complete step
-    }
-
-    /**
-     * Check if workflow is complete
-     * @returns {boolean} True if at complete step
-     */
-    isComplete() {
-        if (!this.currentWorkflowId) return false;
-        const workflow = getWorkflowConfig(this.currentWorkflowId);
-        return workflow && this.currentStepIndex === workflow.workflowSteps.length - 1;
-    }
-
-    /**
-     * Get step actions for a specific step
-     * This is a placeholder - actual implementation would return function calls/actions
-     * @param {string} stepId - Step identifier
-     * @returns {Array} Array of function calls/actions for the step
-     */
-    getStepActions(stepId) {
-        // Placeholder implementation
-        // In a real implementation, this would return actual function calls/actions
-        // based on the step ID and current context
-        return [];
-    }
-
-    /**
-     * Get current step configuration
-     * @returns {Object|null} Current step configuration or null if no active workflow
-     */
-    getCurrentStepConfig() {
-        if (!this.currentWorkflowId) return null;
-        const stepName = this.getCurrentStepName();
-        return stepName ? getStepConfig(this.currentWorkflowId, stepName) : null;
-    }
-
-    /**
-     * Get validation properties for current step
-     * @returns {Array} Array of validation property names for current step
-     */
-    getCurrentStepValidationProperties() {
-        if (!this.currentWorkflowId) return [];
-        const stepName = this.getCurrentStepName();
-        return stepName ? getStepValidationProperties(this.currentWorkflowId, stepName) : [];
-    }
-
-    /**
-     * Validate state against current step requirements
-     * @param {Object} state - State object to validate
-     * @returns {Object} Validation result with isValid and missingProperties
-     */
-    validateCurrentStepState(state) {
-        if (!this.currentWorkflowId) {
-            return { isValid: false, missingProperties: [], requiredProperties: [] };
-        }
-        const stepName = this.getCurrentStepName();
-        return stepName ? validateStepState(this.currentWorkflowId, stepName, state) : 
-                         { isValid: false, missingProperties: [], requiredProperties: [] };
-    }
-
-    /**
-     * Get workflow state for saving to chat card flags
-     * @returns {Object|null} State object or null if no active workflow
-     */
-    getState() {
-        if (!this.currentWorkflowId) return null;
-        
-        return {
-            workflowId: this.currentWorkflowId,
-            stepIndex: this.currentStepIndex,
-            stepName: this.getCurrentStepName()
-        };
-    }
-
-    /**
-     * Restore workflow state from chat card flags
-     * @param {Object} state - State object from chat card flags
-     * @returns {boolean} True if state was restored successfully
-     */
-    restoreState(state) {
-        if (!state || !state.workflowId || typeof state.stepIndex !== 'number') {
-            return false;
-        }
-
-        const workflow = getWorkflowConfig(state.workflowId);
-        if (!workflow) {
-            API.log('warning', `WorkflowManager: Cannot restore state for unknown workflow "${state.workflowId}"`);
-            return false;
-        }
-
-        // Validate step index
-        if (state.stepIndex < 0 || state.stepIndex >= workflow.workflowSteps.length) {
-            API.log('warning', `WorkflowManager: Invalid step index ${state.stepIndex} for workflow "${state.workflowId}"`);
-            return false;
-        }
-
-        this.currentWorkflowId = state.workflowId;
-        this.currentStepIndex = state.stepIndex;
-        return true;
-    }
-
-    /**
-     * Reset workflow manager to initial state
-     */
-    reset() {
-        this.currentWorkflowId = null;
-        this.currentStepIndex = 0;
     }
 }

@@ -388,7 +388,7 @@ export class GenericRollRenderer {
             const { actor, type: dialogType, themeName, featureState, theme } = dialogData;
             
             // Get available features for this actor and dialog type
-            const availableFeatures = featureManager.getAvailableFeatures(actor, dialogType);
+            const availableFeatures = await featureManager.getFeaturesByActorAndDialog(actor, dialogType);
             
             if (!availableFeatures || availableFeatures.length === 0) {
                 return ''; // No features to display

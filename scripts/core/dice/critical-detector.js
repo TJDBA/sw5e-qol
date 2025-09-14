@@ -4,7 +4,7 @@
  * Location: scripts/core/dice/critical-detector.js
  */
 
-import { API } from '../../../api.js';
+import { API } from '../../api.js';
 
 /**
  * Critical Detector Class

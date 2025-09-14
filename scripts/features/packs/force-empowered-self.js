@@ -13,9 +13,9 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
             name: "Force-Empowered Self", 
             description: "Channel the Force to enhance your physical strikes with kinetic energy",
             affects: ["damage"],
-            workflowSteps: [],
+            workflowSteps: ["base-dice-pool-features-attack"],
             section: "features",
-            isReactive: false,
+            isReactive: true, //Should be false, but for testing purposes we want it to be true
             isActive: true,
             injectionType: {
                 "damage": "html"
@@ -159,24 +159,55 @@ export default class ForceEmpoweredSelfFeature extends BaseFeature {
         }
     }
 
-    /**
-     * Damage modifiers
+   /**
+     * Get damage modifier in dice pool element format
      * @param {Object} actor - The actor object
-     * @param {Object} dialogState - Current dialog state
-     * @param {Object} featureData - Feature data containing damage information
+     * @returns {Object} Dice pool element object
      */
-    getDamageModifiers(actor, dialogState, featureData) {
-        const modifier = featureData.modifier || this.modifier;
-        const modifierType = featureData.modifierType || this.modifierType;
-        return [
-            this.createModifier(
-                `${this.name}`,
-                modifierType,
-                modifier,
-                true,
-                true
-            )
-        ];
+    getDamageModifier(actor) {
+        try {
+            // Calculate the kinetic die based on class level and multiclass improvement
+            const kineticDie = this.calculateKineticDie(actor);
+            
+            // Return in dice pool element format
+            return {
+                element: kineticDie,
+                elementType: 'dice',
+                modifierType: this.modifierType,
+                modifierName: this.name,
+                featureName: this.id
+            };
+        } catch (error) {
+            API.log('error', `Failed to get damage modifier:`, error);
+            // Return fallback in dice pool element format
+            return {
+                element: this.modifier,
+                elementType: 'dice',
+                modifierType: this.modifierType,
+                modifierName: this.modifierName,
+                featureName: this.id
+            };
+        }
+    }
+
+    apply(dicePool, state, featureWorkflowStep) {
+        console.log('ForceEmpoweredSelfFeature: Applying feature to dice pool', dicePool);
+        switch (featureWorkflowStep) {
+            case "base-dice-pool-features-attack":
+                console.log('ForceEmpoweredSelfFeature: Applying feature to attack dice pool');
+                dicePool.forEach(dice => {
+                    if (dice.elementType == 'dice') {
+                    // Add '+0' to the element string to ensure a modifier is always present
+                    if (typeof dice.element === 'string' && !dice.element.includes('+0')) {
+                        dice.element += '+1';
+                    }
+                    }
+                });
+                dicePool.push(this.getDamageModifier(state.actor));
+                break;
+        }
+        console.log('ForceEmpoweredSelfFeature: Applied feature to dice pool', dicePool);
+        return dicePool;
     }
 }
 

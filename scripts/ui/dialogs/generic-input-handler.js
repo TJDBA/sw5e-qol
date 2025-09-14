@@ -429,16 +429,16 @@ export class GenericInputHandler {
      */
     async launchWorkflow(dialogState) {
         try {
-            // Get workflow executor from module API
+            // Get workflow manager from module API
             const module = game.modules.get('sw5e-qol');
-            const WorkflowExecutor = module?.api?.WorkflowExecutor;
+            const WorkflowManager = module?.api?.WorkflowManager;
             
-            if (!WorkflowExecutor) {
-                throw new Error('WorkflowExecutor not available. Make sure the module is fully loaded.');
+            if (!WorkflowManager) {
+                throw new Error('WorkflowManager not available. Make sure the module is fully loaded.');
             }
             
-            // Create workflow executor instance
-            const executor = new WorkflowExecutor();
+            // Create workflow manager instance
+            const executor = new WorkflowManager();
             
             // Launch attack workflow
             const result = await executor.executeWorkflow('attack', dialogState);

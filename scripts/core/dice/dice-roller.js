@@ -4,7 +4,7 @@
  * Location: scripts/core/dice/dice-roller.js
  */
 
-import { API } from '../../../api.js';
+import { API } from '../../api.js';
 
 /**
  * Dice Roller Class
@@ -24,7 +24,7 @@ export class DiceRoller {
      */
     async rollAttackPool(diceConfig, state) {
         try {
-            const { targets, rollSeparate, advantage, disadvantage } = diceConfig;
+            const { targets, rollSeparate, basePool } = diceConfig;
             const rolls = [];
 
             if (rollSeparate && targets.length > 1) {
@@ -61,12 +61,12 @@ export class DiceRoller {
             if (rollSeparate && targets.length > 1) {
                 // Roll separately for each target
                 for (let i = 0; i < targets.length; i++) {
-                    const roll = await this.createDamageRoll(diceConfig, state, i);
+                    const roll = await this.createDamageRoll(diceConfig, i);
                     rolls.push(roll);
                 }
             } else {
                 // Roll once for all targets
-                const roll = await this.createDamageRoll(diceConfig, state, 0);
+                const roll = await this.createDamageRoll(diceConfig, 0);
                 rolls.push(roll);
             }
 
@@ -85,25 +85,16 @@ export class DiceRoller {
      * @param {number} targetIndex - Target index
      * @returns {Roll} Roll object
      */
-    async createAttackRoll(diceConfig, state, targetIndex) {
+    async createAttackRoll(diceConfig, targetIndex) {
         try {
-            const { baseFormula, advantage, disadvantage } = diceConfig;
+            const { baseFormula } = diceConfig;
             
-            // Apply advantage/disadvantage
-            let formula = baseFormula;
-            if (advantage) {
-                formula = `max(${baseFormula}, ${baseFormula})`;
-            } else if (disadvantage) {
-                formula = `min(${baseFormula}, ${baseFormula})`;
-            }
-
             // Create and evaluate roll
-            const roll = await new Roll(formula).evaluate({ async: true });
+            const roll = await new Roll(baseFormula).evaluate({ async: true });
             
             // Add roll metadata
             roll.options = {
-                advantage: advantage || false,
-                disadvantage: disadvantage || false,
+                basePool: basePool,
                 targetIndex: targetIndex,
                 rollType: 'attack'
             };
@@ -126,8 +117,17 @@ export class DiceRoller {
         try {
             const { baseFormula, critical } = diceConfig;
             
-            // Apply critical hit doubling if applicable
             let formula = baseFormula;
+
+            const advantageType = state.dialogState.advantageSelection || 'Normal';
+            if (advantageType === 'Advantage') {
+                formula = `max(${baseFormula}, ${baseFormula})`;
+            } else if (advantageType === 'Disadvantage') {
+                formula = `min(${baseFormula}, ${baseFormula})`;
+            }
+
+           
+            // Apply critical hit doubling if applicable
             if (critical) {
                 // This will need to be adapted based on how critical damage is handled
                 formula = `(${baseFormula}) * 2`;
