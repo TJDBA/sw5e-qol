@@ -6,7 +6,7 @@
 console.log('SW5E QoL Module: main.js is loading...');
 
 // Don't import anything during the import phase - wait for FoundryVTT to be ready
-let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, themeManager, CardHandler, CardRenderer, WorkflowManager, featureManager;
+let API, GenericRollHandler, GenericRollRenderer, GenericInputHandler, themeManager, CardHandler, CardRenderer, WorkflowManager, featureManager, DiceRoller;
 
 /**
  * Initialize the module
@@ -86,6 +86,16 @@ Hooks.once('init', async function() {
             console.error('WorkflowManager import error details:', error.stack);
         }
         
+        // Import DiceRoller
+        try {
+            console.log('SW5E QoL Module: DiceRoller import starting...');
+            const diceRollerModule = await import('./core/dice/dice-roller.js');
+            DiceRoller = diceRollerModule.DiceRoller;
+            console.log('SW5E QoL Module: DiceRoller imported successfully');
+        } catch (error) {
+            console.error('SW5E QoL Module: Failed to import DiceRoller', error);
+        }
+        
         // Import feature system AFTER workflow (since it might depend on it)
         try {
             console.log('SW5E QoL Module: Feature system import starting...');
@@ -125,6 +135,7 @@ Hooks.once('init', async function() {
                 ...(CardHandler && { CardHandler }),
                 ...(CardRenderer && { CardRenderer }),
                 ...(WorkflowManager && { WorkflowManager }),
+                ...(DiceRoller && { DiceRoller }),
                 
                 // Utility functions (only if imported successfully)
                 ...(API && { API }),
@@ -139,7 +150,8 @@ Hooks.once('init', async function() {
                         themeManager: !!themeManager,
                         CardHandler: !!CardHandler,
                         CardRenderer: !!CardRenderer,
-                        WorkflowManager: !!WorkflowManager
+                        WorkflowManager: !!WorkflowManager,
+                        DiceRoller: !!DiceRoller
                     }
                 }
             };
@@ -160,6 +172,14 @@ Hooks.once('init', async function() {
 Hooks.once('ready', async function() {
     try {
         console.log('SW5E QoL Module: Ready!');
+        
+        // Import test files
+        try {
+            await import('./test-create-damage-roll.js');
+            console.log('SW5E QoL Module: Damage roll test loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load damage roll test:', error);
+        }
         
         // Check what's available
         const module = game.modules.get('sw5e-qol');

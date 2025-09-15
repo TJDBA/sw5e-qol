@@ -60,15 +60,16 @@ export function getWeaponDetails(actor, itemID = null, isEquipped = null) {
         
         // Filter by specific item ID if provided
         if (itemID) {
-            weapons = weapons.filter(weapon => weapon.id === itemID);
-            if (weapons.length === 0) {
+            const foundWeapon = weapons.find(weapon => weapon.id === itemID);
+            if (!foundWeapon) {
                 API.log('debug', `No weapon found with ID: ${itemID}`);
                 return null;
             }
+            weapons = [foundWeapon]; // Wrap in array to maintain array structure
         }
         
         // Filter by equipped status if specified
-        if (isEquipped !== null) {
+        if (isEquipped) {
             weapons = weapons.filter(weapon => {
                 // Check if weapon is equipped (assuming equipped property exists)
                 const equipped = weapon.system?.equipped !== false; // Default to true if not specified

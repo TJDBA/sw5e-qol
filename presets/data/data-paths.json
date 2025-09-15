@@ -35,7 +35,8 @@
       "subpaths": {
         "prof": "system.attributes.prof",
         "level": "system.details.level",
-        "abilities": "system.abilities"
+        "abilities": "system.abilities",
+        "ac": "system.attributes.ac"
       }
     },
     "class": {

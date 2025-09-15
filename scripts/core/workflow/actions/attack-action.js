@@ -6,8 +6,10 @@
 
 import { API } from '../../../api.js';
 import { DiceBuilder, DiceRoller, D20Processor, CriticalDetector } from '../../dice/index.js';
+import { getActorFromTokenID } from '../../../actors/actor-util.js';
+import { getWeaponById } from '../../../actors/item-util.js';
 
-const logThisFile = false;
+const logThisFile = true;
 
 /**
  * Attack Action Class
@@ -33,6 +35,7 @@ export class AttackAction {
     async execute(state) {
         try {
             if (logThisFile) API.log('debug', 'AttackAction: Starting execution');
+            let results = [];
             
             console.log('⚔️ AttackAction called!');
             console.log('Current state:', state);
@@ -42,17 +45,21 @@ export class AttackAction {
             if (logThisFile) API.log('debug', 'AttackAction: Step 1 - Dice pool built', diceConfig);
             
             // Step 2: Roll the dice
-            //const rolls = await this.rollDice(diceConfig, state);
+            const rolls = await this.rollDice(diceConfig, state);
             if (logThisFile) API.log('debug', 'AttackAction: Step 2 - Dice rolled', rolls);
             
             // Step 3: Check results
-            //const results = await this.checkResults(rolls, state);
+            if(!state.dialogState.targetIDs[0].noTarget) {
+                results = await this.checkResults(state, rolls, state.dialogState.targetIDs);
+            } else {
+                results = [{rollTotal: rolls[0].total, target: state.dialogState.targetIDs[0]}];
+            }
             if (logThisFile) API.log('debug', 'AttackAction: Step 3 - Results checked', results);
             
             // Update state with attack results
-            //state.attackResults = results;
-            //state.diceConfig = diceConfig;
-            //state.rolls = rolls;
+            state.attackResults = results;
+            state.diceConfig = diceConfig;
+            state.rolls = rolls;
             
             if (logThisFile) API.log('debug', 'AttackAction: Execution completed');
             return state;
@@ -100,33 +107,43 @@ export class AttackAction {
 
     /**
      * Step 3: Check results
-     * @param {Array} rolls - Array of Roll objects
      * @param {Object} state - Workflow state
+     * @param {Array} rolls - Array of Roll objects
+     * @param {Array} targetIDs - Array of targets
      * @returns {Array} Array of attack results
      */
-    async checkResults(rolls, state) {
+    async checkResults(state, rolls, targetIDs) {
         try {
             if (logThisFile) API.log('debug', 'AttackAction: Checking results');
-            const results = [];
             
+            const results = [];
+            const actor = await getActorFromTokenID(state.dialogState.ownerID);
+            const weapon = getWeaponById(actor, state.dialogState.itemID);
+            
+            console.log('🎯 Step 3 - Target IDs:', targetIDs);
             for (let i = 0; i < rolls.length; i++) {
                 const roll = rolls[i];
-                const target = state.targets[i] || state.targets[0]; // Use specific target or first target
                 
-                // Check if attack hits
+                // Use getActorFromTokenID utility to retrieve the target actor from the token ID
+                console.log('🎯 Step 3 - Target ID:', targetIDs[i].tokenId);
+                const target = await getActorFromTokenID(targetIDs[i].tokenId);
+                
+                API.log('debug', 'AttackAction: Checking results for target:', target);
+                
+                // Check if there is a target
                 const hitResult = this.d20Processor.checkAttack(roll, target);
-                
-                // Check for critical hit
-                const criticalResult = this.criticalDetector.checkCritical(roll, hitResult, target);
+
+                const criticalResult = this.criticalDetector.checkCritical(roll, hitResult, target, weapon.criticalThreshold);
                 
                 results.push({
-                    roll: roll,
+                    rollTotal: roll.total,
                     target: target,
                     hitResult: hitResult,
                     criticalResult: criticalResult,
                     success: hitResult.hit,
                     isCritical: criticalResult.isCritical
                 });
+                
             }
             
             console.log('🎯 Step 3 - Results checked:', results.length, 'results');

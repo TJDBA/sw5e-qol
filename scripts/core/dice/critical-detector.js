@@ -5,6 +5,7 @@
  */
 
 import { API } from '../../api.js';
+import { getDataPaths } from '../../core/utils/reference/data-lookup.js';
 
 /**
  * Critical Detector Class
@@ -20,13 +21,15 @@ export class CriticalDetector {
      * @param {Roll} attackRoll - Attack roll object
      * @param {Object} hitResult - Hit result from D20Processor
      * @param {Object} target - Target object
+     * @param {number} criticalThreshold - Critical threshold
      * @returns {Object} Critical hit result
      */
-    checkCritical(attackRoll, hitResult, target) {
+    checkCritical(attackRoll, hitResult, target, criticalThreshold) {
         try {
             const naturalRoll = this.getNaturalRoll(attackRoll);
             const isNatural20 = naturalRoll === 20;
-            const isCriticalThreshold = this.checkCriticalThreshold(attackRoll, target);
+            
+            const isCriticalThreshold = (isNatural20 || hitResult.hit) ? this.checkCriticalThreshold(attackRoll, target, criticalThreshold || 20) : false;
             const isCritical = isNatural20 || (isCriticalThreshold && hitResult.hit);
 
             return {
@@ -34,8 +37,8 @@ export class CriticalDetector {
                 naturalRoll: naturalRoll,
                 isNatural20: isNatural20,
                 isCriticalThreshold: isCriticalThreshold,
-                type: this.getCriticalType(isNatural20, isCriticalThreshold),
-                threshold: this.getCriticalThreshold(target)
+                type: isNatural20 ? 'natural20' : isCriticalThreshold ? 'threshold' : 'none',
+                threshold: criticalThreshold
             };
         } catch (error) {
             API.log('error', 'CriticalDetector: Error checking critical:', error);
@@ -55,48 +58,16 @@ export class CriticalDetector {
      * Check if roll meets critical threshold
      * @param {Roll} attackRoll - Attack roll object
      * @param {Object} target - Target object
+     * @param {number} criticalThreshold - Critical threshold
      * @returns {boolean} True if meets critical threshold
      */
-    checkCriticalThreshold(attackRoll, target) {
+    checkCriticalThreshold(attackRoll, target, criticalThreshold) {
         try {
             const naturalRoll = this.getNaturalRoll(attackRoll);
-            const criticalThreshold = this.getCriticalThreshold(target);
             return naturalRoll >= criticalThreshold;
         } catch (error) {
             API.log('warning', 'CriticalDetector: Error checking critical threshold:', error);
             return false;
-        }
-    }
-
-    /**
-     * Get critical threshold for target
-     * @param {Object} target - Target object
-     * @returns {number} Critical threshold (default 20)
-     */
-    getCriticalThreshold(target) {
-        try {
-            // This will need to be adapted based on the SW5E system structure
-            // For now, return default threshold
-            return 20;
-        } catch (error) {
-            API.log('warning', 'CriticalDetector: Error getting critical threshold:', error);
-            return 20;
-        }
-    }
-
-    /**
-     * Get critical type based on detection method
-     * @param {boolean} isNatural20 - Is natural 20
-     * @param {boolean} isCriticalThreshold - Meets critical threshold
-     * @returns {string} Critical type
-     */
-    getCriticalType(isNatural20, isCriticalThreshold) {
-        if (isNatural20) {
-            return 'natural20';
-        } else if (isCriticalThreshold) {
-            return 'threshold';
-        } else {
-            return 'none';
         }
     }
 

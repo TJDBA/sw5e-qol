@@ -406,13 +406,9 @@ export class GenericInputHandler {
                     // Log the dialog state for debugging
                     console.log('=== WORKFLOW START ===');
                     console.log('Dialog State:', dialogState);
-                    
-                    // Close the dialog
-                    if (this.handler && this.handler.resolveDialog) {
-                        this.handler.currentDialog = null; // Clean up dialog reference
-                        this.handler.resolveDialog(dialogState);
-                    }
-                    
+                   
+                    this.closeDialog();
+
                     // Launch workflow system
                     await this.launchWorkflow(dialogState);
                     
@@ -421,6 +417,49 @@ export class GenericInputHandler {
                     console.error('Workflow launch error:', error);
                 }
             });
+        }
+    }
+
+    /**
+     * Close the dialog
+     */
+    closeDialog() {
+        try {
+            // Method 1: Try to close via handler's resolveDialog
+            if (this.handler && this.handler.resolveDialog) {
+                this.handler.currentDialog = null; // Clean up dialog reference
+                this.handler.resolveDialog();
+            }
+            
+            // Method 2: Try to close the dialog element directly
+            if (this.dialogElement) {
+                // Find the dialog container (usually has class 'dialog' or similar)
+                const dialogContainer = this.dialogElement.closest('.dialog') || 
+                                      this.dialogElement.closest('.window-app') ||
+                                      this.dialogElement.closest('.window');
+                
+                if (dialogContainer) {
+                    // Try to close using Foundry's dialog close method
+                    if (dialogContainer.close) {
+                        dialogContainer.close();
+                    } else {
+                        // Fallback: remove the dialog from DOM
+                        dialogContainer.remove();
+                    }
+                } else {
+                    // Last resort: remove the dialog element itself
+                    this.dialogElement.remove();
+                }
+            }
+            
+            // Method 3: Try to close using Foundry's dialog manager
+            if (game.dialog && game.dialog.close) {
+                game.dialog.close();
+            }
+            
+        } catch (error) {
+            API.log('error', 'Failed to close dialog', error);
+            console.error('Dialog close error:', error);
         }
     }
 
@@ -1211,7 +1250,7 @@ export class GenericInputHandler {
             
             // Return empty array if no targets are selected
             if (targets.length === 0) {
-                return [];
+                return [{ noTarget: true }];
             }
             
             return targets.map(target => ({

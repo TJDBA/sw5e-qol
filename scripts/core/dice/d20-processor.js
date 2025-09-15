@@ -5,6 +5,7 @@
  */
 
 import { API } from '../../api.js';
+import { getDataPaths } from '../../core/utils/reference/data-lookup.js';
 
 /**
  * D20 Processor Class
@@ -23,8 +24,9 @@ export class D20Processor {
      */
     checkAttack(attackRoll, target) {
         try {
+            const acPath = getDataPaths('actor', 'character').subpaths.ac;
             const attackTotal = attackRoll.total;
-            const targetAC = target.ac;
+            const targetAC = getProperty(target, acPath+'.value');
             const hit = attackTotal >= targetAC;
 
             return {
