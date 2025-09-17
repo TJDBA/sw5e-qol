@@ -6,6 +6,7 @@
 
 import { API } from '../../../api.js';
 import { CardRenderer } from '../../../ui/cards/card-renderer.js';
+import { getActorFromTokenID } from '../../../actors/actor-util.js';
 
 const logThisFile = true;
 
@@ -125,13 +126,15 @@ export class CompleteAction {
             const cardType = this.determineCardType();
             
             // Create card data structure from workflow state
-            const cardData = this.createCardData(messageId, cardType);
+            const cardData = await this.createCardData(messageId, cardType);
             
             // Render the card using the CardRenderer
             const cardHtml = await this.cardRenderer.renderCard(cardData);
             
             // Create FoundryVTT chat message
             await this.createChatMessage(cardHtml, cardData);
+            
+            if (logThisFile) API.log('debug', 'CompleteAction: Final card HTML:', cardHtml);
             
             if (logThisFile) API.log('debug', 'CompleteAction: Chat card message built');
         } catch (error) {
@@ -166,20 +169,63 @@ export class CompleteAction {
      * Create card data structure from workflow state
      * @param {string} messageId - Unique message ID
      * @param {string} cardType - Type of card to create
-     * @returns {Object} Card data object
+     * @returns {Promise<Object>} Card data object
      */
-    createCardData(messageId, cardType) {
+    async createCardData(messageId, cardType) {
         try {
-            if (logThisFile) API.log('debug', 'CompleteAction: Creating card data');
+            if (logThisFile) API.log('debug', 'CompleteAction: Creating card data', this.state);
             
-            // Get actor information
-            const actor = game.actors.get(this.state.dialogState?.ownerID);
+            // Get actor information using the proper data lookup function
+            const actor = await getActorFromTokenID(this.state.dialogState?.ownerID);
             const actorName = actor?.name || 'Unknown Actor';
-            const actorImg = actor?.img || 'icons/svg/mystery-man.svg';
+            
+            // Try to get the actor's image, with fallbacks
+            let actorImg = 'icons/svg/mystery-man.svg';
+            if (actor) {
+                // First try the actor's image
+                if (actor.img && actor.img !== 'icons/svg/mystery-man.svg') {
+                    actorImg = actor.img;
+                } else if (actor.data?.img && actor.data.img !== 'icons/svg/mystery-man.svg') {
+                    actorImg = actor.data.img;
+                } else {
+                    // Try to get the first token's image for this actor
+                    const tokens = canvas.tokens?.placeables?.filter(token => token.actor?.id === actor.id);
+                    if (tokens && tokens.length > 0) {
+                        actorImg = tokens[0].data.img || 'icons/svg/mystery-man.svg';
+                    }
+                }
+            }
+            
+            if (logThisFile) API.log('debug', 'CompleteAction: Actor data:', {
+                actorId: this.state.dialogState?.ownerID,
+                actorName: actorName,
+                actorImg: actorImg,
+                actorImgResolved: actorImg,
+                actor: actor,
+                actorImgProperty: actor?.img,
+                actorDataImg: actor?.data?.img
+            });
             
             // Get the user who owns the actor for color information
-            const ownerUser = game.users.get(actor?.data?.permission?.default || game.user.id);
+            // Try to get the actor's owner, fallback to current user
+            let ownerUser = null;
+            if (actor?.permission) {
+                // Check if actor has specific owner
+                const ownerId = actor.permission.default;
+                if (ownerId) {
+                    ownerUser = game.users.get(ownerId);
+                }
+            }
+            // Fallback to current user if no specific owner found
+            if (!ownerUser) {
+                ownerUser = game.user;
+            }
             const userColor = ownerUser?.color || '#000000';
+            
+            if (logThisFile) API.log('debug', 'CompleteAction: User data:', {
+                ownerUser: ownerUser,
+                userColor: userColor
+            });
             
             // Create base card data
             const cardData = {

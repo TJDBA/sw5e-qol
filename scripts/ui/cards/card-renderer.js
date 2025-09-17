@@ -1,5 +1,7 @@
 import { API } from '../../api.js';
 
+const logThisFile = true;
+
 /**
  * Card Renderer
  * Handles template rendering and dynamic component assembly for chat cards
@@ -70,9 +72,13 @@ export class CardRenderer {
             // Prepare card data
             const preparedData = this.prepareCardData(cardData);
             
+            if (logThisFile) API.log('debug', 'CardRenderer: Prepared data for template:', preparedData);
+            
             // Render base card with full module path
             const baseTemplate = 'modules/sw5e-qol/templates/cards/base-card.hbs';
             const baseHtml = await renderTemplate(baseTemplate, preparedData);
+            
+            if (logThisFile) API.log('debug', 'CardRenderer: Rendered HTML:', baseHtml);
             
             // Create temporary container to parse HTML
             const tempDiv = document.createElement('div');
@@ -101,10 +107,19 @@ export class CardRenderer {
      * Prepare card data with user information
      */
     prepareCardData(cardData) {
-        const user = game.users.get(cardData.userId || game.user.id);
-        const userColor = user?.color || '#000000';
-        const userName = user?.name || 'Unknown User';
-        const userAvatar = user?.avatar || 'icons/svg/mystery-man.svg';
+        if (logThisFile) API.log('debug', 'CardRenderer: Preparing card data:', cardData);
+        
+        // Use actor information if available, otherwise fall back to user information
+        const userName = cardData.actorName || game.users.get(cardData.userId || game.user.id)?.name || 'Unknown User';
+        const userAvatar = cardData.actorImg || game.users.get(cardData.userId || game.user.id)?.avatar || 'icons/svg/mystery-man.svg';
+        const userColor = cardData.userColor || game.users.get(cardData.userId || game.user.id)?.color || '#000000';
+        
+        if (logThisFile) API.log('debug', 'CardRenderer: Final values:', {
+            userName: userName,
+            userAvatar: userAvatar,
+            userColor: userColor,
+            originalCardData: cardData
+        });
         
         return {
             ...cardData,

@@ -2,6 +2,8 @@ import { API } from '../../api.js';
 import { getWeaponDamageData, getAllWeaponDamageParts, isSmartWeapon, getSmartWeaponData } from '../../actors/item-util.js';
 import { getAbilityModifier, getWeaponAbility, getProficiencyBonus } from '../../actors/actor-util.js';
 
+const logThisFile = false;
+
 /**
  * Generic Input Handler for Dialog Components
  * Handles all component interactions that can be reused across different dialogs

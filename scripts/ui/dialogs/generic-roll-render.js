@@ -3,6 +3,8 @@ import { featureManager } from '../../features/feature-manager.js';
 import { buildItemSelectionList, getWeaponDamageData, getAllWeaponDamageParts, isSmartWeapon, getSmartWeaponData } from '../../actors/item-util.js';
 import { getAbilityModifier, getWeaponAbility, getProficiencyBonus } from '../../actors/actor-util.js';
 
+const logThisFile = false;
+
 /**
  * Generic Roll Dialog Renderer
  * Handles template rendering and dynamic section assembly

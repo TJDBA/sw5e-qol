@@ -5,6 +5,8 @@ import { themeManager } from '../theme-manager.js';
 import { featureManager } from '../../features/feature-manager.js';
 import { getActorFromTokenID } from '../../actors/actor-util.js';
 
+const logThisFile = false;
+
 /**
  * Generic Roll Dialog Handler
  * Manages dialog logic and coordinates with renderer and input handler

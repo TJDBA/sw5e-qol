@@ -9,7 +9,7 @@ import { DiceBuilder, DiceRoller, D20Processor, CriticalDetector } from '../../d
 import { getActorFromTokenID } from '../../../actors/actor-util.js';
 import { getWeaponById } from '../../../actors/item-util.js';
 
-const logThisFile = true;
+const logThisFile = false;
 
 /**
  * Attack Action Class

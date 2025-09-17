@@ -1,5 +1,7 @@
 /* SW5E QoL Card Styles */
 
+/* CSS Custom Properties - Use theme-specific variables with fallbacks */
+
 .sw5e-qol-card {
     margin: 0.5rem 0;
     border-radius: 8px;
@@ -8,9 +10,15 @@
 }
 
 .card-border {
-    border-left: 4px solid #000;
-    background: var(--color-bg);
+    border-left: 4px solid var(--border-color, var(--bendu-border-dark, #666666));
+    background: var(--bendu-bg-primary, #3a3a3a);
     border-radius: 0 8px 8px 0;
+}
+
+/* Higher specificity for inline styles */
+.sw5e-qol-card .card-border[style*="border-left-color"] {
+    border-left-style: solid;
+    border-left-width: 4px;
 }
 
 .card-header {
@@ -18,19 +26,19 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1rem;
-    background: var(--color-bg-dark);
-    border-bottom: 1px solid var(--color-border);
+    background: var(--bendu-bg-tertiary, #2a2a2a);
+    border-bottom: 1px solid var(--bendu-border-light, #888888);
 }
 
 .card-title h3 {
     margin: 0;
     font-size: 1.1rem;
-    color: var(--color-text);
+    color: var(--bendu-text-header, #e0e0e0);
 }
 
 .card-timestamp {
     font-size: 0.8rem;
-    color: var(--color-text-secondary);
+    color: var(--bendu-text-muted, #888888);
     margin-left: 0.5rem;
 }
 
@@ -44,12 +52,15 @@
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--bendu-border-light, #888888);
+    object-fit: cover;
+    display: block;
+    flex-shrink: 0;
 }
 
 .user-name {
     font-size: 0.9rem;
-    color: var(--color-text);
+    color: var(--bendu-text-primary, #f0f0f0);
 }
 
 .card-body {
@@ -58,33 +69,33 @@
 
 .card-footer {
     padding: 0.75rem 1rem;
-    background: var(--color-bg-light);
-    border-top: 1px solid var(--color-border);
+    background: var(--bendu-bg-secondary, #4a4a4a);
+    border-top: 1px solid var(--bendu-border-light, #888888);
 }
 
 .component-divider {
     height: 1px;
-    background: var(--color-border);
+    background: var(--bendu-border-light, #888888);
     margin: 0.75rem 0;
 }
 
 /* Roll Visualization */
 .roll-visualization {
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--bendu-border-light, #888888);
     border-radius: 4px;
     margin: 0.5rem 0;
 }
 
 .roll-header {
     padding: 0.5rem;
-    background: var(--color-bg-light);
-    border-bottom: 1px solid var(--color-border);
+    background: var(--bendu-bg-secondary, #4a4a4a);
+    border-bottom: 1px solid var(--bendu-border-light, #888888);
 }
 
 .expand-toggle {
     background: none;
     border: none;
-    color: var(--color-text);
+    color: var(--bendu-text-primary, #f0f0f0);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -95,7 +106,7 @@
 }
 
 .expand-toggle:hover {
-    color: var(--color-text-highlight);
+    color: var(--bendu-text-header, #e0e0e0);
 }
 
 .roll-content {
@@ -130,13 +141,13 @@
 
 .damage-label, .crit-label {
     font-weight: bold;
-    color: var(--color-text);
+    color: var(--bendu-text-primary, #f0f0f0);
 }
 
 .damage-value, .crit-value {
     font-size: 1.2rem;
     font-weight: bold;
-    color: var(--color-primary);
+    color: var(--bendu-accent, #999999);
 }
 
 .crit-damage-total {
@@ -146,7 +157,7 @@
 }
 
 .crit-value {
-    color: var(--color-danger);
+    color: var(--bendu-border-dark, #666666);
 }
 
 .damage-by-type {
@@ -156,7 +167,7 @@
 .damage-by-type h4 {
     margin: 0 0 0.5rem 0;
     font-size: 0.9rem;
-    color: var(--color-text);
+    color: var(--bendu-text-primary, #f0f0f0);
 }
 
 .damage-types {
@@ -170,20 +181,20 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem 0.5rem;
-    background: var(--color-bg-light);
+    background: var(--bendu-bg-secondary, #4a4a4a);
     border-radius: 4px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--bendu-border-light, #888888);
 }
 
 .type-name {
     font-size: 0.8rem;
-    color: var(--color-text-secondary);
+    color: var(--bendu-text-light, #b0b0b0);
     text-transform: capitalize;
 }
 
 .type-value {
     font-weight: bold;
-    color: var(--color-text);
+    color: var(--bendu-text-primary, #f0f0f0);
 }
 
 .target-damage {
@@ -193,7 +204,7 @@
 .target-damage h4 {
     margin: 0 0 0.5rem 0;
     font-size: 0.9rem;
-    color: var(--color-text);
+    color: var(--bendu-text-primary, #f0f0f0);
 }
 
 .target-list {
@@ -207,14 +218,14 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.25rem 0.5rem;
-    background: var(--color-bg-light);
+    background: var(--bendu-bg-secondary, #4a4a4a);
     border-radius: 4px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--bendu-border-light, #888888);
 }
 
 .target-name {
     font-size: 0.9rem;
-    color: var(--color-text);
+    color: var(--bendu-text-primary, #f0f0f0);
 }
 
 .target-status {
@@ -225,13 +236,13 @@
 }
 
 .target-status.normal {
-    background: var(--color-bg);
-    color: var(--color-text);
+    background: var(--bendu-bg-primary, #3a3a3a);
+    color: var(--bendu-text-primary, #f0f0f0);
 }
 
 .target-status.crit {
-    background: var(--color-danger);
-    color: var(--color-text-inverse);
+    background: var(--bendu-border-dark, #666666);
+    color: var(--bendu-text-primary, #f0f0f0);
 }
 
 /* Attack Results */
@@ -254,13 +265,13 @@
 
 .attack-label {
     font-weight: bold;
-    color: var(--color-text);
+    color: var(--bendu-text-primary, #f0f0f0);
 }
 
 .attack-value {
     font-size: 1.2rem;
     font-weight: bold;
-    color: var(--color-primary);
+    color: var(--bendu-accent, #999999);
 }
 
 .attack-result {
@@ -271,11 +282,11 @@
 }
 
 .attack-result.success {
-    color: var(--color-success);
+    color: var(--bendu-accent, #999999);
 }
 
 .attack-result.miss {
-    color: var(--color-danger);
+    color: var(--bendu-border-dark, #666666);
 }
 
 .target-info {
@@ -283,19 +294,19 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem;
-    background: var(--color-bg-light);
+    background: var(--bendu-bg-secondary, #4a4a4a);
     border-radius: 4px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--bendu-border-light, #888888);
 }
 
 .target-label {
     font-size: 0.9rem;
-    color: var(--color-text-secondary);
+    color: var(--bendu-text-light, #b0b0b0);
 }
 
 .target-name {
     font-size: 0.9rem;
-    color: var(--color-text);
+    color: var(--bendu-text-primary, #f0f0f0);
     font-weight: bold;
 }
 
@@ -319,13 +330,13 @@
 
 .save-label, .dc-label {
     font-weight: bold;
-    color: var(--color-text);
+    color: var(--bendu-text-primary, #f0f0f0);
 }
 
 .save-value, .dc-value {
     font-size: 1.2rem;
     font-weight: bold;
-    color: var(--color-primary);
+    color: var(--bendu-accent, #999999);
 }
 
 .save-result {
@@ -336,11 +347,11 @@
 }
 
 .save-result.success {
-    color: var(--color-success);
+    color: var(--bendu-accent, #999999);
 }
 
 .save-result.failure {
-    color: var(--color-danger);
+    color: var(--bendu-border-dark, #666666);
 }
 
 /* Action Buttons */
@@ -352,10 +363,10 @@
 
 .action-button {
     padding: 0.5rem 1rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--bendu-border-light, #888888);
     border-radius: 4px;
-    background: var(--color-bg);
-    color: var(--color-text);
+    background: var(--bendu-bg-primary, #3a3a3a);
+    color: var(--bendu-text-primary, #f0f0f0);
     cursor: pointer;
     font-size: 0.9rem;
     display: flex;
@@ -365,38 +376,38 @@
 }
 
 .action-button:hover {
-    background: var(--color-bg-light);
-    border-color: var(--color-border-highlight);
+    background: var(--bendu-bg-secondary, #4a4a4a);
+    border-color: var(--bendu-border-dark, #666666);
 }
 
 .action-button.primary {
-    background: var(--color-primary);
-    color: var(--color-text-inverse);
-    border-color: var(--color-primary);
+    background: var(--bendu-accent, #999999);
+    color: var(--bendu-text-primary, #f0f0f0);
+    border-color: var(--bendu-accent, #999999);
 }
 
 .action-button.primary:hover {
-    background: var(--color-primary-dark);
+    background: var(--bendu-border-dark, #666666);
 }
 
 .action-button.secondary {
-    background: var(--color-bg-light);
-    color: var(--color-text);
-    border-color: var(--color-border);
+    background: var(--bendu-bg-secondary, #4a4a4a);
+    color: var(--bendu-text-primary, #f0f0f0);
+    border-color: var(--bendu-border-light, #888888);
 }
 
 .action-button.secondary:hover {
-    background: var(--color-bg);
+    background: var(--bendu-bg-primary, #3a3a3a);
 }
 
 .action-button.danger {
-    background: var(--color-danger);
-    color: var(--color-text-inverse);
-    border-color: var(--color-danger);
+    background: var(--bendu-border-dark, #666666);
+    color: var(--bendu-text-primary, #f0f0f0);
+    border-color: var(--bendu-border-dark, #666666);
 }
 
 .action-button.danger:hover {
-    background: var(--color-danger-dark);
+    background: var(--bendu-border-dark, #666666);
 }
 
 /* Responsive Design */

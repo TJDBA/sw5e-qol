@@ -9,7 +9,7 @@ import { DiceBuilder, DiceRoller } from '../../dice/index.js';
 import { getActorFromTokenID } from '../../../actors/actor-util.js';
 import { getWeaponById } from '../../../actors/item-util.js';
 
-const logThisFile = true;
+const logThisFile = false;
 
 /**
  * Damage Action Class
