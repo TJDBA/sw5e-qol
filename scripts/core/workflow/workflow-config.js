@@ -38,6 +38,38 @@ export const WORKFLOW_CONFIG = {
         }
     },
 
+    "damage": {
+        workflowActions: ["start", "damage", "complete"],
+        actions: {
+            "start": {
+                name: "Initialize Damage",
+                description: "Set up damage parameters",
+                validationProperties: [
+                    "actorId",
+                    "itemId",
+                    "targetId",
+                    "damageType"
+                ]
+            },      
+            "damage": {
+                name: "Execute Damage Roll",
+                description: "Perform the damage roll calculation and display result",
+                validationProperties: [
+                    "damageRoll",
+                    "damageResult"
+                ]
+            },
+            "complete": {
+                name: "Finalize Damage",
+                description: "Complete damage workflow and clean up state",
+                validationProperties: [
+                    "finalResult",
+                    "workflowComplete"
+                ]
+            }
+        }
+    },
+
     // Attack-Damage workflow - attack followed by damage
     "attack-damage": {
         workflowActions: ["start", "attack", "damage", "complete"],

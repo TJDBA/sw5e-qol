@@ -479,8 +479,11 @@ export class GenericInputHandler {
             // Create workflow manager instance
             const executor = new WorkflowManager();
             
+            // Get dialog type
+            const dialogType = this.getDialogType();
+            
             // Launch attack workflow
-            const result = await executor.executeWorkflow('attack', dialogState);
+            const result = await executor.executeWorkflow(dialogType, dialogState);
             
             // Log the final result
             console.log('=== WORKFLOW END ===');

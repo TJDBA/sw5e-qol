@@ -72,7 +72,7 @@ export class DiceBuilder {
         try {
             const { dialogState, targets } = state;
             const actor = getActorFromTokenID(dialogState.ownerID);
-            const item = actor?.items.get(dialogState.itemID);
+            //const item = actor?.items.get(dialogState.itemID);
             
             if (actor == null) {
                 throw new Error('Actor or item not found');

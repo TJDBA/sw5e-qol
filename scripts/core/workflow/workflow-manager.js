@@ -97,7 +97,7 @@ export class WorkflowManager {
                 workflowType: workflowType,
                 message: `WorkflowManager successfully executed ${workflowType} workflow`,
                 timestamp: Date.now(),
-                dialogState: dialogState,
+                //dialogState: dialogState,
                 workflowState: workflowState,
                 completedActions: workflowState.completedActions,
                 errors: workflowState.errors
