@@ -10,6 +10,7 @@ import { getActorFromTokenID } from '../../../actors/actor-util.js';
 
 const logThisFile = true;
 
+
 /**
  * Complete Action Class
  * Handles workflow completion with force point processing and chat card generation
@@ -51,176 +52,82 @@ export class CompleteAction {
     }
 
     /**
-     * Process force point usage
-     * Checks if force points were used and handles the processing
+     * Process force point usage if applicable
      */
     async processForcePointUsage() {
-        try {
-            if (logThisFile) API.log('debug', 'CompleteAction: Processing force point usage');
-            
-            // TODO: Implement force point usage checking and processing
-            // - Check if force points were used in the workflow
-            // - Deduct force points from actor
-            // - Update state with force point usage information
-            
-            if (logThisFile) API.log('debug', 'CompleteAction: Force point usage processed');
-        } catch (error) {
-            API.log('error', 'CompleteAction: Error processing force point usage:', error);
-            throw error;
-        }
+        if (logThisFile) API.log('debug', 'CompleteAction: Processing force point usage');
+        // TODO: Implement force point processing logic
     }
 
     /**
      * Handle workflow step based on action type
-     * Calls the appropriate sub-method for the specific workflow step
      */
     async handleWorkflowStep() {
-        try {
-            if (logThisFile) API.log('debug', 'CompleteAction: Handling workflow step');
-            
-            const workflowType = this.state.workflowType;
-            
-            // Call sub-method based on workflow type
-            switch (workflowType) {
-                case 'attack':
-                    await this.handleAttackWorkflow();
-                    break;
-                case 'save':
-                    await this.handleSaveWorkflow();
-                    break;
-                case 'check':
-                    await this.handleCheckWorkflow();
-                    break;
-                case 'damage':
-                    await this.handleDamageWorkflow();
-                    break;
-                default:
-                    if (logThisFile) API.log('warning', `CompleteAction: Unknown workflow type: ${workflowType}`);
-                    break;
-            }
-            
-            if (logThisFile) API.log('debug', 'CompleteAction: Workflow step handled');
-        } catch (error) {
-            API.log('error', 'CompleteAction: Error handling workflow step:', error);
-            throw error;
+        const workflowType = this.state.workflowType;
+        if (logThisFile) API.log('debug', 'CompleteAction: Handling workflow step:', workflowType);
+        
+        switch (workflowType) {
+            case 'attack':
+                await this.handleAttackWorkflow();
+                break;
+            case 'damage':
+                await this.handleDamageWorkflow();
+                break;
+            case 'save':
+                await this.handleSaveWorkflow();
+                break;
+            case 'check':
+                await this.handleCheckWorkflow();
+                break;
+            default:
+                API.log('warning', 'CompleteAction: Unknown workflow type:', workflowType);
         }
     }
 
     /**
      * Build chat card message
-     * Creates the final chat card message for the workflow
      */
     async buildChatCardMessage() {
         try {
             if (logThisFile) API.log('debug', 'CompleteAction: Building chat card message');
             
-            // Initialize card renderer if not already done
-            if (!this.cardRenderer) {
-                this.cardRenderer = new CardRenderer();
-            }
-            
             // Generate unique message ID
             const messageId = foundry.utils.randomID();
             
-            // Determine card type based on workflow type
+            // Determine card type based on workflow
             const cardType = this.determineCardType();
             
-            // Create card data structure from workflow state
-            const cardData = await this.createCardData(messageId, cardType);
-            
-            // Render the card using the CardRenderer
-            const cardHtml = await this.cardRenderer.renderCard(cardData);
-            
-            // Create FoundryVTT chat message
-            await this.createChatMessage(cardHtml, cardData);
-            
-            if (logThisFile) API.log('debug', 'CompleteAction: Final card HTML:', cardHtml);
-            
-            if (logThisFile) API.log('debug', 'CompleteAction: Chat card message built');
-        } catch (error) {
-            API.log('error', 'CompleteAction: Error building chat card message:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Determine card type based on workflow type
-     * @returns {string} Card type for rendering
-     */
-    determineCardType() {
-        const workflowType = this.state.workflowType;
-        
-        // Map workflow types to card types
-        switch (workflowType) {
-            case 'attack':
-                return 'attack';
-            case 'damage':
-                return 'damage';
-            case 'save':
-                return 'save';
-            case 'check':
-                return 'ability';
-            default:
-                return 'generic';
-        }
-    }
-
-    /**
-     * Create card data structure from workflow state
-     * @param {string} messageId - Unique message ID
-     * @param {string} cardType - Type of card to create
-     * @returns {Promise<Object>} Card data object
-     */
-    async createCardData(messageId, cardType) {
-        try {
-            if (logThisFile) API.log('debug', 'CompleteAction: Creating card data', this.state);
-            
-            // Get actor information using the proper data lookup function
+            // Get actor information
             const actor = await getActorFromTokenID(this.state.dialogState?.ownerID);
-            const actorName = actor?.name || 'Unknown Actor';
-            
-            // Try to get the actor's image, with fallbacks
-            let actorImg = 'icons/svg/mystery-man.svg';
-            if (actor) {
-                // First try the actor's image
-                if (actor.img && actor.img !== 'icons/svg/mystery-man.svg') {
-                    actorImg = actor.img;
-                } else if (actor.data?.img && actor.data.img !== 'icons/svg/mystery-man.svg') {
-                    actorImg = actor.data.img;
-                } else {
-                    // Try to get the first token's image for this actor
-                    const tokens = canvas.tokens?.placeables?.filter(token => token.actor?.id === actor.id);
-                    if (tokens && tokens.length > 0) {
-                        actorImg = tokens[0].data.img || 'icons/svg/mystery-man.svg';
-                    }
-                }
+            if (!actor) {
+                throw new Error('Actor not found for chat card');
             }
+            
+            // Get actor name and image
+            const actorName = actor.name || 'Unknown Actor';
+            let actorImg = actor.img || actor.data?.img;
+            
+            // Fallback to first token image if actor image not available
+            if (!actorImg && actor.getActiveTokens().length > 0) {
+                const firstToken = actor.getActiveTokens()[0];
+                actorImg = firstToken.document.texture.src || firstToken.document.img;
+            }
+            
+            // Fallback to default image
+            if (!actorImg) {
+                actorImg = '/icons/svg/dice-target.svg';
+            }
+            
+            // Get user information
+            const ownerUser = game.users.get(actor.ownership.default) || game.user;
+            const userColor = ownerUser.color || '#999999';
+            const userName = ownerUser.name || 'Unknown User';
+            const userAvatar = ownerUser.avatar || '/icons/svg/mystery-man.svg';
             
             if (logThisFile) API.log('debug', 'CompleteAction: Actor data:', {
-                actorId: this.state.dialogState?.ownerID,
                 actorName: actorName,
-                actorImg: actorImg,
-                actorImgResolved: actorImg,
-                actor: actor,
-                actorImgProperty: actor?.img,
-                actorDataImg: actor?.data?.img
+                actorImg: actorImg
             });
-            
-            // Get the user who owns the actor for color information
-            // Try to get the actor's owner, fallback to current user
-            let ownerUser = null;
-            if (actor?.permission) {
-                // Check if actor has specific owner
-                const ownerId = actor.permission.default;
-                if (ownerId) {
-                    ownerUser = game.users.get(ownerId);
-                }
-            }
-            // Fallback to current user if no specific owner found
-            if (!ownerUser) {
-                ownerUser = game.user;
-            }
-            const userColor = ownerUser?.color || '#000000';
             
             if (logThisFile) API.log('debug', 'CompleteAction: User data:', {
                 ownerUser: ownerUser,
@@ -233,7 +140,7 @@ export class CompleteAction {
                 cardType: cardType,
                 userId: game.user.id, // Keep for message ownership
                 actorId: this.state.dialogState?.ownerID, // Add actor ID
-                title: this.generateCardTitle(),
+                title: this.generateCardTitle(actorName), // Pass actorName to generateCardTitle
                 roll: this.getPrimaryRoll(),
                 results: this.getWorkflowResults(),
                 targets: this.getTargets(),
@@ -241,29 +148,185 @@ export class CompleteAction {
                 // Actor-specific information
                 actorName: actorName,
                 actorImg: actorImg,
-                userColor: userColor
+                userColor: userColor,
+                // User information
+                userName: userName,
+                userAvatar: userAvatar,
+                timestamp: new Date().toLocaleTimeString()
             };
             
             // Add workflow-specific data
             this.addWorkflowSpecificData(cardData);
             
             if (logThisFile) API.log('debug', 'CompleteAction: Card data created', cardData);
-            return cardData;
             
+            // Initialize card renderer
+            this.cardRenderer = new CardRenderer();
+            
+            // Render the card using the CardRenderer
+            const cardHtml = await this.cardRenderer.renderCard(cardData);
+            
+            // DEBUG: Check if CSS is loaded
+            this.debugCSSLoading();
+            
+            // DEBUG: Inspect the rendered HTML
+            this.debugRenderedHTML(cardHtml);
+            
+            // Create FoundryVTT chat message
+            const message = await this.createChatMessage(cardHtml, cardData);
+            
+            // DEBUG: Check the created message
+            this.debugCreatedMessage(message);
+            
+            if (logThisFile) API.log('debug', 'CompleteAction: Final card HTML:', cardHtml);
+            
+            if (logThisFile) API.log('debug', 'CompleteAction: Chat card message built');
         } catch (error) {
-            API.log('error', 'CompleteAction: Error creating card data:', error);
+            API.log('error', 'CompleteAction: Error building chat card message:', error);
             throw error;
         }
     }
 
     /**
-     * Generate card title based on workflow type and context
+     * Debug CSS loading status
+     */
+    debugCSSLoading() {
+        if (logThisFile) {
+            API.log('debug', '=== CSS DEBUGGING ===');
+            
+            // Check if cards.css is loaded
+            const cardsCSS = Array.from(document.styleSheets).find(sheet => 
+                sheet.href && sheet.href.includes('cards.css')
+            );
+            
+            if (cardsCSS) {
+                API.log('debug', '✅ cards.css is loaded:', cardsCSS.href);
+                
+                // Try to access CSS rules
+                try {
+                    const rules = Array.from(cardsCSS.cssRules || []);
+                    const cardRules = rules.filter(rule => 
+                        rule.selectorText && rule.selectorText.includes('sw5e-qol-card')
+                    );
+                    API.log('debug', `Found ${cardRules.length} sw5e-qol-card rules:`, cardRules.map(r => r.selectorText));
+                } catch (e) {
+                    API.log('debug', '❌ Cannot access CSS rules (CORS):', e.message);
+                }
+            } else {
+                API.log('debug', '❌ cards.css not found in loaded stylesheets');
+            }
+            
+            // Check all loaded stylesheets
+            const allSheets = Array.from(document.styleSheets).map(sheet => ({
+                href: sheet.href,
+                title: sheet.title,
+                disabled: sheet.disabled
+            }));
+            API.log('debug', 'All loaded stylesheets:', allSheets);
+        }
+    }
+
+    /**
+     * Debug rendered HTML
+     */
+    debugRenderedHTML(cardHtml) {
+        if (logThisFile) {
+            API.log('debug', '=== HTML DEBUGGING ===');
+            API.log('debug', 'Rendered card HTML length:', cardHtml.length);
+            API.log('debug', 'Rendered card HTML preview:', cardHtml.substring(0, 500) + '...');
+            
+            // Check if HTML contains expected classes
+            const hasCardClass = cardHtml.includes('sw5e-qol-card');
+            const hasBorderClass = cardHtml.includes('card-border');
+            const hasHeaderClass = cardHtml.includes('card-header');
+            
+            API.log('debug', 'HTML contains expected classes:', {
+                'sw5e-qol-card': hasCardClass,
+                'card-border': hasBorderClass,
+                'card-header': hasHeaderClass
+            });
+            
+            // Check for inline styles
+            const hasInlineStyle = cardHtml.includes('style=');
+            API.log('debug', 'HTML contains inline styles:', hasInlineStyle);
+            
+            if (hasInlineStyle) {
+                const styleMatch = cardHtml.match(/style="[^"]*"/);
+                API.log('debug', 'Inline style found:', styleMatch ? styleMatch[0] : 'none');
+            }
+        }
+    }
+
+    /**
+     * Debug created message
+     */
+    debugCreatedMessage(message) {
+        if (logThisFile) {
+            API.log('debug', '=== MESSAGE DEBUGGING ===');
+            API.log('debug', 'Created message ID:', message.id);
+            API.log('debug', 'Message content length:', message.content.length);
+            
+            // Check if message is in DOM
+            setTimeout(() => {
+                const messageElement = document.querySelector(`[data-message-id="${message.id}"]`);
+                if (messageElement) {
+                    API.log('debug', '✅ Message found in DOM');
+                    
+                    // Check computed styles
+                    const computedStyle = window.getComputedStyle(messageElement);
+                    const bgColor = computedStyle.getPropertyValue('background-color');
+                    const textColor = computedStyle.getPropertyValue('color');
+                    const borderColor = computedStyle.getPropertyValue('border-left-color');
+                    
+                    API.log('debug', 'Computed styles:', {
+                        backgroundColor: bgColor,
+                        color: textColor,
+                        borderLeftColor: borderColor
+                    });
+                    
+                    // Check if CSS classes are applied
+                    const hasCardClass = messageElement.classList.contains('sw5e-qol-card');
+                    const hasBorderClass = messageElement.querySelector('.card-border');
+                    
+                    API.log('debug', 'CSS classes applied:', {
+                        hasCardClass: hasCardClass,
+                        hasBorderClass: !!hasBorderClass
+                    });
+                    
+                } else {
+                    API.log('debug', '❌ Message not found in DOM');
+                }
+            }, 100);
+        }
+    }
+
+    /**
+     * Determine card type based on workflow type
+     * @returns {string} Card type
+     */
+    determineCardType() {
+        const workflowType = this.state.workflowType;
+        switch (workflowType) {
+            case 'attack':
+                return 'attack';
+            case 'damage':
+                return 'damage';
+            case 'save':
+                return 'save';
+            case 'check':
+                return 'check';
+            default:
+                return 'generic';
+        }
+    }
+
+    /**
+     * Generate card title
+     * @param {string} actorName - The actor's name
      * @returns {string} Card title
      */
-    generateCardTitle() {
+    generateCardTitle(actorName = 'Unknown Actor') {
         const workflowType = this.state.workflowType;
-        const actor = game.actors.get(this.state.dialogState?.ownerID);
-        const actorName = actor?.name || 'Unknown Actor';
         
         switch (workflowType) {
             case 'attack':
@@ -275,68 +338,49 @@ export class CompleteAction {
             case 'check':
                 return `${actorName} - Ability Check`;
             default:
-                return `${actorName} - ${workflowType.charAt(0).toUpperCase() + workflowType.slice(1)}`;
+                return `${actorName} - ${workflowType}`;
         }
     }
 
     /**
-     * Get the primary roll for the card
-     * @returns {Roll|null} Primary roll object
+     * Get primary roll data
+     * @returns {Object} Primary roll data
      */
     getPrimaryRoll() {
-        if (!this.state.rolls) {
-            return null;
-        }
+        const workflowType = this.state.workflowType;
         
-        // Handle different roll structures based on workflow type
-        if (Array.isArray(this.state.rolls)) {
-            // Attack action uses array of rolls
-            return this.state.rolls[0];
-        } else if (this.state.rolls.normalRoll) {
-            // Damage action uses object with normalRoll, baseRoll, critRoll
-            return this.state.rolls.normalRoll;
-        } else if (this.state.rolls.total !== undefined) {
-            // Single roll object
-            return this.state.rolls;
+        switch (workflowType) {
+            case 'attack':
+                return this.state.attackResults?.rolls?.[0] || { total: 0, dice: [] };
+            case 'damage':
+                return this.state.damageResults?.normalRoll || { total: 0, dice: [] };
+            default:
+                return { total: 0, dice: [] };
         }
-        
-        return null;
     }
 
     /**
-     * Get workflow results for the card
-     * @returns {Array} Array of results
+     * Get workflow results
+     * @returns {Object} Workflow results
      */
     getWorkflowResults() {
-        const results = [];
-        
-        // Add attack results if available
-        if (this.state.attackResults) {
-            results.push(...this.state.attackResults);
-        }
-        
-        // Add damage results if available
-        if (this.state.damageResults) {
-            results.push(...this.state.damageResults);
-        }
-        
-        return results;
+        return {
+            attackResults: this.state.attackResults,
+            damageResults: this.state.damageResults
+        };
     }
 
     /**
-     * Get targets for the card
-     * @returns {Array} Array of targets
+     * Get targets
+     * @returns {Array} Target IDs
      */
     getTargets() {
-        if (this.state.dialogState?.targetIDs) {
-            return this.state.dialogState.targetIDs;
-        }
-        return [];
+        return this.state.dialogState?.targets || [];
     }
 
     /**
-     * Get available actions for the card
-     * @returns {Array} Array of available actions
+     * Get available actions
+     * @returns {Array} Available actions
      */
     getAvailableActions() {
         // TODO: Implement action buttons based on workflow type
@@ -396,10 +440,14 @@ export class CompleteAction {
                 }
             };
             
-            // Create the message
-            await ChatMessage.create(messageData);
+            if (logThisFile) API.log('debug', 'CompleteAction: Message data:', messageData);
             
-            if (logThisFile) API.log('debug', 'CompleteAction: Chat message created');
+            // Create the message
+            const message = await ChatMessage.create(messageData);
+            
+            if (logThisFile) API.log('debug', 'CompleteAction: Chat message created with ID:', message.id);
+            
+            return message;
             
         } catch (error) {
             API.log('error', 'CompleteAction: Error creating chat message:', error);

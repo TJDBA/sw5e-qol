@@ -1,291 +1,245 @@
+/**
+ * Card Renderer
+ * Minimalistic card rendering using existing utilities
+ * Location: scripts/ui/cards/card-renderer.js
+ */
+
 import { API } from '../../api.js';
+import { themeManager } from '../theme-manager.js';
 
 const logThisFile = true;
 
 /**
- * Card Renderer
- * Handles template rendering and dynamic component assembly for chat cards
+ * Card Renderer Class
+ * Renders chat cards with inline styling for reliability
  */
 export class CardRenderer {
-    /**
-     * Create a new CardRenderer instance
-     */
     constructor() {
-        this.componentTemplates = new Map();
-        this.initialized = false;
-        this.init();
+        if (logThisFile) API.log('debug', 'CardRenderer: Constructor called');
     }
 
     /**
-     * Initialize the renderer
-     */
-    async init() {
-        try {
-            await this.loadComponentTemplates();
-            this.initialized = true;
-            API.log('debug', 'Card renderer initialized');
-        } catch (error) {
-            API.log('error', 'Failed to initialize card renderer', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Load all component templates
-     */
-    async loadComponentTemplates() {
-        const componentNames = [
-            'roll-visualization',
-            'damage-results',
-            'attack-results',
-            'save-results',
-            'action-buttons',
-            'target-info'
-        ];
-
-        for (const name of componentNames) {
-            try {
-                const template = `modules/sw5e-qol/templates/cards/components/${name}.hbs`;
-                this.componentTemplates.set(name, template);
-                API.log('debug', `Loaded component template: ${name}`);
-            } catch (error) {
-                API.log('warning', `Failed to load component template: ${name}`, error);
-            }
-        }
-    }
-
-    /**
-     * Render a card with components
+     * Render a card with the given data
+     * @param {Object} cardData - Card data object
+     * @returns {string} Rendered card HTML
      */
     async renderCard(cardData) {
         try {
-            // Wait for initialization to complete
-            if (!this.initialized) {
-                await this.init();
-            }
+            if (logThisFile) API.log('debug', 'CardRenderer: Starting card render');
             
-            // Check if FoundryVTT templates are available
-            if (typeof renderTemplate === 'undefined') {
-                throw new Error('FoundryVTT templates not ready. Please wait for the game to fully load.');
-            }
+            // Prepare card data with theme colors
+            const preparedData = await this.prepareCardData(cardData);
             
-            // Prepare card data
-            const preparedData = this.prepareCardData(cardData);
+            if (logThisFile) API.log('debug', 'CardRenderer: Prepared data:', preparedData);
             
-            if (logThisFile) API.log('debug', 'CardRenderer: Prepared data for template:', preparedData);
+            // Render the card using Handlebars template
+            const cardHtml = await this.renderTemplate(preparedData);
             
-            // Render base card with full module path
-            const baseTemplate = 'modules/sw5e-qol/templates/cards/base-card.hbs';
-            const baseHtml = await renderTemplate(baseTemplate, preparedData);
+            if (logThisFile) API.log('debug', 'CardRenderer: Card rendered successfully');
             
-            if (logThisFile) API.log('debug', 'CardRenderer: Rendered HTML:', baseHtml);
+            return cardHtml;
             
-            // Create temporary container to parse HTML
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = baseHtml;
-            
-            // Get card body for component insertion
-            const cardBody = tempDiv.querySelector('#card-body');
-            const cardFooter = tempDiv.querySelector('#card-footer');
-            
-            if (!cardBody) {
-                throw new Error('Card body not found in template');
-            }
-
-            // Insert components based on card type
-            await this.insertComponents(cardBody, cardFooter, cardData);
-
-            return tempDiv.innerHTML;
-
         } catch (error) {
-            API.log('error', 'Failed to render card', error);
+            API.log('error', 'CardRenderer: Failed to render card:', error);
             throw error;
         }
     }
 
     /**
-     * Prepare card data with user information
+     * Prepare card data with theme colors and fallbacks
+     * @param {Object} cardData - Raw card data
+     * @returns {Object} Prepared card data with theme colors
      */
-    prepareCardData(cardData) {
-        if (logThisFile) API.log('debug', 'CardRenderer: Preparing card data:', cardData);
+    async prepareCardData(cardData) {
+        // Get current theme colors
+        const themeColors = this.getThemeColors();
         
-        // Use actor information if available, otherwise fall back to user information
-        const userName = cardData.actorName || game.users.get(cardData.userId || game.user.id)?.name || 'Unknown User';
-        const userAvatar = cardData.actorImg || game.users.get(cardData.userId || game.user.id)?.avatar || 'icons/svg/mystery-man.svg';
-        const userColor = cardData.userColor || game.users.get(cardData.userId || game.user.id)?.color || '#000000';
+        if (logThisFile) API.log('debug', 'CardRenderer: Theme colors:', themeColors);
         
-        if (logThisFile) API.log('debug', 'CardRenderer: Final values:', {
-            userName: userName,
-            userAvatar: userAvatar,
-            userColor: userColor,
-            originalCardData: cardData
-        });
+        // Get user information
+        const user = game.users.get(cardData.userId) || game.user;
         
-        return {
-            ...cardData,
-            userColor,
-            userName,
-            userAvatar,
-            timestamp: new Date().toLocaleTimeString()
+        // Prepare the data with theme colors and fallbacks
+        const preparedData = {
+            // Basic card data
+            messageId: cardData.messageId || 'unknown',
+            cardType: cardData.cardType || 'generic',
+            title: cardData.title || 'Unknown Action',
+            timestamp: cardData.timestamp || new Date().toLocaleTimeString(),
+            
+            // Actor information
+            actorName: cardData.actorName || 'Unknown Actor',
+            actorImg: cardData.actorImg || '/icons/svg/mystery-man.svg',
+            
+            // User information
+            userColor: cardData.userColor || user.color || '#999999',
+            
+            // Roll data
+            roll: cardData.roll || null,
+            
+            // Results data
+            attackResults: cardData.attackResults || null,
+            damageResults: cardData.damageResults || null,
+            
+            // Actions
+            actions: cardData.actions || [],
+            
+            // Theme colors
+            ...themeColors
         };
+        
+        if (logThisFile) API.log('debug', 'CardRenderer: Prepared data with theme colors');
+        if (logThisFile) API.log('debug', 'CardRenderer: Final prepared data:', preparedData);
+        
+        return preparedData;
     }
 
     /**
-     * Insert components into card body and footer
+     * Get theme colors for the current theme
+     * @returns {Object} Theme color object
      */
-    async insertComponents(cardBody, cardFooter, cardData) {
+    getThemeColors() {
+        // Get current theme
+        const currentTheme = themeManager?.getCurrentTheme() || 'bendu';
+        
+        if (logThisFile) API.log('debug', 'CardRenderer: Current theme:', currentTheme);
+        
+        // Define theme color mappings
+        const themeColorMap = {
+            bendu: {
+                cardBg: '#3a3a3a',
+                headerBg: '#2a2a2a',
+                footerBg: '#4a4a4a',
+                textColor: '#f0f0f0',
+                titleColor: '#e0e0e0',
+                timestampColor: '#888888',
+                borderColor: '#888888',
+                rollColor: '#4CAF50',
+                formulaColor: '#b0b0b0',
+                damageColor: '#FF5722',
+                successColor: '#4CAF50',
+                errorColor: '#F44336',
+                warningColor: '#FF9800',
+                criticalColor: '#FFD700',
+                resultBg: '#2a2a2a',
+                buttonBg: '#555555',
+                buttonTextColor: '#f0f0f0',
+                buttonBorderColor: '#888888'
+            },
+            light: {
+                cardBg: '#f5f5f5',
+                headerBg: '#e8e8e8',
+                footerBg: '#eeeeee',
+                textColor: '#333333',
+                titleColor: '#222222',
+                timestampColor: '#666666',
+                borderColor: '#cccccc',
+                rollColor: '#2E7D32',
+                formulaColor: '#666666',
+                damageColor: '#D32F2F',
+                successColor: '#2E7D32',
+                errorColor: '#C62828',
+                warningColor: '#F57C00',
+                criticalColor: '#F9A825',
+                resultBg: '#e8e8e8',
+                buttonBg: '#757575',
+                buttonTextColor: '#ffffff',
+                buttonBorderColor: '#999999'
+            },
+            dark: {
+                cardBg: '#1a1a1a',
+                headerBg: '#0d0d0d',
+                footerBg: '#2a2a2a',
+                textColor: '#e0e0e0',
+                titleColor: '#ffffff',
+                timestampColor: '#888888',
+                borderColor: '#444444',
+                rollColor: '#66BB6A',
+                formulaColor: '#aaaaaa',
+                damageColor: '#EF5350',
+                successColor: '#66BB6A',
+                errorColor: '#EF5350',
+                warningColor: '#FFB74D',
+                criticalColor: '#FFD54F',
+                resultBg: '#0d0d0d',
+                buttonBg: '#424242',
+                buttonTextColor: '#e0e0e0',
+                buttonBorderColor: '#666666'
+            },
+            tech: {
+                cardBg: '#1e1e2e',
+                headerBg: '#11111b',
+                footerBg: '#313244',
+                textColor: '#cdd6f4',
+                titleColor: '#f5c2e7',
+                timestampColor: '#6c7086',
+                borderColor: '#45475a',
+                rollColor: '#a6e3a1',
+                formulaColor: '#bac2de',
+                damageColor: '#f38ba8',
+                successColor: '#a6e3a1',
+                errorColor: '#f38ba8',
+                warningColor: '#fab387',
+                criticalColor: '#f9e2af',
+                resultBg: '#11111b',
+                buttonBg: '#45475a',
+                buttonTextColor: '#cdd6f4',
+                buttonBorderColor: '#6c7086'
+            }
+        };
+        
+        return themeColorMap[currentTheme] || themeColorMap.bendu;
+    }
+
+    /**
+     * Render the card template
+     * @param {Object} data - Prepared card data
+     * @returns {string} Rendered HTML
+     */
+    async renderTemplate(data) {
         try {
-            const components = this.getComponentOrder(cardData.cardType);
+            // Use FoundryVTT's renderTemplate function
+            const template = 'modules/sw5e-qol/templates/cards/base-card.hbs';
+            const html = await renderTemplate(template, data);
             
-            for (const componentName of components) {
-                const template = this.componentTemplates.get(componentName);
-                if (!template) {
-                    API.log('warning', `Component template not found: ${componentName}`);
-                    continue;
-                }
-
-                // Prepare component data
-                const componentData = this.prepareComponentData(componentName, cardData);
-                
-                // Check if FoundryVTT templates are available
-                if (typeof renderTemplate === 'undefined') {
-                    throw new Error('FoundryVTT templates not ready. Please wait for the game to fully load.');
-                }
-                
-                // Render component
-                const componentHtml = await renderTemplate(template, componentData);
-                
-                // Determine if component goes in body or footer
-                const targetContainer = this.getComponentContainer(componentName, cardBody, cardFooter);
-                
-                // Insert component with divider if needed
-                if (targetContainer.children.length > 0) {
-                    targetContainer.appendChild(this.createDivider());
-                }
-                targetContainer.insertAdjacentHTML('beforeend', componentHtml);
-            }
+            if (logThisFile) API.log('debug', 'CardRenderer: Template rendered successfully');
+            
+            return html;
 
         } catch (error) {
-            API.log('error', 'Failed to insert components', error);
-            throw error;
+            API.log('error', 'CardRenderer: Failed to render template:', error);
+            
+            // Fallback to simple HTML if template fails
+            return this.createFallbackHTML(data);
         }
     }
 
     /**
-     * Get component order based on card type
+     * Create fallback HTML if template rendering fails
+     * @param {Object} data - Card data
+     * @returns {string} Fallback HTML
      */
-    getComponentOrder(cardType) {
-        switch (cardType) {
-            case 'damage':
-                return ['roll-visualization', 'damage-results', 'action-buttons', 'target-info'];
-            case 'attack':
-                return ['roll-visualization', 'attack-results', 'action-buttons'];
-            case 'save':
-                return ['roll-visualization', 'save-results', 'action-buttons'];
-            case 'ability':
-            case 'skill':
-                return ['roll-visualization', 'attack-results', 'action-buttons'];
-            default:
-                return ['roll-visualization', 'action-buttons'];
-        }
-    }
-
-    /**
-     * Determine which container a component should go in
-     */
-    getComponentContainer(componentName, cardBody, cardFooter) {
-        const footerComponents = ['action-buttons', 'target-info'];
-        return footerComponents.includes(componentName) ? cardFooter : cardBody;
-    }
-
-    /**
-     * Prepare component-specific data
-     */
-    prepareComponentData(componentName, cardData) {
-        switch (componentName) {
-            case 'roll-visualization':
-                // Render the roll HTML here instead of in the template
-                let rollHtml = '';
-                if (cardData.roll) {
-                    try {
-                        rollHtml = cardData.roll.render();
-                    } catch (error) {
-                        API.log('warning', 'Failed to render roll', error);
-                        rollHtml = `<div class="roll-placeholder">Roll: ${cardData.roll.total}</div>`;
-                    }
-                }
-                
-                return {
-                    rollHtml: rollHtml,
-                    collapsed: true,
-                    messageId: cardData.messageId
-                };
-            case 'damage-results':
-                return {
-                    results: cardData.results,
-                    targets: cardData.targets
-                };
-            case 'attack-results':
-                return {
-                    results: cardData.results,
-                    target: cardData.target
-                };
-            case 'save-results':
-                return {
-                    results: cardData.results,
-                    saveType: cardData.saveType
-                };
-            case 'action-buttons':
-                return {
-                    actions: cardData.actions || [],
-                    messageId: cardData.messageId
-                };
-            case 'target-info':
-                return {
-                    targets: cardData.targets || []
-                };
-            default:
-                return cardData;
-        }
-    }
-
-    /**
-     * Create a divider element
-     */
-    createDivider() {
-        const divider = document.createElement('div');
-        divider.className = 'component-divider';
-        return divider;
-    }
-
-    /**
-     * Update an existing card with new data
-     */
-    async updateCard(messageId, updateData) {
-        try {
-            const message = game.messages.get(messageId);
-            if (!message) {
-                throw new Error(`Message not found: ${messageId}`);
-            }
-
-            // Get existing card data from message flags
-            const existingData = message.getFlag('sw5e-qol', 'cardData') || {};
-            const updatedData = { ...existingData, ...updateData };
-
-            // Re-render the card
-            const newHtml = await this.renderCard(updatedData);
-
-            // Update the message content
-            await message.update({ content: newHtml });
-
-            // Update the flags with new data
-            await message.setFlag('sw5e-qol', 'cardData', updatedData);
-
-            API.log('debug', `Updated card: ${messageId}`);
-
-        } catch (error) {
-            API.log('error', 'Failed to update card', error);
-            throw error;
-        }
+    createFallbackHTML(data) {
+        if (logThisFile) API.log('debug', 'CardRenderer: Using fallback HTML');
+        
+        return `
+            <div class="sw5e-qol-card" data-message-id="${data.messageId}" data-card-type="${data.cardType}">
+                <div class="card-border" style="border-left-color: ${data.userColor}; background: ${data.cardBg}; border-radius: 0 8px 8px 0;">
+                    <div class="card-header" style="background: ${data.headerBg}; border-bottom: 1px solid ${data.borderColor}; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div class="card-title">
+                            <h3 style="color: ${data.titleColor}; margin: 0; font-size: 1.1rem;">${data.title}</h3>
+                            <span class="card-timestamp" style="color: ${data.timestampColor}; font-size: 0.8rem; margin-left: 0.5rem;">${data.timestamp}</span>
+                        </div>
+                        <div class="card-user" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <img src="${data.actorImg}" alt="${data.actorName}" class="user-avatar" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid ${data.borderColor}; object-fit: cover;" />
+                            <span class="user-name" style="color: ${data.textColor}; font-size: 0.9rem;">${data.actorName}</span>
+                        </div>
+                    </div>
+                    <div class="card-body" style="background: ${data.cardBg}; color: ${data.textColor}; padding: 1rem;">
+                        <p>Card content for ${data.cardType}</p>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 }

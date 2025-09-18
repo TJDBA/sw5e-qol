@@ -26,6 +26,7 @@
     --section-divider-border: 1px solid var(--light-border-light);
     --input-text: var(--light-text-secondary);
     
+    
     /* Table Variables */
     --table-border: 1px solid var(--light-border-dark);
     --table-bg: var(--light-bg-secondary);

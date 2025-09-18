@@ -58,8 +58,8 @@ Hooks.once('init', async function() {
             console.error('SW5E QoL Module: Failed to import ThemeManager', error);
         }
         
-         // Import card system components
-         try {
+        // Import card system components
+        try {
             const cardHandlerModule = await import('./ui/cards/card-handler.js');
             CardHandler = cardHandlerModule.CardHandler;
             console.log('SW5E QoL Module: CardHandler imported successfully');
@@ -179,6 +179,105 @@ Hooks.once('ready', async function() {
             console.log('SW5E QoL Module: Damage roll test loaded');
         } catch (error) {
             console.warn('SW5E QoL Module: Failed to load damage roll test:', error);
+        }
+        
+        // Load simple card test
+        try {
+            const simpleCardTestModule = await import('./test-simple-debug.js');
+            window.testSimpleCard = simpleCardTestModule.testSimpleCard;
+            console.log('SW5E QoL Module: Simple card test loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load simple card test:', error);
+        }
+        
+        // Load v10 compatibility test
+        try {
+            const v10TestModule = await import('./test-v10-compatibility.js');
+            window.testV10Compatibility = v10TestModule.testV10Compatibility;
+            console.log('SW5E QoL Module: V10 compatibility test loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load v10 compatibility test:', error);
+        }
+        
+        // Load CSS debug utility
+        try {
+            const cssDebugModule = await import('./debug-css.js');
+            window.debugCSS = cssDebugModule.debugCSS;
+            console.log('SW5E QoL Module: CSS debug utility loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load CSS debug utility:', error);
+        }
+        
+        // Load CSS loading test
+        try {
+            const cssLoadingTestModule = await import('./test-css-loading.js');
+            window.testCSSLoading = cssLoadingTestModule.testCSSLoading;
+            console.log('SW5E QoL Module: CSS loading test loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load CSS loading test:', error);
+        }
+        
+        // Load CSS force reload utility
+        try {
+            const cssForceReloadModule = await import('./force-css-reload.js');
+            window.forceCSSReload = cssForceReloadModule.forceCSSReload;
+            console.log('SW5E QoL Module: CSS force reload utility loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load CSS force reload utility:', error);
+        }
+        
+        // Load CSS card test
+        try {
+            const cssCardTestModule = await import('./test-css-card.js');
+            window.testCSSCard = cssCardTestModule.testCSSCard;
+            console.log('SW5E QoL Module: CSS card test loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load CSS card test:', error);
+        }
+        
+        // Load new card system test
+        try {
+            const newCardTestModule = await import('./test-new-cards.js');
+            window.testNewCards = newCardTestModule.testNewCards;
+            console.log('SW5E QoL Module: New card system test loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load new card system test:', error);
+        }
+        
+        // Load inline styling test
+        try {
+            const inlineStylingTestModule = await import('./test-inline-styling.js');
+            window.testInlineStyling = inlineStylingTestModule.testInlineStyling;
+            console.log('SW5E QoL Module: Inline styling test loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load inline styling test:', error);
+        }
+        
+        // Load simple inline test
+        try {
+            const simpleInlineTestModule = await import('./test-simple-inline.js');
+            window.testSimpleInline = simpleInlineTestModule.testSimpleInline;
+            console.log('SW5E QoL Module: Simple inline test loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load simple inline test:', error);
+        }
+        
+        // Load debug test loading
+        try {
+            const debugTestModule = await import('./debug-test-loading.js');
+            window.debugTestLoading = debugTestModule.debugTestLoading;
+            console.log('SW5E QoL Module: Debug test loading loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load debug test loading:', error);
+        }
+        
+        // Load basic test
+        try {
+            const basicTestModule = await import('./test-basic.js');
+            window.testBasic = basicTestModule.testBasic;
+            console.log('SW5E QoL Module: Basic test loaded');
+        } catch (error) {
+            console.warn('SW5E QoL Module: Failed to load basic test:', error);
         }
         
         // Check what's available
