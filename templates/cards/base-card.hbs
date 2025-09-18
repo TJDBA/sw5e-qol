@@ -1,14 +1,10 @@
 <div class="sw5e-qol-card" data-message-id="{{messageId}}" data-card-type="{{cardType}}" data-user-id="{{userId}}">
     <div class="card-border" style="border-left: 2px solid {{userColor}}; background: {{cardBg}}; border-radius: 0 8px 8px 0; margin: 0.5rem 0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-        <div class="card-header" style="background: {{headerBg}}; border-bottom: 1px solid {{borderColor}}; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center;">
-            <div class="card-title">
-                <h3 style="color: {{titleColor}}; margin: 0; font-size: 1.1rem;">{{title}}</h3>
-                <span class="card-timestamp" style="color: {{timestampColor}}; font-size: 0.8rem; margin-left: 0.5rem;">{{timestamp}}</span>
-            </div>
-            <div class="card-user" style="display: flex; align-items: center; gap: 0.5rem;">
+        <div class="card-title">
+            <h3 style="color: {{titleColor}}; margin: 0; font-size: 0.75rem;">
                 <img src="{{actorImg}}" alt="{{actorName}}" class="user-avatar" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid {{borderColor}};" />
-                <span class="user-name" style="color: {{textColor}}; font-size: 0.9rem;">{{actorName}}</span>
-            </div>
+                {{title}}
+            </h3>
         </div>
         
         <div class="card-body" style="background: {{cardBg}}; color: {{textColor}}; padding: 1rem;" id="card-body">
