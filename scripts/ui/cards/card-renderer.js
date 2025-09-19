@@ -56,6 +56,9 @@ export class CardRenderer {
         
         if (logThisFile) API.log('debug', 'CardRenderer: Theme colors:', themeColors);
         
+        // Get current theme name
+        const currentTheme = themeManager?.getCurrentTheme() || 'bendu';
+        
         // Get user information
         const user = game.users.get(cardData.userId) || game.user;
         
@@ -73,6 +76,10 @@ export class CardRenderer {
             
             // User information
             userColor: cardData.userColor || user.color || '#999999',
+            userName: cardData.userName || user.name || 'Unknown User',
+            
+            // Theme information
+            theme: currentTheme,
             
             // Roll data
             roll: cardData.roll || null,
@@ -84,7 +91,7 @@ export class CardRenderer {
             // Actions
             actions: cardData.actions || [],
             
-            // Theme colors
+            // Theme colors (for fallback inline styles if needed)
             ...themeColors
         };
         

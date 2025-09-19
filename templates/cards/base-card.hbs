@@ -1,17 +1,22 @@
-<div class="sw5e-qol-card" data-message-id="{{messageId}}" data-card-type="{{cardType}}" data-user-id="{{userId}}">
-    <div class="card-border" style="border-left: 2px solid {{userColor}}; background: {{cardBg}}; border-radius: 0 8px 8px 0; margin: 0.5rem 0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+<div class="sw5e-qol-card" data-message-id="{{messageId}}" data-card-type="{{cardType}}" data-user-id="{{userId}}" data-theme="{{theme}}">
+    <div class="card-border" style="border: 2px solid {{userColor}};">
         <div class="card-title">
-            <h3 style="color: {{titleColor}}; margin: 0; font-size: 0.75rem;">
-                <img src="{{actorImg}}" alt="{{actorName}}" class="user-avatar" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid {{borderColor}};" />
-                {{title}}
-            </h3>
+            <div class="card-title-content">
+                <div class="actor-image-group">
+                    <img src="{{actorImg}}" alt="{{actorName}}" class="user-avatar" />
+                </div>
+                <div class="actor-info-group">
+                    <div class="actor-name">{{actorName}}</div>
+                    <div class="user-name">{{userName}}</div>
+                </div>
+            </div>
         </div>
         
-        <div class="card-body" style="background: {{cardBg}}; color: {{textColor}}; padding: 1rem;" id="card-body">
+        <div class="card-body" id="card-body">
             <!-- Components will be dynamically inserted here -->
         </div>
         
-        <div class="card-footer" style="background: {{footerBg}}; border-top: 1px solid {{borderColor}}; padding: 0.75rem 1rem;" id="card-footer">
+        <div class="card-footer" id="card-footer">
             <!-- Footer components will be inserted here -->
         </div>
     </div>

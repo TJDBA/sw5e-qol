@@ -1,6 +1,6 @@
-/* SW5E QoL Card Styles - Direct Styling Approach */
-/* Based on sw5e-helper approach for reliability */
+/* SW5E QoL Card Styles - Theme-based with Specificity */
 
+/* Base card styling */
 .sw5e-qol-card {
     margin: 0.5rem 0;
     border-radius: 8px;
@@ -8,73 +8,201 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Card border with user color override */
 .card-border {
-    border-left: 4px solid #666666;
-    background: #3a3a3a;
-    border-radius: 0 8px 8px 0;
+    border-radius: 8px;
 }
 
-/* Higher specificity for inline styles */
-.sw5e-qol-card .card-border[style*="border-left-color"] {
-    border-left-style: solid;
-    border-left-width: 4px;
+/* Higher specificity for user color border */
+.sw5e-qol-card .card-border[style*="border-color"] {
+    border-style: solid;
+    border-width: 2px;
 }
 
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* Card title styling */
+.card-title {
     padding: 0.75rem 1rem;
-    background: #2a2a2a;
-    border-bottom: 1px solid #888888;
+    border-bottom: 1px solid;
 }
 
-.card-title h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    color: #e0e0e0;
-}
-
-.card-timestamp {
-    font-size: 0.8rem;
-    color: #888888;
-    margin-left: 0.5rem;
-}
-
-.card-user {
+.card-title-content {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
-.user-avatar {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 1px solid #888888;
-    object-fit: cover;
-    display: block;
+.actor-image-group {
     flex-shrink: 0;
 }
 
-.user-name {
-    font-size: 0.9rem;
-    color: #f0f0f0;
+.actor-info-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.125rem;
 }
 
+.actor-name {
+    font-size: 0.5rem;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.user-name {
+    font-size: 0.5rem;
+    opacity: 0.8;
+    line-height: 1.2;
+}
+
+/* User avatar styling */
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid;
+    flex-shrink: 0;
+}
+
+/* Card body and footer */
 .card-body {
     padding: 1rem;
-    background: #3a3a3a;
-    color: #f0f0f0;
 }
 
 .card-footer {
     padding: 0.75rem 1rem;
-    background: #4a4a4a;
-    border-top: 1px solid #888888;
+    border-top: 1px solid;
 }
 
-/* Action buttons */
+/* Theme-specific styling using high specificity */
+.sw5e-qol-card[data-theme="bendu"] .card-border {
+    background: var(--bendu-bg-primary, #3a3a3a);
+}
+
+.sw5e-qol-card[data-theme="bendu"] .card-title {
+    background: var(--bendu-bg-tertiary, #2a2a2a);
+    border-bottom-color: var(--bendu-border-light, #888888);
+}
+
+.sw5e-qol-card[data-theme="bendu"] .actor-name {
+    color: var(--bendu-text-header, #e0e0e0);
+}
+
+.sw5e-qol-card[data-theme="bendu"] .user-name {
+    color: var(--bendu-text-muted, #888888);
+}
+
+.sw5e-qol-card[data-theme="bendu"] .user-avatar {
+    border-color: var(--bendu-border-light, #888888);
+}
+
+.sw5e-qol-card[data-theme="bendu"] .card-body {
+    background: var(--bendu-bg-primary, #3a3a3a);
+    color: var(--bendu-text-primary, #f0f0f0);
+}
+
+.sw5e-qol-card[data-theme="bendu"] .card-footer {
+    background: var(--bendu-bg-secondary, #4a4a4a);
+    border-top-color: var(--bendu-border-light, #888888);
+}
+
+/* Light theme */
+.sw5e-qol-card[data-theme="light"] .card-border {
+    background: #f5f5f5;
+}
+
+.sw5e-qol-card[data-theme="light"] .card-title {
+    background: #e0e0e0;
+    border-bottom-color: #aaaaaa;
+}
+
+.sw5e-qol-card[data-theme="light"] .actor-name {
+    color: #1a1a1a;
+}
+
+.sw5e-qol-card[data-theme="light"] .user-name {
+    color: #666666;
+}
+
+.sw5e-qol-card[data-theme="light"] .user-avatar {
+    border-color: #aaaaaa;
+}
+
+.sw5e-qol-card[data-theme="light"] .card-body {
+    background: #f5f5f5;
+    color: #333333;
+}
+
+.sw5e-qol-card[data-theme="light"] .card-footer {
+    background: #cccccc;
+    border-top-color: #aaaaaa;
+}
+
+/* Dark theme */
+.sw5e-qol-card[data-theme="dark"] .card-border {
+    background: #222222;
+}
+
+.sw5e-qol-card[data-theme="dark"] .card-title {
+    background: #1a1a1a;
+    border-bottom-color: #666666;
+}
+
+.sw5e-qol-card[data-theme="dark"] .actor-name {
+    color: #f0f0f0;
+}
+
+.sw5e-qol-card[data-theme="dark"] .user-name {
+    color: #777777;
+}
+
+.sw5e-qol-card[data-theme="dark"] .user-avatar {
+    border-color: #666666;
+}
+
+.sw5e-qol-card[data-theme="dark"] .card-body {
+    background: #222222;
+    color: #e0e0e0;
+}
+
+.sw5e-qol-card[data-theme="dark"] .card-footer {
+    background: #2a2a2a;
+    border-top-color: #666666;
+}
+
+/* Tech theme */
+.sw5e-qol-card[data-theme="tech"] .card-border {
+    background: #1c2a3a;
+}
+
+.sw5e-qol-card[data-theme="tech"] .card-title {
+    background: #121e2c;
+    border-bottom-color: #406080;
+}
+
+.sw5e-qol-card[data-theme="tech"] .actor-name {
+    color: #c0e0ff;
+}
+
+.sw5e-qol-card[data-theme="tech"] .user-name {
+    color: #6080a0;
+}
+
+.sw5e-qol-card[data-theme="tech"] .user-avatar {
+    border-color: #406080;
+}
+
+.sw5e-qol-card[data-theme="tech"] .card-body {
+    background: #1c2a3a;
+    color: #a0d0ff;
+}
+
+.sw5e-qol-card[data-theme="tech"] .card-footer {
+    background: #25384d;
+    border-top-color: #406080;
+}
+
+/* Action buttons and other components */
 .action-buttons {
     display: flex;
     gap: 0.5rem;
@@ -83,10 +211,8 @@
 
 .action-button {
     padding: 0.5rem 1rem;
-    border: 1px solid #888888;
+    border: 1px solid;
     border-radius: 4px;
-    background: #555555;
-    color: #f0f0f0;
     cursor: pointer;
     text-decoration: none;
     font-size: 0.9rem;
@@ -94,38 +220,36 @@
 }
 
 .action-button:hover {
-    background: #666666;
-    border-color: #999999;
+    opacity: 0.8;
 }
 
 .action-button.primary {
-    background: #999999;
-    color: white;
-    border-color: #999999;
+    font-weight: bold;
 }
 
-.action-button.primary:hover {
-    background: #aaaaaa;
+/* Theme-specific button styling */
+.sw5e-qol-card[data-theme="bendu"] .action-button {
+    background: var(--bendu-bg-secondary, #4a4a4a);
+    color: var(--bendu-text-primary, #f0f0f0);
+    border-color: var(--bendu-border-light, #888888);
 }
 
-.action-button.secondary {
-    background: #4a4a4a;
-    color: #f0f0f0;
-    border-color: #888888;
+.sw5e-qol-card[data-theme="light"] .action-button {
+    background: #dddddd;
+    color: #333333;
+    border-color: #aaaaaa;
 }
 
-.action-button.secondary:hover {
-    background: #3a3a3a;
-}
-
-.action-button.danger {
-    background: #666666;
-    color: #f0f0f0;
+.sw5e-qol-card[data-theme="dark"] .action-button {
+    background: #333333;
+    color: #e0e0e0;
     border-color: #666666;
 }
 
-.action-button.danger:hover {
-    background: #777777;
+.sw5e-qol-card[data-theme="tech"] .action-button {
+    background: #3f51b5;
+    color: #ffffff;
+    border-color: #5c6bc0;
 }
 
 /* Status indicators */
@@ -199,10 +323,14 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .card-header {
+    .card-title-content {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
+    }
+    
+    .actor-info-group {
+        align-items: flex-start;
     }
     
     .action-buttons {
@@ -211,11 +339,5 @@
     
     .action-button {
         justify-content: center;
-    }
-    
-    .damage-summary, .attack-summary, .save-summary {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
     }
 }
